@@ -1,13 +1,10 @@
-# The pinned nixpkgs set used by `default.nix` and `release.nix` in the
-# top-level of the project.
-
-import (builtins.fetchGit {
-    name = "nixos-unstable-2021-01-28";
-    url = "https://github.com/nixos/nixpkgs-channels/";
-    ref = "refs/heads/nixos-unstable";
-
-    # To get the current value of `rev`:
-    # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
-    # or check https://status.nixos.org/ to see latest versions without build problems
-    rev = "4762fba469e2baa82f983b262e2c06ac2fdaae67";
-  }) {}
+# To update `commit-id` go to https://status.nixos.org/, which lists the
+# latest commit that passes all the tests for any release. Unless there is an
+# overriding reason, pick the latest stable NixOS release, at the time of
+# writing this is nixos-20.09.
+let
+  name = "nixos-unstable-2021-01-28";
+  commit-id = "15a64b2facc1b91f4361bdd101576e8886ef834b";
+  url = "https://github.com/nixos/nixpkgs/archive/${commit-id}.tar.gz";
+in
+  import (builtins.fetchTarball { url = url; }) {}
