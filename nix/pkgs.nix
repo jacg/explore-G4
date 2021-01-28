@@ -2,7 +2,7 @@
 # top-level of the project.
 
 import (builtins.fetchGit {
-    name = "nixos-unstable-2021-01-23";
+    name = "nixos-unstable-2021-01-28";
     url = "https://github.com/nixos/nixpkgs-channels/";
     ref = "refs/heads/nixos-unstable";
 
