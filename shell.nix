@@ -11,6 +11,7 @@ pkgs.mkShell {
 
   buildInputs = derivation.buildInputs ++ [
     pkgs.clang_11
+    pkgs.bear
   ];
 
 }
