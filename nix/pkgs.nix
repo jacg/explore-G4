@@ -4,7 +4,7 @@
 # writing this is nixos-20.09.
 let
   name = "nixos-unstable-2021-01-28";
-  commit-id = "15a64b2facc1b91f4361bdd101576e8886ef834b";
+  commit-id = "4c9a74aa459dc525fcfdfb3019b234f68de66c8a";
   url = "https://github.com/nixos/nixpkgs/archive/${commit-id}.tar.gz";
 in
   import (builtins.fetchTarball { url = url; }) {}
