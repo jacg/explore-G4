@@ -1,8 +1,13 @@
+# Fundamental derivation of how to build the project: a function from
+# dependencies to build-result. Picking the specific versions of the
+# dependencies is Someone Else's Problem: `default.nix`, `release.nix` get to
+# pick these.
+
 { boost, poco, stdenv }:
 
 stdenv.mkDerivation {
   name = "explore-gee-fore";
-  src = ./.;
+  src = ../.;
 
   # build-time dependencies
   nativeBuildInputs = [
