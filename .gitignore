@@ -2,3 +2,7 @@
 /.direnv/
 /result
 /result-2
+/CMakeCache.txt
+/CMakeFiles/
+/Makefile
+/cmake_install.cmake
