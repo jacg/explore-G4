@@ -17,7 +17,7 @@ stdenv.mkDerivation {
 
   # run-time dependencies
   buildInputs = [
-    #clangd
+
   ];
 
   buildPhase = ''
