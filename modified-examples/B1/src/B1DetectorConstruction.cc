@@ -81,10 +81,10 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4Material* shape1_mat = nist -> FindOrBuildMaterial("G4_A-150_TISSUE");
 
   // Conical section shape
-  G4double shape1_rmina = 0.*cm,    shape1_rmaxa = 2.*cm;
-  G4double shape1_rminb = 0.*cm,    shape1_rmaxb = 4.*cm;
-  G4double shape1_hz    = 3.*cm;
-  G4double shape1_phimin = 0.*deg, shape1_phimax = 360.*deg;
+  G4double shape1_rmina = 0 * cm,    shape1_rmaxa = 2 * cm;
+  G4double shape1_rminb = 0 * cm,    shape1_rmaxb = 4 * cm;
+  G4double shape1_hz    = 3 * cm;
+  G4double shape1_phimin = 0 * deg, shape1_phimax = 360 * deg;
   G4Cons* solidShape1 =
     new G4Cons("Shape1",
                shape1_rmina, shape1_rmaxa, shape1_rminb, shape1_rmaxb, shape1_hz,
