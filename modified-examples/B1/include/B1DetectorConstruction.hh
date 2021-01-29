@@ -13,7 +13,7 @@ class B1DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
     B1DetectorConstruction();
-    virtual ~B1DetectorConstruction();
+    virtual ~B1DetectorConstruction() {}
 
     virtual G4VPhysicalVolume* Construct();
 

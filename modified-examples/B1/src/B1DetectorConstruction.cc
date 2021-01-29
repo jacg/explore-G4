@@ -18,10 +18,6 @@ B1DetectorConstruction::B1DetectorConstruction()
 { }
 
 
-B1DetectorConstruction::~B1DetectorConstruction()
-{ }
-
-
 G4VPhysicalVolume* B1DetectorConstruction::Construct()
 {
   // Get nist material manager
