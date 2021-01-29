@@ -74,7 +74,7 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
      (G4RunManager::GetRunManager() -> GetUserPrimaryGeneratorAction());
   G4String runCondition;
   if (generatorAction) {
-    const G4ParticleGun* particleGun = generatorAction -> GetParticleGun();
+    const auto* particleGun = generatorAction -> GetParticleGun();
     runCondition += particleGun -> GetParticleDefinition() -> GetParticleName();
     runCondition += " of ";
     G4double particleEnergy = particleGun -> GetParticleEnergy();
@@ -89,7 +89,7 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
   }
 
   G4cout                                                                   << G4endl
-     << " The run consists of " << nofEvents << " "<< runCondition         << G4endl
+     << " The run consists of " << nofEvents << " " << runCondition        << G4endl
      << " Cumulated dose per run, in scoring volume : "
      << G4BestUnit(dose,"Dose") << " rms = " << G4BestUnit(rmsDose,"Dose") << G4endl
      << "------------------------------------------------------------"     << G4endl << G4endl;
@@ -97,6 +97,6 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
 
 
 void B1RunAction::AddEdep(G4double edep) {
-  fEdep  += edep;
-  fEdep2 += edep*edep;
+  this -> fEdep  += edep;
+  this -> fEdep2 += edep * edep;
 }
