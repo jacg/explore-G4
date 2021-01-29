@@ -29,28 +29,28 @@ B1RunAction::B1RunAction()
 
   // Register accumulable to the accumulable manager
   auto accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager->RegisterAccumulable(fEdep);
-  accumulableManager->RegisterAccumulable(fEdep2);
+  accumulableManager -> RegisterAccumulable(fEdep);
+  accumulableManager -> RegisterAccumulable(fEdep2);
 }
 
 
 void B1RunAction::BeginOfRunAction(const G4Run*) {
   // inform the runManager to save random number seed
-  G4RunManager::GetRunManager()->SetRandomNumberStore(false);
+  G4RunManager::GetRunManager() -> SetRandomNumberStore(false);
 
   // reset accumulables to their initial values
   auto accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager->Reset();
+  accumulableManager -> Reset();
 }
 
 
 void B1RunAction::EndOfRunAction(const G4Run* run) {
-  G4int nofEvents = run->GetNumberOfEvent();
+  G4int nofEvents = run -> GetNumberOfEvent();
   if (nofEvents == 0) return;
 
   // Merge accumulables
   auto accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager->Merge();
+  accumulableManager -> Merge();
 
   // Compute dose = total energy deposit in a run and its variance
   G4double edep  = fEdep. GetValue();
@@ -61,8 +61,8 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
 
   const auto* detectorConstruction
    = static_cast<const B1DetectorConstruction*>
-     (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-  G4double    mass = detectorConstruction->GetScoringVolume()->GetMass();
+     (G4RunManager::GetRunManager() -> GetUserDetectorConstruction());
+  G4double    mass = detectorConstruction -> GetScoringVolume() -> GetMass();
   G4double    dose = edep / mass;
   G4double rmsDose = rms  / mass;
 
@@ -71,13 +71,13 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
   //        run manager for multi-threaded mode.
   const auto* generatorAction
    = static_cast<const B1PrimaryGeneratorAction*>
-     (G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction());
+     (G4RunManager::GetRunManager() -> GetUserPrimaryGeneratorAction());
   G4String runCondition;
   if (generatorAction) {
-    const G4ParticleGun* particleGun = generatorAction->GetParticleGun();
-    runCondition += particleGun->GetParticleDefinition()->GetParticleName();
+    const G4ParticleGun* particleGun = generatorAction -> GetParticleGun();
+    runCondition += particleGun -> GetParticleDefinition() -> GetParticleName();
     runCondition += " of ";
-    G4double particleEnergy = particleGun->GetParticleEnergy();
+    G4double particleEnergy = particleGun -> GetParticleEnergy();
     runCondition += G4BestUnit(particleEnergy, "Energy");
   }
 
