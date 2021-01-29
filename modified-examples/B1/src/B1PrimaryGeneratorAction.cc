@@ -13,12 +13,9 @@
 
 B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
 : G4VUserPrimaryGeneratorAction(),
-  fParticleGun(0),
+  fParticleGun(new G4ParticleGun(1)), // shoot 1 particle per invocation
   fEnvelopeBox(0)
 {
-  G4int n_particle = 1;
-  fParticleGun  = new G4ParticleGun(n_particle);
-
   // default particle kinematic
   G4ParticleDefinition* particle
     = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
