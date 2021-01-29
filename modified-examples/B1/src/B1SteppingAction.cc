@@ -14,22 +14,24 @@ B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
 {}
 
 
-void B1SteppingAction::UserSteppingAction(const G4Step* step)
-{
+void B1SteppingAction::UserSteppingAction(const G4Step* step) {
   if (!fScoringVolume) {
     const B1DetectorConstruction* detectorConstruction
       = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();
+      (G4RunManager::GetRunManager() -> GetUserDetectorConstruction());
+    fScoringVolume = detectorConstruction -> GetScoringVolume();
   }
 
   // get volume of the current step
-  G4LogicalVolume* volume
-    = step->GetPreStepPoint()->GetTouchableHandle()
-      ->GetVolume()->GetLogicalVolume();
+  G4LogicalVolume* volume =
+    step
+    -> GetPreStepPoint()
+    -> GetTouchableHandle()
+    -> GetVolume()
+    -> GetLogicalVolume();
 
   if (volume == fScoringVolume) {
     // collect energy deposited in this step
-    fEventAction->AddEdep(step->GetTotalEnergyDeposit());
+    fEventAction -> AddEdep(step -> GetTotalEnergyDeposit());
   }
 }
