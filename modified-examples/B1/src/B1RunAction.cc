@@ -34,8 +34,7 @@ void B1RunAction::BeginOfRunAction(const G4Run*) {
   G4RunManager::GetRunManager() -> SetRandomNumberStore(false);
 
   // reset accumulables to their initial values
-  auto accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager -> Reset();
+  G4AccumulableManager::Instance() -> Reset();
 }
 
 
@@ -48,10 +47,10 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
   accumulableManager -> Merge();
 
   // Compute dose = total energy deposit in a run and its variance
-  G4double edep  = fEdep. GetValue();
+  G4double edep  = fEdep .GetValue();
   G4double edep2 = fEdep2.GetValue();
 
-  G4double rms = edep2 - edep*edep/nofEvents;
+  G4double rms = edep2 - edep * edep / nofEvents;
   if (rms > 0) rms = std::sqrt(rms); else rms = 0;
 
   const auto* detectorConstruction
