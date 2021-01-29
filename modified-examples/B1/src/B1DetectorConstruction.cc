@@ -19,7 +19,7 @@ B1DetectorConstruction::B1DetectorConstruction()
 
 
 G4VPhysicalVolume* B1DetectorConstruction::Construct() {
-  // Get nist material manager
+  // Lookup-by-name of materials from NIST database
   G4NistManager* nist = G4NistManager::Instance();
 
   // Envelope parameters
