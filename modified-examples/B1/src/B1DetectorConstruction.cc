@@ -48,7 +48,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
 
   G4VPhysicalVolume* physWorld =
     new G4PVPlacement(0,                     //no rotation
-                      G4ThreeVector(),       //at (0,0,0)
+                      {},                    //at (0,0,0)
                       logicWorld,            //its logical volume
                       "World",               //its name
                       0,                     //its mother  volume
@@ -69,7 +69,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                         "Envelope");         //its name
 
   new G4PVPlacement(0,                       //no rotation
-                    G4ThreeVector(),         //at (0,0,0)
+                    {},                      //at (0,0,0)
                     logicEnv,                //its logical volume
                     "Envelope",              //its name
                     logicWorld,              //its mother  volume
@@ -79,7 +79,6 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
 
   // Shape 1
   G4Material* shape1_mat = nist -> FindOrBuildMaterial("G4_A-150_TISSUE");
-  G4ThreeVector pos1 = G4ThreeVector(0, 2*cm, -7*cm);
 
   // Conical section shape
   G4double shape1_rmina = 0.*cm,    shape1_rmaxa = 2.*cm;
@@ -97,7 +96,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                         "Shape1");           //its name
 
   new G4PVPlacement(0,                       //no rotation
-                    pos1,                    //at position
+                    {0, 2*cm, -7*cm},        //at position
                     logicShape1,             //its logical volume
                     "Shape1",                //its name
                     logicEnv,                //its mother  volume
@@ -107,7 +106,6 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
 
   // Shape 2
   G4Material* shape2_mat = nist -> FindOrBuildMaterial("G4_BONE_COMPACT_ICRU");
-  G4ThreeVector pos2 = G4ThreeVector(0, -1*cm, 7*cm);
 
   // Trapezoid shape
   G4double shape2_dxa = 12*cm, shape2_dxb = 12*cm;
@@ -124,7 +122,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                         "Shape2");           //its name
 
   new G4PVPlacement(0,                       //no rotation
-                    pos2,                    //at position
+                    {0, -1*cm, 7*cm},        //at position
                     logicShape2,             //its logical volume
                     "Shape2",                //its name
                     logicEnv,                //its mother  volume
