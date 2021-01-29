@@ -19,7 +19,7 @@ class G4Box;
 class B1PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 public:
   B1PrimaryGeneratorAction();
-  virtual ~B1PrimaryGeneratorAction();
+  virtual ~B1PrimaryGeneratorAction() {}
 
   virtual void GeneratePrimaries(G4Event*) override;
 

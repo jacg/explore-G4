@@ -25,9 +25,6 @@ B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
 }
 
 
-B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction() {}
-
-
 void B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
   //this function is called at the begining of ecah event
 
