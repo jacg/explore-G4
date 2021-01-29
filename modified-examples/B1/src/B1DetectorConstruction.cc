@@ -41,7 +41,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
               0.5 * world_sizeXY,
               0.5 * world_sizeZ  );          //its size
 
-  G4LogicalVolume* logicWorld =
+  auto logicWorld =
     new G4LogicalVolume(solidWorld,          //its solid
                         world_mat,           //its material
                         "World");            //its name
@@ -63,7 +63,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
               0.5 * env_sizeXY,
               0.5 * env_sizeZ  );            //its size
 
-  G4LogicalVolume* logicEnv =
+  auto logicEnv =
     new G4LogicalVolume(solidEnv,            //its solid
                         env_mat,             //its material
                         "Envelope");         //its name
@@ -85,12 +85,13 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double shape1_rminb = 0 * cm,    shape1_rmaxb = 4 * cm;
   G4double shape1_hz    = 3 * cm;
   G4double shape1_phimin = 0 * deg, shape1_phimax = 360 * deg;
+
   G4Cons* solidShape1 =
     new G4Cons("Shape1",
                shape1_rmina, shape1_rmaxa, shape1_rminb, shape1_rmaxb, shape1_hz,
                shape1_phimin, shape1_phimax);
 
-  G4LogicalVolume* logicShape1 =
+  auto logicShape1 =
     new G4LogicalVolume(solidShape1,         //its solid
                         shape1_mat,          //its material
                         "Shape1");           //its name
@@ -116,7 +117,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
               0.5*shape2_dxa, 0.5*shape2_dxb,
               0.5*shape2_dya, 0.5*shape2_dyb, 0.5*shape2_dz); //its size
 
-  G4LogicalVolume* logicShape2 =
+  auto logicShape2 =
     new G4LogicalVolume(solidShape2,         //its solid
                         shape2_mat,          //its material
                         "Shape2");           //its name
