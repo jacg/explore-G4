@@ -39,6 +39,6 @@ let
 
 in
  [
-   (myProject { stdenv = compilers.gcc10;   boost = pkgs.boost; poco = pocoLibs.poco9; })
-   (myProject { stdenv = compilers.clang11; boost = pkgs.boost; poco = pocoLibs.poco10; })
+   (myProject { stdenv = compilers.gcc10;   geant4 = pkgs.geant4; })
+   (myProject { stdenv = compilers.clang11; geant4 = pkgs.geant4; })
  ]

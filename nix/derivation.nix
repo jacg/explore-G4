@@ -3,7 +3,7 @@
 # dependencies is Someone Else's Problem: `default.nix`, `release.nix` get to
 # pick these.
 
-{ boost, poco, stdenv }:
+{ geant4, stdenv }:
 
 stdenv.mkDerivation {
   name = "explore-gee-fore";
@@ -11,8 +11,15 @@ stdenv.mkDerivation {
 
   # build-time dependencies
   nativeBuildInputs = [
-    boost
-    poco
+    geant4
+    geant4.data.G4PhotonEvaporation
+    geant4.data.G4EMLOW
+    geant4.data.G4RadioactiveDecay
+    geant4.data.G4ENSDFSTATE
+    geant4.data.G4SAIDDATA
+    geant4.data.G4PARTICLEXS
+    geant4.data.G4NDL
+
   ];
 
   # run-time dependencies
