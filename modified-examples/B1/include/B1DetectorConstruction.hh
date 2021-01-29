@@ -17,6 +17,7 @@ public:
   G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
 
 protected:
+  // Who owns this? I can't see where it's deleted!
   G4LogicalVolume* fScoringVolume;
 };
 
