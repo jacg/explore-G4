@@ -9,18 +9,15 @@ class G4LogicalVolume;
 
 /// Detector construction class to define materials and geometry.
 
-class B1DetectorConstruction : public G4VUserDetectorConstruction
-{
-  public:
-    B1DetectorConstruction();
-    virtual ~B1DetectorConstruction() {}
+class B1DetectorConstruction : public G4VUserDetectorConstruction {
+public:
+  B1DetectorConstruction();
+  virtual ~B1DetectorConstruction() {}
+  virtual G4VPhysicalVolume* Construct();
+  G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
 
-    virtual G4VPhysicalVolume* Construct();
-
-    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
-
-  protected:
-    G4LogicalVolume*  fScoringVolume;
+protected:
+  G4LogicalVolume* fScoringVolume;
 };
 
 #endif
