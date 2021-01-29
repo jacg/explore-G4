@@ -23,13 +23,11 @@ public:
 
   virtual void GeneratePrimaries(G4Event*) override;
 
-  const G4ParticleGun* GetParticleGun() const { return fParticleGun; }
+  const G4ParticleGun* GetParticleGun() const { return fParticleGun.get(); }
 
 private:
-  G4ParticleGun* fParticleGun;
+  std::unique_ptr<G4ParticleGun> fParticleGun;
   G4Box* fEnvelopeBox;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif

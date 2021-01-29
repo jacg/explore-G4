@@ -25,7 +25,7 @@ B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
 }
 
 
-B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction() { delete fParticleGun; }
+B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction() {}
 
 
 void B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
