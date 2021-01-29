@@ -17,6 +17,10 @@ B1DetectorConstruction::B1DetectorConstruction()
   fScoringVolume(nullptr)
 { }
 
+// Create logical volume from solid and material
+G4LogicalVolume* RENAME_ME(G4VSolid* solid, G4Material* material) {
+  return new G4LogicalVolume(solid, material, solid->GetName());
+}
 
 G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   // Lookup-by-name of materials from NIST database
@@ -35,16 +39,12 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double world_sizeZ  = 1.2 * env_sizeZ;
   G4Material* world_mat = nist -> FindOrBuildMaterial("G4_AIR");
 
-  G4Box* solidWorld =
-    new G4Box("World",                       //its name
-              0.5 * world_sizeXY,
-              0.5 * world_sizeXY,
-              0.5 * world_sizeZ  );          //its size
-
-  auto logicWorld =
-    new G4LogicalVolume(solidWorld,          //its solid
-                        world_mat,           //its material
-                        "World");            //its name
+  auto logicWorld = RENAME_ME
+    (new G4Box("World",
+               0.5 * world_sizeXY,
+               0.5 * world_sizeXY,
+               0.5 * world_sizeZ  ),
+     world_mat);
 
   G4VPhysicalVolume* physWorld =
     new G4PVPlacement(0,                     //no rotation
@@ -57,16 +57,12 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                       checkOverlaps);        //overlaps checking
 
   // Envelope
-  G4Box* solidEnv =
-    new G4Box("Envelope",                    //its name
-              0.5 * env_sizeXY,
-              0.5 * env_sizeXY,
-              0.5 * env_sizeZ  );            //its size
-
-  auto logicEnv =
-    new G4LogicalVolume(solidEnv,            //its solid
-                        env_mat,             //its material
-                        "Envelope");         //its name
+  auto logicEnv = RENAME_ME
+    (new G4Box("Envelope",
+               0.5 * env_sizeXY,
+               0.5 * env_sizeXY,
+               0.5 * env_sizeZ),
+     env_mat);
 
   new G4PVPlacement(0,                       //no rotation
                     {},                      //at (0,0,0)
@@ -86,15 +82,11 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double shape1_hz    = 3 * cm;
   G4double shape1_phimin = 0 * deg, shape1_phimax = 360 * deg;
 
-  G4Cons* solidShape1 =
-    new G4Cons("Shape1",
-               shape1_rmina, shape1_rmaxa, shape1_rminb, shape1_rmaxb, shape1_hz,
-               shape1_phimin, shape1_phimax);
-
-  auto logicShape1 =
-    new G4LogicalVolume(solidShape1,         //its solid
-                        shape1_mat,          //its material
-                        "Shape1");           //its name
+  auto logicShape1 = RENAME_ME
+    (new G4Cons("Shape1", shape1_rmina, shape1_rmaxa, shape1_rminb,
+                shape1_rmaxb, shape1_hz, shape1_phimin,
+                shape1_phimax),
+     shape1_mat);
 
   new G4PVPlacement(0,                       //no rotation
                     {0, 2*cm, -7*cm},        //at position
@@ -112,15 +104,12 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double shape2_dxa = 12*cm, shape2_dxb = 12*cm;
   G4double shape2_dya = 10*cm, shape2_dyb = 16*cm;
   G4double shape2_dz  = 6*cm;
-  G4Trd* solidShape2 =
-    new G4Trd("Shape2",                      //its name
-              0.5*shape2_dxa, 0.5*shape2_dxb,
-              0.5*shape2_dya, 0.5*shape2_dyb, 0.5*shape2_dz); //its size
 
-  auto logicShape2 =
-    new G4LogicalVolume(solidShape2,         //its solid
-                        shape2_mat,          //its material
-                        "Shape2");           //its name
+  auto logicShape2 = RENAME_ME
+    (new G4Trd("Shape2", // its name
+               0.5 * shape2_dxa, 0.5 * shape2_dxb, 0.5 * shape2_dya,
+               0.5 * shape2_dyb, 0.5 * shape2_dz),
+     shape2_mat);
 
   new G4PVPlacement(0,                       //no rotation
                     {0, -1*cm, 7*cm},        //at position
