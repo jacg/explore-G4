@@ -131,7 +131,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                     checkOverlaps);          //overlaps checking
 
   // Set Shape2 as scoring volume
-  fScoringVolume = logicShape2;
+  this -> fScoringVolume = logicShape2;
 
   //always return the physical World
   return physWorld;
