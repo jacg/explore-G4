@@ -14,7 +14,7 @@
 B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
 : G4VUserPrimaryGeneratorAction{},
   fParticleGun{new G4ParticleGun(1)}, // shoot 1 particle per invocation
-  fEnvelopeBox{0}
+  fEnvelopeBox{nullptr}
 {
   // default particle kinematic
   G4ParticleDefinition* particle
