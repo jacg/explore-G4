@@ -28,7 +28,7 @@ stdenv.mkDerivation {
   ];
 
   buildPhase = ''
-    c++ -std=c++17 -o main main.cc -lPocoFoundation -lboost_system
+    c++ -std=c++17 -o main main.cc
   '';
 
   installPhase = ''
