@@ -81,7 +81,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double shape1_phimin = 0 * deg, shape1_phimax = 360 * deg;
 
   auto logicShape1 = RENAME_ME
-    (new G4Cons("Shape1", shape1_rmina, shape1_rmaxa, shape1_rminb,
+    (new G4Cons("TissueCone", shape1_rmina, shape1_rmaxa, shape1_rminb,
                 shape1_rmaxb, shape1_hz, shape1_phimin,
                 shape1_phimax),
      material("G4_A-150_TISSUE"));
@@ -103,7 +103,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double shape2_dz  = 6*cm;
 
   auto logicShape2 = RENAME_ME
-    (new G4Trd("Shape2", // its name
+    (new G4Trd("BoneTrapezoid", // its name
                0.5 * shape2_dxa, 0.5 * shape2_dxb, 0.5 * shape2_dya,
                0.5 * shape2_dyb, 0.5 * shape2_dz),
      material("G4_BONE_COMPACT_ICRU"));
