@@ -6,6 +6,9 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
 endif()
 project(B1)
 
+# --------------- JMG trial ------------------------------
+set (CMAKE_CXX_STANDARD 17)
+
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
