@@ -11,12 +11,8 @@
 
 #include "Randomize.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
-  //
   G4UIExecutive* ui = nullptr;
   if ( argc == 1 ) {
     ui = new G4UIExecutive(argc, argv);
@@ -26,45 +22,40 @@ int main(int argc, char** argv)
   // G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
   // Construct the default run manager
-  //
-  auto runManager =
-    G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
+  auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
 
   // Set mandatory initialization classes
-  //
+
   // Detector construction
-  runManager->SetUserInitialization(new detector_construction());
+  runManager -> SetUserInitialization(new detector_construction());
 
   // Physics list
   G4VModularPhysicsList* physicsList = new QBBC;
-  physicsList->SetVerboseLevel(1);
-  runManager->SetUserInitialization(physicsList);
+  physicsList -> SetVerboseLevel(1);
+  runManager  -> SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager->SetUserInitialization(new action_initialization());
+  runManager -> SetUserInitialization(new action_initialization());
 
   // Initialize visualization
-  //
   G4VisManager* visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive("Quiet");
-  visManager->Initialize();
+  visManager -> Initialize();
 
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
   // Process macro or start UI session
-  //
-  if ( ! ui ) {
+  if (!ui) {
     // batch mode
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
-    UImanager->ApplyCommand(command+fileName);
-  }
-  else {
+    UImanager -> ApplyCommand(command+fileName);
+  } else {
     // interactive mode
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    ui->SessionStart();
+    UImanager -> ApplyCommand("/control/execute init_vis.mac");
+    ui -> SessionStart();
     delete ui;
   }
 
@@ -76,5 +67,3 @@ int main(int argc, char** argv)
   delete visManager;
   delete runManager;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
