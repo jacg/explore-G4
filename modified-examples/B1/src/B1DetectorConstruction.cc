@@ -10,6 +10,7 @@
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
+#include <G4ThreeVector.hh>
 
 
 B1DetectorConstruction::B1DetectorConstruction()
@@ -25,14 +26,19 @@ G4LogicalVolume* RENAME_ME(G4VSolid* solid, G4Material* material) {
 G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   // Lookup-by-name of materials from NIST database
   G4NistManager* nist = G4NistManager::Instance();
+
   auto material = [nist] (auto const& name) { return nist->FindOrBuildMaterial(name); };
+
+  auto place = [] (G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent) {
+    auto name = logical -> GetName();
+    bool bool_op = false;
+    bool check_overlaps = true;
+    return new G4PVPlacement(0, position, logical, name, parent, bool_op, check_overlaps);
+  };
 
   // Envelope parameters
   G4double env_sizeXY = 20 * cm;
   G4double env_sizeZ  = 30 * cm;
-
-  // Option to switch on/off checking of volumes overlaps
-  G4bool checkOverlaps = true;
 
   // World ----------------------------------------------------------------------
   G4double world_sizeXY = 1.2 * env_sizeXY;
@@ -45,15 +51,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * world_sizeZ  ),
      material("G4_AIR"));
 
-  G4VPhysicalVolume* physWorld =
-    new G4PVPlacement(0,              // no rotation
-                      {},             // at (0,0,0)
-                      logicWorld,     // its logical volume
-                      "World",        // its name
-                      0,              // its mother  volume
-                      false,          // no boolean operation
-                      0,              // copy number
-                      checkOverlaps); // overlaps checking
+  G4VPhysicalVolume* physWorld = place({}, logicWorld, nullptr);
 
   // Envelope ----------------------------------------------------------------------
   auto logicEnv = RENAME_ME
@@ -63,14 +61,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * env_sizeZ),
      material("G4_WATER"));
 
-  new G4PVPlacement(0,              // no rotation
-                    {},             // at (0,0,0)
-                    logicEnv,       // its logical volume
-                    "Envelope",     // its name
-                    logicWorld,     // its mother  volume
-                    false,          // no boolean operation
-                    0,              // copy number
-                    checkOverlaps); // overlaps checking
+  place({}, logicEnv, logicWorld);
 
   // Shape 1 ----------------------------------------------------------------------
 
@@ -86,14 +77,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                 shape1_phimax),
      material("G4_A-150_TISSUE"));
 
-  new G4PVPlacement(0,                // no rotation
-                    {0, 2*cm, -7*cm}, // at position
-                    logicShape1,      // its logical volume
-                    "Shape1",         // its name
-                    logicEnv,         // its mother  volume
-                    false,            // no boolean operation
-                    0,                // copy number
-                    checkOverlaps);   // overlaps checking
+  place({0, 2*cm, -7*cm}, logicShape1, logicEnv);
 
   // Shape 2 ----------------------------------------------------------------------
 
@@ -108,14 +92,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * shape2_dyb, 0.5 * shape2_dz),
      material("G4_BONE_COMPACT_ICRU"));
 
-  new G4PVPlacement(0,                // no rotation
-                    {0, -1*cm, 7*cm}, // at position
-                    logicShape2,      // its logical volume
-                    "Shape2",         // its name
-                    logicEnv,         // its mother  volume
-                    false,            // no boolean operation
-                    0,                // copy number
-                    checkOverlaps);   // overlaps checking
+  place({0, -1*cm, 7*cm}, logicShape2, logicEnv);
 
   // --------------------------------------------------------------------------------
 
