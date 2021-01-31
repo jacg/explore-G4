@@ -1,18 +1,15 @@
-#include "detector_construction.hh"
 #include "action_initialization.hh"
-
-#include "G4RunManagerFactory.hh"
-
-#include "G4UImanager.hh"
-#include "QBBC.hh"
-
-#include "G4VisExecutive.hh"
-#include "G4UIExecutive.hh"
-
-#include "Randomize.hh"
+#include "detector_construction.hh"
 
 #include <G4RunManager.hh>
+#include <G4RunManagerFactory.hh>
+#include <G4UIExecutive.hh>
+#include <G4UImanager.hh>
+#include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
+
+#include <QBBC.hh>
+#include <Randomize.hh>
 
 #include <memory>
 

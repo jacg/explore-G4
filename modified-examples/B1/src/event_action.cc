@@ -1,8 +1,8 @@
 #include "event_action.hh"
 #include "run_action.hh"
 
-#include "G4Event.hh"
-#include "G4RunManager.hh"
+#include <G4Event.hh>
+#include <G4RunManager.hh>
 
 
 event_action::event_action(run_action* runAction)

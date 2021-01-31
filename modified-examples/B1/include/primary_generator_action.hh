@@ -1,11 +1,11 @@
 #ifndef primary_generator_action_h
 #define primary_generator_action_h 1
 
-#include <memory>
+#include <G4ParticleGun.hh>
+#include <G4VUserPrimaryGeneratorAction.hh>
+#include <globals.hh>
 
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "G4ParticleGun.hh"
-#include "globals.hh"
+#include <memory>
 
 class G4ParticleGun;
 class G4Event;

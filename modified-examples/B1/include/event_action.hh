@@ -1,8 +1,8 @@
 #ifndef event_action_h
 #define event_action_h 1
 
-#include "G4UserEventAction.hh"
-#include "globals.hh"
+#include <G4UserEventAction.hh>
+#include <globals.hh>
 
 class run_action;
 

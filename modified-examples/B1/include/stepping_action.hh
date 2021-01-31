@@ -1,8 +1,8 @@
 #ifndef B1SteppingAction_h
 #define B1SteppingAction_h 1
 
-#include "G4UserSteppingAction.hh"
-#include "globals.hh"
+#include <G4UserSteppingAction.hh>
+#include <globals.hh>
 
 class event_action;
 

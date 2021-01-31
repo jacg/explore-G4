@@ -1,7 +1,7 @@
 #ifndef action_initialization_h
 #define action_initialization_h 1
 
-#include "G4VUserActionInitialization.hh"
+#include <G4VUserActionInitialization.hh>
 
 /// Action initialization class.
 

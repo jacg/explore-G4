@@ -1,9 +1,9 @@
 #ifndef run_action_h
 #define run_action_h 1
 
-#include "G4UserRunAction.hh"
-#include "G4Accumulable.hh"
-#include "globals.hh"
+#include <G4Accumulable.hh>
+#include <G4UserRunAction.hh>
+#include <globals.hh>
 
 class G4Run;
 

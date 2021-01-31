@@ -1,14 +1,15 @@
 #include "primary_generator_action.hh"
 
-#include "G4LogicalVolumeStore.hh"
-#include "G4LogicalVolume.hh"
-#include "G4Box.hh"
-#include "G4RunManager.hh"
-#include "G4ParticleGun.hh"
-#include "G4ParticleTable.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4SystemOfUnits.hh"
-#include "Randomize.hh"
+#include <G4Box.hh>
+#include <G4LogicalVolume.hh>
+#include <G4LogicalVolumeStore.hh>
+#include <G4ParticleDefinition.hh>
+#include <G4ParticleGun.hh>
+#include <G4ParticleTable.hh>
+#include <G4RunManager.hh>
+#include <G4SystemOfUnits.hh>
+
+#include <Randomize.hh>
 
 
 primary_generator_action::primary_generator_action()

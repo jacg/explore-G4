@@ -1,8 +1,8 @@
 #ifndef detector_construction_h
 #define detector_construction_h 1
 
-#include "G4VUserDetectorConstruction.hh"
-#include "globals.hh"
+#include <G4VUserDetectorConstruction.hh>
+#include <globals.hh>
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
