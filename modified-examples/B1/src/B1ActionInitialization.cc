@@ -22,8 +22,8 @@ void B1ActionInitialization::Build() const {
   auto action = new run_action;
 
   SetUserAction                      (action);
-  auto eventAction = new event_action(action);
+  auto eventAction = new event_action{action};
 
   SetUserAction                    (eventAction);
-  SetUserAction(new stepping_action(eventAction));
+  SetUserAction(new stepping_action{eventAction});
 }
