@@ -1,5 +1,5 @@
 #include "detector_construction.hh"
-#include "B1ActionInitialization.hh"
+#include "action_initialization.hh"
 
 #include "G4RunManagerFactory.hh"
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager->SetUserInitialization(new B1ActionInitialization());
+  runManager->SetUserInitialization(new action_initialization());
 
   // Initialize visualization
   //
