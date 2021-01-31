@@ -58,41 +58,37 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
 
   place({}, logicEnv, logicWorld);
 
-  // Shape 1 ----------------------------------------------------------------------
+  // Cone --------------------------------------------------------------------------
+  G4double cone_rmina = 0 * cm,    cone_rmaxa = 2 * cm;
+  G4double cone_rminb = 0 * cm,    cone_rmaxb = 4 * cm;
+  G4double cone_hz    = 3 * cm;
+  G4double cone_phimin = 0 * deg, cone_phimax = 360 * deg;
 
-  // Conical section shape
-  G4double shape1_rmina = 0 * cm,    shape1_rmaxa = 2 * cm;
-  G4double shape1_rminb = 0 * cm,    shape1_rmaxb = 4 * cm;
-  G4double shape1_hz    = 3 * cm;
-  G4double shape1_phimin = 0 * deg, shape1_phimax = 360 * deg;
-
-  auto logicShape1 = RENAME_ME
-    (new G4Cons("TissueCone", shape1_rmina, shape1_rmaxa, shape1_rminb,
-                shape1_rmaxb, shape1_hz, shape1_phimin,
-                shape1_phimax),
+  auto cone = RENAME_ME
+    (new G4Cons("TissueCone", cone_rmina, cone_rmaxa, cone_rminb,
+                cone_rmaxb, cone_hz, cone_phimin,
+                cone_phimax),
      material("G4_A-150_TISSUE"));
 
-  place({0, 2*cm, -7*cm}, logicShape1, logicEnv);
+  place({0, 2*cm, -7*cm}, cone, logicEnv);
 
-  // Shape 2 ----------------------------------------------------------------------
+  // Trapezoid -------------------------------------------------------------------
+  G4double trapezoid_dxa = 12*cm, trapezoid_dxb = 12*cm;
+  G4double trapezoid_dya = 10*cm, trapezoid_dyb = 16*cm;
+  G4double trapezoid_dz  = 6*cm;
 
-  // Trapezoid shape
-  G4double shape2_dxa = 12*cm, shape2_dxb = 12*cm;
-  G4double shape2_dya = 10*cm, shape2_dyb = 16*cm;
-  G4double shape2_dz  = 6*cm;
-
-  auto logicShape2 = RENAME_ME
+  auto trapezoid = RENAME_ME
     (new G4Trd("BoneTrapezoid", // its name
-               0.5 * shape2_dxa, 0.5 * shape2_dxb, 0.5 * shape2_dya,
-               0.5 * shape2_dyb, 0.5 * shape2_dz),
+               0.5 * trapezoid_dxa, 0.5 * trapezoid_dxb, 0.5 * trapezoid_dya,
+               0.5 * trapezoid_dyb, 0.5 * trapezoid_dz),
      material("G4_BONE_COMPACT_ICRU"));
 
-  place({0, -1*cm, 7*cm}, logicShape2, logicEnv);
+  place({0, -1*cm, 7*cm}, trapezoid, logicEnv);
 
   // --------------------------------------------------------------------------------
 
   // Set Shape2 as scoring volume
-  this -> fScoringVolume = logicShape2;
+  this -> fScoringVolume = trapezoid;
 
   //always return the physical World
   return physWorld;
