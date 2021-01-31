@@ -13,11 +13,6 @@
 #include <G4ThreeVector.hh>
 
 
-B1DetectorConstruction::B1DetectorConstruction()
-: G4VUserDetectorConstruction()
-, fScoringVolume(nullptr)
-{ }
-
 // Create logical volume from solid and material
 G4LogicalVolume* RENAME_ME(G4VSolid* solid, G4Material* material) {
   return new G4LogicalVolume(solid, material, solid->GetName());
