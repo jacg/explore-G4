@@ -1,4 +1,4 @@
-#include "B1DetectorConstruction.hh"
+#include "detector_construction.hh"
 #include "B1ActionInitialization.hh"
 
 #include "G4RunManagerFactory.hh"
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
   // Set mandatory initialization classes
   //
   // Detector construction
-  runManager->SetUserInitialization(new B1DetectorConstruction());
+  runManager->SetUserInitialization(new detector_construction());
 
   // Physics list
   G4VModularPhysicsList* physicsList = new QBBC;

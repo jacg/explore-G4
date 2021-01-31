@@ -1,6 +1,6 @@
 #include "B1SteppingAction.hh"
 #include "B1EventAction.hh"
-#include "B1DetectorConstruction.hh"
+#include "detector_construction.hh"
 
 #include "G4Step.hh"
 #include "G4Event.hh"
@@ -16,8 +16,8 @@ B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step) {
   if (!fScoringVolume) {
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
+    const detector_construction* detectorConstruction
+      = static_cast<const detector_construction*>
       (G4RunManager::GetRunManager() -> GetUserDetectorConstruction());
     fScoringVolume = detectorConstruction -> GetScoringVolume();
   }

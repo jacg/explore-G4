@@ -1,4 +1,4 @@
-#include "B1DetectorConstruction.hh"
+#include "detector_construction.hh"
 
 #include "G4RunManager.hh"
 #include "G4NistManager.hh"
@@ -18,7 +18,7 @@ G4LogicalVolume* logical(G4VSolid* solid, G4Material* material) {
   return new G4LogicalVolume(solid, material, solid->GetName());
 }
 
-G4VPhysicalVolume* B1DetectorConstruction::Construct() {
+G4VPhysicalVolume* detector_construction::Construct() {
   // Lookup-by-name of materials from NIST database
   G4NistManager* nist = G4NistManager::Instance();
 
