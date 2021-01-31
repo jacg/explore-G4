@@ -78,7 +78,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double trapezoid_dz  = 6*cm;
 
   auto trapezoid = RENAME_ME
-    (new G4Trd("BoneTrapezoid", // its name
+    (new G4Trd("BoneTrapezoid",
                0.5 * trapezoid_dxa, 0.5 * trapezoid_dxb, 0.5 * trapezoid_dya,
                0.5 * trapezoid_dyb, 0.5 * trapezoid_dz),
      material("G4_BONE_COMPACT_ICRU"));
