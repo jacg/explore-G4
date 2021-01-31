@@ -1,5 +1,5 @@
 #include "B1ActionInitialization.hh"
-#include "B1PrimaryGeneratorAction.hh"
+#include "primary_generator_action.hh"
 #include "run_action.hh"
 #include "event_action.hh"
 #include "stepping_action.hh"

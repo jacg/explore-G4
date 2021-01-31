@@ -1,5 +1,5 @@
 #include "run_action.hh"
-#include "B1PrimaryGeneratorAction.hh"
+#include "primary_generator_action.hh"
 #include "detector_construction.hh"
 // #include "B1Run.hh"
 
