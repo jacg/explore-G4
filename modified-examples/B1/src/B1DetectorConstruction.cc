@@ -34,7 +34,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   // Option to switch on/off checking of volumes overlaps
   G4bool checkOverlaps = true;
 
-  // World
+  // World ----------------------------------------------------------------------
   G4double world_sizeXY = 1.2 * env_sizeXY;
   G4double world_sizeZ  = 1.2 * env_sizeZ;
 
@@ -46,16 +46,16 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
      material("G4_AIR"));
 
   G4VPhysicalVolume* physWorld =
-    new G4PVPlacement(0,                     //no rotation
-                      {},                    //at (0,0,0)
-                      logicWorld,            //its logical volume
-                      "World",               //its name
-                      0,                     //its mother  volume
-                      false,                 //no boolean operation
-                      0,                     //copy number
-                      checkOverlaps);        //overlaps checking
+    new G4PVPlacement(0,              // no rotation
+                      {},             // at (0,0,0)
+                      logicWorld,     // its logical volume
+                      "World",        // its name
+                      0,              // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  // Envelope
+  // Envelope ----------------------------------------------------------------------
   auto logicEnv = RENAME_ME
     (new G4Box("Envelope",
                0.5 * env_sizeXY,
@@ -63,16 +63,16 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * env_sizeZ),
      material("G4_WATER"));
 
-  new G4PVPlacement(0,                       //no rotation
-                    {},                      //at (0,0,0)
-                    logicEnv,                //its logical volume
-                    "Envelope",              //its name
-                    logicWorld,              //its mother  volume
-                    false,                   //no boolean operation
-                    0,                       //copy number
-                    checkOverlaps);          //overlaps checking
+  new G4PVPlacement(0,              // no rotation
+                    {},             // at (0,0,0)
+                    logicEnv,       // its logical volume
+                    "Envelope",     // its name
+                    logicWorld,     // its mother  volume
+                    false,          // no boolean operation
+                    0,              // copy number
+                    checkOverlaps); // overlaps checking
 
-  // Shape 1
+  // Shape 1 ----------------------------------------------------------------------
 
   // Conical section shape
   G4double shape1_rmina = 0 * cm,    shape1_rmaxa = 2 * cm;
@@ -86,16 +86,16 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                 shape1_phimax),
      material("G4_A-150_TISSUE"));
 
-  new G4PVPlacement(0,                       //no rotation
-                    {0, 2*cm, -7*cm},        //at position
-                    logicShape1,             //its logical volume
-                    "Shape1",                //its name
-                    logicEnv,                //its mother  volume
-                    false,                   //no boolean operation
-                    0,                       //copy number
-                    checkOverlaps);          //overlaps checking
+  new G4PVPlacement(0,                // no rotation
+                    {0, 2*cm, -7*cm}, // at position
+                    logicShape1,      // its logical volume
+                    "Shape1",         // its name
+                    logicEnv,         // its mother  volume
+                    false,            // no boolean operation
+                    0,                // copy number
+                    checkOverlaps);   // overlaps checking
 
-  // Shape 2
+  // Shape 2 ----------------------------------------------------------------------
 
   // Trapezoid shape
   G4double shape2_dxa = 12*cm, shape2_dxb = 12*cm;
@@ -108,14 +108,16 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * shape2_dyb, 0.5 * shape2_dz),
      material("G4_BONE_COMPACT_ICRU"));
 
-  new G4PVPlacement(0,                       //no rotation
-                    {0, -1*cm, 7*cm},        //at position
-                    logicShape2,             //its logical volume
-                    "Shape2",                //its name
-                    logicEnv,                //its mother  volume
-                    false,                   //no boolean operation
-                    0,                       //copy number
-                    checkOverlaps);          //overlaps checking
+  new G4PVPlacement(0,                // no rotation
+                    {0, -1*cm, 7*cm}, // at position
+                    logicShape2,      // its logical volume
+                    "Shape2",         // its name
+                    logicEnv,         // its mother  volume
+                    false,            // no boolean operation
+                    0,                // copy number
+                    checkOverlaps);   // overlaps checking
+
+  // --------------------------------------------------------------------------------
 
   // Set Shape2 as scoring volume
   this -> fScoringVolume = logicShape2;
