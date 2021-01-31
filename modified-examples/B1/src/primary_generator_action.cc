@@ -13,7 +13,7 @@
 
 primary_generator_action::primary_generator_action()
 : G4VUserPrimaryGeneratorAction{},
-  fParticleGun{new G4ParticleGun(1)}, // shoot 1 particle per invocation
+  fParticleGun{new G4ParticleGun{1}}, // shoot 1 particle per invocation
   fEnvelopeBox{nullptr}
 {
   // default particle kinematic

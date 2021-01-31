@@ -17,10 +17,10 @@ run_action::run_action()
   fEdep2(0)
 {
   // add new units for dose
-  new G4UnitDefinition("milligray", "milliGy" , "Dose", 1.e-3  * gray);
-  new G4UnitDefinition("microgray", "microGy" , "Dose", 1.e-6  * gray);
-  new G4UnitDefinition( "nanogray",  "nanoGy" , "Dose", 1.e-9  * gray);
-  new G4UnitDefinition( "picogray",  "picoGy" , "Dose", 1.e-12 * gray);
+  new G4UnitDefinition{"milligray", "milliGy" , "Dose", 1.e-3  * gray};
+  new G4UnitDefinition{"microgray", "microGy" , "Dose", 1.e-6  * gray};
+  new G4UnitDefinition{ "nanogray",  "nanoGy" , "Dose", 1.e-9  * gray};
+  new G4UnitDefinition{ "picogray",  "picoGy" , "Dose", 1.e-12 * gray};
 
   // Register accumulable to the accumulable manager
   auto accumulableManager = G4AccumulableManager::Instance();

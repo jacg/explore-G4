@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   // Detect interactive mode (if no arguments) and define UI session
   auto ui = unique_ptr<G4UIExecutive>{};
   if ( argc == 1 ) {
-    ui.reset(new G4UIExecutive(argc, argv));
+    ui.reset(new G4UIExecutive{argc, argv});
   }
 
   // Optionally: choose a different Random engine...
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   // Set mandatory initialization classes
 
   // Detector construction
-  runManager -> SetUserInitialization(new detector_construction());
+  runManager -> SetUserInitialization(new detector_construction{});
 
   // Physics list
   G4VModularPhysicsList* physicsList = new QBBC;
@@ -43,12 +43,12 @@ int main(int argc, char **argv) {
   runManager  -> SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager -> SetUserInitialization(new action_initialization());
+  runManager -> SetUserInitialization(new action_initialization{});
 
   // Initialize visualization
   auto visManager = unique_ptr<G4VisManager>{new G4VisExecutive};
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive("Quiet");
+  // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
   visManager -> Initialize();
 
   // Get the pointer to the User Interface manager
