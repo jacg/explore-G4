@@ -28,7 +28,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
     auto name = logical -> GetName();
     bool bool_op = false;
     bool check_overlaps = true;
-    return new G4PVPlacement(0, position, logical, name, parent, bool_op, check_overlaps);
+    return new G4PVPlacement(nullptr, position, logical, name, parent, bool_op, check_overlaps);
   };
 
   // Envelope parameters
