@@ -14,7 +14,7 @@
 
 
 // Create logical volume from solid and material
-G4LogicalVolume* RENAME_ME(G4VSolid* solid, G4Material* material) {
+G4LogicalVolume* logical(G4VSolid* solid, G4Material* material) {
   return new G4LogicalVolume(solid, material, solid->GetName());
 }
 
@@ -39,7 +39,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double world_sizeXY = 1.2 * env_sizeXY;
   G4double world_sizeZ  = 1.2 * env_sizeZ;
 
-  auto logicWorld = RENAME_ME
+  auto logicWorld = logical
     (new G4Box("World",
                0.5 * world_sizeXY,
                0.5 * world_sizeXY,
@@ -49,7 +49,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4VPhysicalVolume* physWorld = place({}, logicWorld);
 
   // Envelope ----------------------------------------------------------------------
-  auto logicEnv = RENAME_ME
+  auto logicEnv = logical
     (new G4Box("Envelope",
                0.5 * env_sizeXY,
                0.5 * env_sizeXY,
@@ -65,11 +65,11 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double cone_phimin = 0 * deg, cone_phimax = 360 * deg;
 
   place({0, 2*cm, -7*cm},
-        RENAME_ME(new G4Cons("TissueCone",
-                             cone_rmina, cone_rmaxa,
-                             cone_rminb, cone_rmaxb,
-                             cone_hz, cone_phimin, cone_phimax),
-                  material("G4_A-150_TISSUE")),
+        logical(new G4Cons("TissueCone",
+                           cone_rmina, cone_rmaxa,
+                           cone_rminb, cone_rmaxb,
+                           cone_hz, cone_phimin, cone_phimax),
+                material("G4_A-150_TISSUE")),
         logicEnv);
 
   // Trapezoid -------------------------------------------------------------------
@@ -77,7 +77,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double trapezoid_dya = 10*cm, trapezoid_dyb = 16*cm;
   G4double trapezoid_dz  = 6*cm;
 
-  auto trapezoid = RENAME_ME
+  auto trapezoid = logical
     (new G4Trd("BoneTrapezoid",
                0.5 * trapezoid_dxa, 0.5 * trapezoid_dxb, 0.5 * trapezoid_dya,
                0.5 * trapezoid_dyb, 0.5 * trapezoid_dz),
