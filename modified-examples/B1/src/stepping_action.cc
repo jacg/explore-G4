@@ -1,4 +1,4 @@
-#include "B1SteppingAction.hh"
+#include "stepping_action.hh"
 #include "event_action.hh"
 #include "detector_construction.hh"
 

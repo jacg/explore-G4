@@ -2,7 +2,7 @@
 #include "B1PrimaryGeneratorAction.hh"
 #include "run_action.hh"
 #include "event_action.hh"
-#include "B1SteppingAction.hh"
+#include "stepping_action.hh"
 
 B1ActionInitialization::B1ActionInitialization() : G4VUserActionInitialization() {}
 
