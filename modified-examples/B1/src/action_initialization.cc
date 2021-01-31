@@ -7,9 +7,6 @@
 action_initialization::action_initialization() : G4VUserActionInitialization() {}
 
 
-action_initialization::~action_initialization() {}
-
-
 // See README for explanation of the role of this method in multi-threaded mode.
 void action_initialization::BuildForMaster() const {
   SetUserAction(new run_action);

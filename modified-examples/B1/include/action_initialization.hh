@@ -9,10 +9,10 @@ class action_initialization : public G4VUserActionInitialization
 {
   public:
     action_initialization();
-    virtual ~action_initialization();
+    virtual ~action_initialization() override {};
 
-    virtual void BuildForMaster() const;
-    virtual void Build() const;
+    virtual void BuildForMaster() const override;
+    virtual void Build()          const override;
 };
 
 #endif
