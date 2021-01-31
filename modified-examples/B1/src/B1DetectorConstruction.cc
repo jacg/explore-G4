@@ -14,8 +14,8 @@
 
 
 B1DetectorConstruction::B1DetectorConstruction()
-: G4VUserDetectorConstruction(),
-  fScoringVolume(nullptr)
+: G4VUserDetectorConstruction()
+, fScoringVolume(nullptr)
 { }
 
 // Create logical volume from solid and material
