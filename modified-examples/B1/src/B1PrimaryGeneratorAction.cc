@@ -11,7 +11,7 @@
 #include "Randomize.hh"
 
 
-B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
+primary_generator_action::primary_generator_action()
 : G4VUserPrimaryGeneratorAction{},
   fParticleGun{new G4ParticleGun(1)}, // shoot 1 particle per invocation
   fEnvelopeBox{nullptr}
@@ -25,7 +25,7 @@ B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
 }
 
 
-void B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
+void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
   //this function is called at the begining of each event
 
   // In order to avoid dependence of PrimaryGeneratorAction
