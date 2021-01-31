@@ -19,11 +19,11 @@ void B1ActionInitialization::BuildForMaster() const {
 void B1ActionInitialization::Build() const {
   SetUserAction(new B1PrimaryGeneratorAction);
 
-  auto action = new run_action;
+  auto run_action_ = new run_action;
 
-  SetUserAction                      (action);
-  auto eventAction = new event_action{action};
+  SetUserAction                        (run_action_);
+  auto event_action_ = new event_action{run_action_};
 
-  SetUserAction                    (eventAction);
-  SetUserAction(new stepping_action{eventAction});
+  SetUserAction                    (event_action_);
+  SetUserAction(new stepping_action{event_action_});
 }
