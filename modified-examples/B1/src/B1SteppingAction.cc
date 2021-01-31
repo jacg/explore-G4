@@ -10,16 +10,16 @@
 B1SteppingAction::B1SteppingAction(event_action* eventAction)
 : G4UserSteppingAction(),
   fEventAction(eventAction),
-  fScoringVolume(nullptr)
+  scoring_volume(nullptr)
 {}
 
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step) {
-  if (!fScoringVolume) {
+  if (!scoring_volume) {
     const detector_construction* detectorConstruction
       = static_cast<const detector_construction*>
       (G4RunManager::GetRunManager() -> GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction -> GetScoringVolume();
+    scoring_volume = detectorConstruction -> GetScoringVolume();
   }
 
   // get volume of the current step
@@ -30,7 +30,7 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step) {
     -> GetVolume()
     -> GetLogicalVolume();
 
-  if (volume == fScoringVolume) {
+  if (volume == scoring_volume) {
     // collect energy deposited in this step
     fEventAction -> AddEdep(step -> GetTotalEnergyDeposit());
   }

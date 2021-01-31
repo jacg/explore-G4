@@ -17,7 +17,7 @@ public:
 
 private:
   event_action*   fEventAction;
-  G4LogicalVolume* fScoringVolume;
+  G4LogicalVolume* scoring_volume;
 };
 
 #endif
