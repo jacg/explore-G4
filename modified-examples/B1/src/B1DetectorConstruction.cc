@@ -64,13 +64,13 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
   G4double cone_hz    = 3 * cm;
   G4double cone_phimin = 0 * deg, cone_phimax = 360 * deg;
 
-  auto cone = RENAME_ME
-    (new G4Cons("TissueCone", cone_rmina, cone_rmaxa, cone_rminb,
-                cone_rmaxb, cone_hz, cone_phimin,
-                cone_phimax),
-     material("G4_A-150_TISSUE"));
-
-  place({0, 2*cm, -7*cm}, cone, logicEnv);
+  place({0, 2*cm, -7*cm},
+        RENAME_ME(new G4Cons("TissueCone",
+                             cone_rmina, cone_rmaxa,
+                             cone_rminb, cone_rmaxb,
+                             cone_hz, cone_phimin, cone_phimax),
+                  material("G4_A-150_TISSUE")),
+        logicEnv);
 
   // Trapezoid -------------------------------------------------------------------
   G4double trapezoid_dxa = 12*cm, trapezoid_dxb = 12*cm;
