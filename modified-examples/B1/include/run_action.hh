@@ -1,5 +1,5 @@
-#ifndef B1RunAction_h
-#define B1RunAction_h 1
+#ifndef run_action_h
+#define run_action_h 1
 
 #include "G4UserRunAction.hh"
 #include "G4Accumulable.hh"
@@ -11,10 +11,10 @@ class G4Run;
 /// deposit accumulated via stepping and event actions. The computed dose is
 /// then printed on the screen.
 
-class B1RunAction : public G4UserRunAction {
+class run_action : public G4UserRunAction {
 public:
-  B1RunAction();
-  virtual ~B1RunAction() {}
+  run_action();
+  virtual ~run_action() {}
 
   // virtual G4Run* GenerateRun();
   virtual void BeginOfRunAction(const G4Run*);

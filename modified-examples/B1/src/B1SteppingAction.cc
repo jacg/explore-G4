@@ -1,5 +1,5 @@
 #include "B1SteppingAction.hh"
-#include "B1EventAction.hh"
+#include "event_action.hh"
 #include "detector_construction.hh"
 
 #include "G4Step.hh"
@@ -7,7 +7,7 @@
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
+B1SteppingAction::B1SteppingAction(event_action* eventAction)
 : G4UserSteppingAction(),
   fEventAction(eventAction),
   fScoringVolume(nullptr)

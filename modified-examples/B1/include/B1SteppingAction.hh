@@ -4,19 +4,19 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 
-class B1EventAction;
+class event_action;
 
 class G4LogicalVolume;
 
 class B1SteppingAction : public G4UserSteppingAction {
 public:
-  B1SteppingAction(B1EventAction* eventAction);
+  B1SteppingAction(event_action* eventAction);
   virtual ~B1SteppingAction() {}
 
   virtual void UserSteppingAction(const G4Step*) override;
 
 private:
-  B1EventAction*   fEventAction;
+  event_action*   fEventAction;
   G4LogicalVolume* fScoringVolume;
 };
 

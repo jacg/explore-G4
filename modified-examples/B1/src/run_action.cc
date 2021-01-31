@@ -1,4 +1,4 @@
-#include "B1RunAction.hh"
+#include "run_action.hh"
 #include "B1PrimaryGeneratorAction.hh"
 #include "detector_construction.hh"
 // #include "B1Run.hh"
@@ -11,7 +11,7 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-B1RunAction::B1RunAction()
+run_action::run_action()
 : G4UserRunAction(),
   fEdep (0),
   fEdep2(0)
@@ -29,7 +29,7 @@ B1RunAction::B1RunAction()
 }
 
 
-void B1RunAction::BeginOfRunAction(const G4Run*) {
+void run_action::BeginOfRunAction(const G4Run*) {
   // inform the runManager to save random number seed
   G4RunManager::GetRunManager() -> SetRandomNumberStore(false);
 
@@ -38,7 +38,7 @@ void B1RunAction::BeginOfRunAction(const G4Run*) {
 }
 
 
-void B1RunAction::EndOfRunAction(const G4Run* run) {
+void run_action::EndOfRunAction(const G4Run* run) {
   G4int nofEvents = run -> GetNumberOfEvent();
   if (nofEvents == 0) return;
 
@@ -90,7 +90,7 @@ void B1RunAction::EndOfRunAction(const G4Run* run) {
 }
 
 
-void B1RunAction::AddEdep(G4double edep) {
+void run_action::AddEdep(G4double edep) {
   this -> fEdep  += edep;
   this -> fEdep2 += edep * edep;
 }
