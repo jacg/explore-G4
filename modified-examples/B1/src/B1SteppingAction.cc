@@ -7,9 +7,9 @@
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
 
-B1SteppingAction::B1SteppingAction(event_action* eventAction)
+B1SteppingAction::B1SteppingAction(event_action* action)
 : G4UserSteppingAction(),
-  fEventAction(eventAction),
+  action(action),
   scoring_volume(nullptr)
 {}
 
@@ -32,6 +32,6 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step) {
 
   if (volume == scoring_volume) {
     // collect energy deposited in this step
-    fEventAction -> AddEdep(step -> GetTotalEnergyDeposit());
+    action -> AddEdep(step -> GetTotalEnergyDeposit());
   }
 }

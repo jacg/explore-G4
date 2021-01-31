@@ -16,7 +16,7 @@ public:
   virtual void UserSteppingAction(const G4Step*) override;
 
 private:
-  event_action*   fEventAction;
+  event_action*    action;
   G4LogicalVolume* scoring_volume;
 };
 
