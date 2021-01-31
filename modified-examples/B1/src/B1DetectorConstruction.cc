@@ -24,7 +24,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
 
   auto material = [nist] (auto const& name) { return nist->FindOrBuildMaterial(name); };
 
-  auto place = [] (G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent) {
+  auto place = [] (G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent=nullptr) {
     auto name = logical -> GetName();
     bool bool_op = false;
     bool check_overlaps = true;
@@ -46,7 +46,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct() {
                0.5 * world_sizeZ  ),
      material("G4_AIR"));
 
-  G4VPhysicalVolume* physWorld = place({}, logicWorld, nullptr);
+  G4VPhysicalVolume* physWorld = place({}, logicWorld);
 
   // Envelope ----------------------------------------------------------------------
   auto logicEnv = RENAME_ME
