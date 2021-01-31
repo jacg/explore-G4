@@ -8,10 +8,10 @@ class event_action;
 
 class G4LogicalVolume;
 
-class B1SteppingAction : public G4UserSteppingAction {
+class stepping_action : public G4UserSteppingAction {
 public:
-  B1SteppingAction(event_action* eventAction);
-  virtual ~B1SteppingAction() {}
+  stepping_action(event_action* eventAction);
+  virtual ~stepping_action() {}
 
   virtual void UserSteppingAction(const G4Step*) override;
 

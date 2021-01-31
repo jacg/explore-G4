@@ -7,14 +7,14 @@
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
 
-B1SteppingAction::B1SteppingAction(event_action* action)
+stepping_action::stepping_action(event_action* action)
 : G4UserSteppingAction(),
   action(action),
   scoring_volume(nullptr)
 {}
 
 
-void B1SteppingAction::UserSteppingAction(const G4Step* step) {
+void stepping_action::UserSteppingAction(const G4Step* step) {
   if (!scoring_volume) {
     const detector_construction* detectorConstruction
       = static_cast<const detector_construction*>
