@@ -49,7 +49,9 @@ public:
     return *this;
   }
 
-  G4PVPlacement* now() {
+  G4PVPlacement* now() { return this->operator()(); }
+
+  G4PVPlacement* operator()() {
     // Maybe allow setting these later on
     bool bool_op        = false;
     bool check_overlaps = true;
