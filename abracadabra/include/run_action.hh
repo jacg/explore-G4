@@ -23,8 +23,8 @@ public:
   void AddEdep (G4double edep);
 
 private:
-  G4Accumulable<G4double> fEdep;
-  G4Accumulable<G4double> fEdep2;
+  G4Accumulable<G4double> edep;
+  G4Accumulable<G4double> edep2;
 };
 
 #endif

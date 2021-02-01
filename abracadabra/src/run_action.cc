@@ -13,8 +13,8 @@
 
 run_action::run_action()
 : G4UserRunAction()
-, fEdep(0)
-, fEdep2(0) {
+, edep(0)
+, edep2(0) {
   // add new units for dose
   new G4UnitDefinition{"milligray", "milliGy" , "Dose", 1.e-3  * gray};
   new G4UnitDefinition{"microgray", "microGy" , "Dose", 1.e-6  * gray};
@@ -23,8 +23,8 @@ run_action::run_action()
 
   // Register accumulable to the accumulable manager
   auto accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager -> RegisterAccumulable(fEdep);
-  accumulableManager -> RegisterAccumulable(fEdep2);
+  accumulableManager -> RegisterAccumulable(edep);
+  accumulableManager -> RegisterAccumulable(edep2);
 }
 
 void run_action::BeginOfRunAction(const G4Run*) {
@@ -45,17 +45,17 @@ void run_action::EndOfRunAction(const G4Run* run) {
   accumulableManager -> Merge();
 
   // Compute dose = total energy deposit in a run and its variance
-  G4double edep  = fEdep .GetValue();
-  G4double edep2 = fEdep2.GetValue();
+  G4double edep_  = this -> edep .GetValue();
+  G4double edep2_ = this -> edep2.GetValue();
 
-  G4double rms = edep2 - edep * edep / nofEvents;
+  G4double rms = edep2_ - edep_ * edep_ / nofEvents;
   if (rms > 0) rms = std::sqrt(rms); else rms = 0;
 
   const auto* detectorConstruction
    = static_cast<const detector_construction*>
      (G4RunManager::GetRunManager() -> GetUserDetectorConstruction());
   G4double    mass = detectorConstruction -> GetScoringVolume() -> GetMass();
-  G4double    dose = edep / mass;
+  G4double    dose = edep_ / mass;
   G4double rmsDose = rms  / mass;
 
   // Run conditions
@@ -88,7 +88,7 @@ void run_action::EndOfRunAction(const G4Run* run) {
 }
 
 
-void run_action::AddEdep(G4double edep) {
-  this -> fEdep  += edep;
-  this -> fEdep2 += edep * edep;
+void run_action::AddEdep(G4double edep_) {
+  this -> edep  += edep_;
+  this -> edep2 += edep_ * edep_;
 }
