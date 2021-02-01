@@ -34,10 +34,11 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of detector_construction
   run_manager -> SetUserInitialization(new detector_construction{});
 
-  // Physics list
-  auto physics_list = new QBBC;
-  physics_list -> SetVerboseLevel(1);
-  run_manager  -> SetUserInitialization(physics_list); // run_manager owns physics_list
+  { // Physics list
+    auto physics_list = new QBBC;
+    physics_list -> SetVerboseLevel(1);
+    run_manager  -> SetUserInitialization(physics_list);
+  } // run_manager owns physics_list
 
   // User action initialization
   run_manager -> SetUserInitialization(new action_initialization{});
