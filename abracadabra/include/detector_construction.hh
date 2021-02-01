@@ -11,14 +11,14 @@ class G4LogicalVolume;
 
 class detector_construction : public G4VUserDetectorConstruction {
 public:
-  detector_construction() : G4VUserDetectorConstruction(), fScoringVolume(nullptr) {}
+  detector_construction() : G4VUserDetectorConstruction(), scoring_volume(nullptr) {}
   virtual ~detector_construction() override {}
   virtual G4VPhysicalVolume* Construct() override;
-  G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+  G4LogicalVolume* GetScoringVolume() const { return scoring_volume; }
 
 protected:
   // Who owns this? I can't see where it's deleted!
-  G4LogicalVolume* fScoringVolume;
+  G4LogicalVolume* scoring_volume;
 };
 
 #endif

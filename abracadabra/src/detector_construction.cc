@@ -87,7 +87,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   // --------------------------------------------------------------------------------
 
   // Set Shape2 as scoring volume
-  this -> fScoringVolume = trapezoid;
+  this -> scoring_volume = trapezoid;
 
   //always return the physical World
   return phys_world;
