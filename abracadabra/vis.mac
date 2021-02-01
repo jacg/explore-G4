@@ -1,5 +1,5 @@
 # Macro file for the visualization setting in the initialization phase
-# of the B1 example when running in interactive mode
+# of the abracadabra when running in interactive mode
 #
 
 # Use these open statements to open selected visualization
@@ -73,9 +73,9 @@
 # Name
 /vis/set/textColour green
 /vis/set/textLayout right
-/vis/scene/add/text2D 0.9 -.9 24 ! ! exampleB1
+/vis/scene/add/text2D 0.9 -.9 24 ! ! abracadabra
 # or, if your system does not support right-adjustment
-#/vis/scene/add/text2D 0 -.9 24 ! ! exampleB1
+#/vis/scene/add/text2D 0 -.9 24 ! ! abracadabra
 /vis/set/textLayout    # Revert to normal (left adjusted) layout
 /vis/set/textColour    # Revert to default text colour (blue)
 #

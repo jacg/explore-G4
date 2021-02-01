@@ -50,7 +50,7 @@ void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
     msg << "Envelope volume of box shape not found.\n"
         << "Perhaps you have changed geometry.\n"
         << "The gun will be place at the center.";
-    G4Exception("B1PrimaryGeneratorAction::GeneratePrimaries()",
+    G4Exception("primary_generator_action::GeneratePrimaries()",
                 "MyCode0002", JustWarning, msg);
   }
 

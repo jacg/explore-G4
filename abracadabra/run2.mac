@@ -1,7 +1,7 @@
-# Macro file for example B1
+# Macro file for abracadabra
 #
 # To be run preferably in batch, without graphics:
-# % exampleB1 run2.mac
+# % abracadabra run2.mac
 #
 #/run/numberOfThreads 4
 /run/initialize
