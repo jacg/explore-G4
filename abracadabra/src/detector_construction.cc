@@ -24,12 +24,19 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto material = [nist](auto const& name) { return nist->FindOrBuildMaterial(name); };
 
   auto place = [](G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent = nullptr) {
-    auto name           = logical->GetName();
+    auto name           = logical -> GetName();
     bool bool_op        = false;
     bool check_overlaps = true;
     return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
   };
 
+  // ----- Materials ------------------------------------------------------------
+  auto air    = material("G4_AIR");
+  auto water  = material("G4_WATER");
+  auto tissue = material("G4_A-150_TISSUE");
+  auto bone   = material("G4_BONE_COMPACT_ICRU");
+
+  // ----- Shapes ---------------------------------------------------------------
   // Envelope parameters
   G4double env_size_xy = 20 * cm;
   G4double env_size_z  = 30 * cm;
@@ -43,7 +50,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
                0.5 * world_size_xy,
                0.5 * world_size_xy,
                0.5 * world_size_z  },
-     material("G4_AIR"));
+     air);
 
   G4VPhysicalVolume* phys_world = place({}, logic_world);
 
@@ -53,7 +60,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
                0.5 * env_size_xy,
                0.5 * env_size_xy,
                0.5 * env_size_z},
-     material("G4_WATER"));
+     water);
 
   place({}, logic_env, logic_world);
 
@@ -68,7 +75,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
                            cone_rmin_a, cone_rmax_a,
                            cone_rmin_b, cone_rmax_b,
                            cone_hz, cone_phi_min, cone_phi_max},
-                material("G4_A-150_TISSUE")),
+                tissue),
         logic_env);
 
   // Trapezoid -------------------------------------------------------------------
@@ -80,7 +87,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
     (new G4Trd{"BoneTrapezoid",
                0.5 * trapezoid_dxa, 0.5 * trapezoid_dxb, 0.5 * trapezoid_dya,
                0.5 * trapezoid_dyb, 0.5 * trapezoid_dz},
-     material("G4_BONE_COMPACT_ICRU"));
+     bone);
 
   place({0, -1*cm, 7*cm}, trapezoid, logic_env);
 
