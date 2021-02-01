@@ -70,17 +70,11 @@ G4VPhysicalVolume* detector_construction::Construct() {
                                               c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b,
                                               c_hz, c_phi_min, c_phi_max});
 
+  this->scoring_volume = trapezoid;
+
   // ----- Place the shapes at specific points in space ----------------------------
-  auto root = place({              }, world    , nullptr);
-  /*  */      place({              }, envelope , world);
-  /*  */      place({0, -1*cm, 7*cm}, trapezoid, envelope);
-  /*  */      place({0,  2*cm,-7*cm}, cone     , envelope);
-
-  // --------------------------------------------------------------------------------
-
-  // Set Shape2 as scoring volume
-  this -> scoring_volume = trapezoid;
-
-  // always return the physical World
-  return root;
+  /*  */ place({0, -1*cm, 7*cm}, trapezoid, envelope);
+  /*  */ place({0,  2*cm,-7*cm}, cone     , envelope);
+  /*  */ place({              }, envelope , world);
+  return place({              }, world    , nullptr);
 }
