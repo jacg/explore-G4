@@ -26,41 +26,41 @@ int main(int argc, char** argv) {
   // G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
   // Construct the default run manager
-  auto runManager = unique_ptr<G4RunManager>
+  auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default)};
 
   // Set mandatory initialization classes
 
-  // Detector construction
-  runManager -> SetUserInitialization(new detector_construction{});
+  // run_manager takes ownership of detector_construction
+  run_manager -> SetUserInitialization(new detector_construction{});
 
   // Physics list
-  auto physicsList = new QBBC;
-  physicsList -> SetVerboseLevel(1);
-  runManager  -> SetUserInitialization(physicsList);
+  auto physics_list = new QBBC;
+  physics_list -> SetVerboseLevel(1);
+  run_manager  -> SetUserInitialization(physics_list); // run_manager owns physics_list
 
   // User action initialization
-  runManager -> SetUserInitialization(new action_initialization{});
+  run_manager -> SetUserInitialization(new action_initialization{});
 
   // Initialize visualization
-  auto visManager = make_unique<G4VisExecutive>();
+  auto vis_manager = make_unique<G4VisExecutive>();
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
-  visManager -> Initialize();
+  vis_manager -> Initialize();
 
   // Get the pointer to the User Interface manager
-  auto UImanager = G4UImanager::GetUIpointer();
+  auto ui_manager = G4UImanager::GetUIpointer();
 
   // Process macro or start UI session
   if (!ui) {
     // batch mode
     G4String command = "/control/execute ";
-    G4String fileName = argv[1];
-    UImanager -> ApplyCommand(command + fileName);
+    G4String file_name = argv[1];
+    ui_manager -> ApplyCommand(command + file_name);
   } else {
     // interactive mode
-    UImanager -> ApplyCommand("/control/execute init_vis.mac");
-    ui        -> SessionStart();
+    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
+    ui         -> SessionStart();
   }
 
   // Job termination
