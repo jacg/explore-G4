@@ -31,45 +31,45 @@ G4VPhysicalVolume* detector_construction::Construct() {
   };
 
   // Envelope parameters
-  G4double env_sizeXY = 20 * cm;
-  G4double env_sizeZ  = 30 * cm;
+  G4double env_size_xy = 20 * cm;
+  G4double env_size_z  = 30 * cm;
 
   // World ----------------------------------------------------------------------
-  G4double world_sizeXY = 1.2 * env_sizeXY;
-  G4double world_sizeZ  = 1.2 * env_sizeZ;
+  G4double world_size_xy = 1.2 * env_size_xy;
+  G4double world_size_z  = 1.2 * env_size_z;
 
-  auto logicWorld = logical
+  auto logic_world = logical
     (new G4Box{"World",
-               0.5 * world_sizeXY,
-               0.5 * world_sizeXY,
-               0.5 * world_sizeZ  },
+               0.5 * world_size_xy,
+               0.5 * world_size_xy,
+               0.5 * world_size_z  },
      material("G4_AIR"));
 
-  G4VPhysicalVolume* physWorld = place({}, logicWorld);
+  G4VPhysicalVolume* phys_world = place({}, logic_world);
 
   // Envelope ----------------------------------------------------------------------
-  auto logicEnv = logical
+  auto logic_env = logical
     (new G4Box{"Envelope",
-               0.5 * env_sizeXY,
-               0.5 * env_sizeXY,
-               0.5 * env_sizeZ},
+               0.5 * env_size_xy,
+               0.5 * env_size_xy,
+               0.5 * env_size_z},
      material("G4_WATER"));
 
-  place({}, logicEnv, logicWorld);
+  place({}, logic_env, logic_world);
 
   // Cone --------------------------------------------------------------------------
-  G4double cone_rmina = 0 * cm,    cone_rmaxa = 2 * cm;
-  G4double cone_rminb = 0 * cm,    cone_rmaxb = 4 * cm;
-  G4double cone_hz    = 3 * cm;
-  G4double cone_phimin = 0 * deg, cone_phimax = 360 * deg;
+  G4double cone_rmin_a  = 0 * cm,   cone_rmax_a = 2 * cm;
+  G4double cone_rmin_b  = 0 * cm,   cone_rmax_b = 4 * cm;
+  G4double cone_hz      = 3 * cm;
+  G4double cone_phi_min = 0 * deg, cone_phi_max = 360 * deg;
 
   place({0, 2*cm, -7*cm},
         logical(new G4Cons{"TissueCone",
-                           cone_rmina, cone_rmaxa,
-                           cone_rminb, cone_rmaxb,
-                           cone_hz, cone_phimin, cone_phimax},
+                           cone_rmin_a, cone_rmax_a,
+                           cone_rmin_b, cone_rmax_b,
+                           cone_hz, cone_phi_min, cone_phi_max},
                 material("G4_A-150_TISSUE")),
-        logicEnv);
+        logic_env);
 
   // Trapezoid -------------------------------------------------------------------
   G4double trapezoid_dxa = 12 * cm, trapezoid_dxb = 12 * cm;
@@ -82,7 +82,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
                0.5 * trapezoid_dyb, 0.5 * trapezoid_dz},
      material("G4_BONE_COMPACT_ICRU"));
 
-  place({0, -1*cm, 7*cm}, trapezoid, logicEnv);
+  place({0, -1*cm, 7*cm}, trapezoid, logic_env);
 
   // --------------------------------------------------------------------------------
 
@@ -90,5 +90,5 @@ G4VPhysicalVolume* detector_construction::Construct() {
   this -> fScoringVolume = trapezoid;
 
   //always return the physical World
-  return physWorld;
+  return phys_world;
 }
