@@ -109,7 +109,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   G4double c_hz      = 3 * cm;
   G4double c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
 
-  // ----- Create the shapes -------------------------------------------------------
+  // ----- Create the components of the detector ------------------------------------
   auto world     = logical(air   , new G4Box{"World"   , w_xy, w_xy, w_z});
   auto envelope  = logical(water , new G4Box{"Envelope", e_xy, e_xy, e_z});
   auto trapezoid = logical(bone  , new G4Trd{"BoneTrapezoid", t_dxa, t_dxb, t_dya, t_dyb, t_dz});
@@ -119,7 +119,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
 
   this->scoring_volume = trapezoid;
 
-  // ----- Place the shapes at specific points in space ----------------------------
+  // ----- Combine the components ---------------------------------------------------
   place(trapezoid).in(envelope).at(0, -1*cm, 7*cm).now();
   place(cone     ).in(envelope).at(0,  2*cm,-7*cm).now();
   place(envelope ).in(world   )                   .now();
