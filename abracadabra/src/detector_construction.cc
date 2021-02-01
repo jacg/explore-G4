@@ -3,11 +3,13 @@
 #include <G4Box.hh>
 #include <G4Cons.hh>
 #include <G4LogicalVolume.hh>
+#include <G4Material.hh>
 #include <G4NistManager.hh>
 #include <G4Orb.hh>
 #include <G4PVPlacement.hh>
 #include <G4RunManager.hh>
 #include <G4Sphere.hh>
+#include <G4String.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4ThreeVector.hh>
 #include <G4Trd.hh>
@@ -17,18 +19,18 @@ G4LogicalVolume* logical(G4Material* material, G4VSolid* solid) {
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
+// Utility for concisely creating materials from NIST code
+G4Material* material(G4String const& name) { return G4NistManager::Instance()->FindOrBuildMaterial(name); };
+
+// Place a logical volume inside
+G4PVPlacement* place(G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent) {
+  auto name           = logical->GetName();
+  bool bool_op        = false;
+  bool check_overlaps = true;
+  return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
+};
+
 G4VPhysicalVolume* detector_construction::Construct() {
-  // Lookup-by-name of materials from NIST database
-  G4NistManager* nist = G4NistManager::Instance();
-
-  auto material = [nist](auto const& name) { return nist->FindOrBuildMaterial(name); };
-
-  auto place = [](G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent = nullptr) {
-    auto name           = logical -> GetName();
-    bool bool_op        = false;
-    bool check_overlaps = true;
-    return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
-  };
 
   // ----- Materials --------------------------------------------------------------
   auto air    = material("G4_AIR");
@@ -41,7 +43,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   G4double length_xy = 20 * cm;
   G4double length_z  = 30 * cm;
 
-  // G4Box requires half-lengths
+  // Envelope: G4Box requires half-lengths
   G4double e_xy = 0.5 * length_xy;
   G4double e_z  = 0.5 * length_z;
 
@@ -79,6 +81,6 @@ G4VPhysicalVolume* detector_construction::Construct() {
   // Set Shape2 as scoring volume
   this -> scoring_volume = trapezoid;
 
-  //always return the physical World
+  // always return the physical World
   return root;
 }
