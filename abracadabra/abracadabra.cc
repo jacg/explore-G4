@@ -13,12 +13,14 @@
 
 #include <memory>
 
+using std::make_unique;
 using std::unique_ptr;
 
 int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
-  auto ui = unique_ptr<G4UIExecutive>{};
-  if (argc == 1) { ui.reset(new G4UIExecutive{argc, argv}); }
+  auto ui = argc == 1
+    ? make_unique<G4UIExecutive>(argc, argv)
+    : unique_ptr <G4UIExecutive>{nullptr};
 
   // Optionally: choose a different Random engine...
   // G4Random::setTheEngine(new CLHEP::MTwistEngine);
@@ -41,7 +43,7 @@ int main(int argc, char** argv) {
   runManager -> SetUserInitialization(new action_initialization{});
 
   // Initialize visualization
-  auto visManager = unique_ptr<G4VisManager>{new G4VisExecutive};
+  auto visManager = make_unique<G4VisExecutive>();
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
   visManager -> Initialize();
