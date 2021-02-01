@@ -7,6 +7,8 @@
 
 #include <memory>
 
+using std::unique_ptr;
+
 class G4ParticleGun;
 class G4Event;
 class G4Box;
@@ -23,11 +25,11 @@ public:
 
   virtual void GeneratePrimaries(G4Event*) override;
 
-  const G4ParticleGun* GetParticleGun() const { return fParticleGun.get(); }
+  const G4ParticleGun* GetParticleGun() const { return particle_gun.get(); }
 
 private:
-  std::unique_ptr<G4ParticleGun> fParticleGun;
-  G4Box* fEnvelopeBox;
+  unique_ptr<G4ParticleGun> particle_gun;
+  G4Box*                    envelope_box;
 };
 
 #endif

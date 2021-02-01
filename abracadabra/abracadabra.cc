@@ -15,12 +15,10 @@
 
 using std::unique_ptr;
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
   auto ui = unique_ptr<G4UIExecutive>{};
-  if ( argc == 1 ) {
-    ui.reset(new G4UIExecutive{argc, argv});
-  }
+  if (argc == 1) { ui.reset(new G4UIExecutive{argc, argv}); }
 
   // Optionally: choose a different Random engine...
   // G4Random::setTheEngine(new CLHEP::MTwistEngine);
@@ -35,7 +33,7 @@ int main(int argc, char **argv) {
   runManager -> SetUserInitialization(new detector_construction{});
 
   // Physics list
-  G4VModularPhysicsList* physicsList = new QBBC;
+  auto physicsList = new QBBC;
   physicsList -> SetVerboseLevel(1);
   runManager  -> SetUserInitialization(physicsList);
 
@@ -49,18 +47,18 @@ int main(int argc, char **argv) {
   visManager -> Initialize();
 
   // Get the pointer to the User Interface manager
-  G4UImanager* UImanager = G4UImanager::GetUIpointer();
+  auto UImanager = G4UImanager::GetUIpointer();
 
   // Process macro or start UI session
   if (!ui) {
     // batch mode
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
-    UImanager -> ApplyCommand(command+fileName);
+    UImanager -> ApplyCommand(command + fileName);
   } else {
     // interactive mode
     UImanager -> ApplyCommand("/control/execute init_vis.mac");
-    ui -> SessionStart();
+    ui        -> SessionStart();
   }
 
   // Job termination

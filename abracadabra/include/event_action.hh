@@ -6,14 +6,13 @@
 
 class run_action;
 
-
 class event_action : public G4UserEventAction {
 public:
   event_action(run_action* runAction);
   virtual ~event_action() override {}
 
   virtual void BeginOfEventAction(const G4Event* event) override;
-  virtual void   EndOfEventAction(const G4Event* event) override;
+  virtual void EndOfEventAction(const G4Event* event) override;
 
   void AddEdep(G4double edep_) { edep += edep_; }
 

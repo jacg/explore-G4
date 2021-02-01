@@ -8,11 +8,9 @@
 #include <G4Step.hh>
 
 stepping_action::stepping_action(event_action* action)
-: G4UserSteppingAction(),
-  action(action),
-  scoring_volume(nullptr)
-{}
-
+: G4UserSteppingAction()
+, action(action)
+, scoring_volume(nullptr) {}
 
 void stepping_action::UserSteppingAction(const G4Step* step) {
   if (!scoring_volume) {

@@ -12,10 +12,9 @@
 #include <G4UnitsTable.hh>
 
 run_action::run_action()
-: G4UserRunAction(),
-  fEdep (0),
-  fEdep2(0)
-{
+: G4UserRunAction()
+, fEdep(0)
+, fEdep2(0) {
   // add new units for dose
   new G4UnitDefinition{"milligray", "milliGy" , "Dose", 1.e-3  * gray};
   new G4UnitDefinition{"microgray", "microGy" , "Dose", 1.e-6  * gray};
@@ -27,7 +26,6 @@ run_action::run_action()
   accumulableManager -> RegisterAccumulable(fEdep);
   accumulableManager -> RegisterAccumulable(fEdep2);
 }
-
 
 void run_action::BeginOfRunAction(const G4Run*) {
   // inform the runManager to save random number seed

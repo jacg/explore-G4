@@ -12,7 +12,6 @@
 #include <G4ThreeVector.hh>
 #include <G4Trd.hh>
 
-
 // Create logical volume from solid and material
 G4LogicalVolume* logical(G4VSolid* solid, G4Material* material) {
   return new G4LogicalVolume{solid, material, solid->GetName()};
@@ -22,11 +21,11 @@ G4VPhysicalVolume* detector_construction::Construct() {
   // Lookup-by-name of materials from NIST database
   G4NistManager* nist = G4NistManager::Instance();
 
-  auto material = [nist] (auto const& name) { return nist->FindOrBuildMaterial(name); };
+  auto material = [nist](auto const& name) { return nist->FindOrBuildMaterial(name); };
 
-  auto place = [] (G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent=nullptr) {
-    auto name = logical -> GetName();
-    bool bool_op = false;
+  auto place = [](G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent = nullptr) {
+    auto name           = logical->GetName();
+    bool bool_op        = false;
     bool check_overlaps = true;
     return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
   };
@@ -73,9 +72,9 @@ G4VPhysicalVolume* detector_construction::Construct() {
         logicEnv);
 
   // Trapezoid -------------------------------------------------------------------
-  G4double trapezoid_dxa = 12*cm, trapezoid_dxb = 12*cm;
-  G4double trapezoid_dya = 10*cm, trapezoid_dyb = 16*cm;
-  G4double trapezoid_dz  = 6*cm;
+  G4double trapezoid_dxa = 12 * cm, trapezoid_dxb = 12 * cm;
+  G4double trapezoid_dya = 10 * cm, trapezoid_dyb = 16 * cm;
+  G4double trapezoid_dz  =  6 * cm;
 
   auto trapezoid = logical
     (new G4Trd{"BoneTrapezoid",
