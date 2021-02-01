@@ -22,13 +22,58 @@ G4LogicalVolume* logical(G4Material* material, G4VSolid* solid) {
 // Utility for concisely creating materials from NIST code
 G4Material* material(G4String const& name) { return G4NistManager::Instance()->FindOrBuildMaterial(name); };
 
-// Place a logical volume inside
-G4PVPlacement* place(G4ThreeVector position, G4LogicalVolume* logical, G4LogicalVolume* parent) {
-  auto name           = logical->GetName();
-  bool bool_op        = false;
-  bool check_overlaps = true;
-  return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
+// ================================================================================
+#include <optional>
+using std::nullopt;
+using std::optional;
+using std::make_optional;
+
+class place {
+public:
+  place(G4LogicalVolume* child)
+  : child(child ? make_optional(child) : nullopt) {}
+
+  place(place const&) = default;
+
+  place& at(G4double x, G4double y, G4double z) { return this->at({x, y, z}); }
+
+  place& at(G4ThreeVector position_) {
+    auto xxx = make_optional(position_);
+    this->position.swap(xxx);
+    return *this;
+  }
+
+  place& in(G4LogicalVolume* parent_) {
+    auto xxx = make_optional(parent_);
+    this->parent.swap(xxx);
+    return *this;
+  }
+
+  G4PVPlacement* now() {
+    // Maybe allow setting these later on
+    bool bool_op        = false;
+    bool check_overlaps = true;
+
+    return new G4PVPlacement {
+      rotation.value_or(nullptr),
+      position.value_or(G4ThreeVector{}),
+      child   .value(),
+      name    .value_or(child.value() -> GetName()),
+      parent  .value_or(nullptr),
+      bool_op,
+      check_overlaps
+    };
+  }
+
+private:
+  optional<G4LogicalVolume*>  child;
+  optional<G4LogicalVolume*>  parent;
+  optional<G4ThreeVector>     position;
+  optional<G4RotationMatrix*> rotation;
+  optional<G4String>          name;
 };
+
+// ================================================================================
 
 G4VPhysicalVolume* detector_construction::Construct() {
 
@@ -73,8 +118,9 @@ G4VPhysicalVolume* detector_construction::Construct() {
   this->scoring_volume = trapezoid;
 
   // ----- Place the shapes at specific points in space ----------------------------
-  /*  */ place({0, -1*cm, 7*cm}, trapezoid, envelope);
-  /*  */ place({0,  2*cm,-7*cm}, cone     , envelope);
-  /*  */ place({              }, envelope , world);
-  return place({              }, world    , nullptr);
+  place(trapezoid).in(envelope).at(0, -1*cm, 7*cm).now();
+  place(cone     ).in(envelope).at(0,  2*cm,-7*cm).now();
+  place(envelope ).in(world   )                   .now();
+
+  return place(world).now();
 }
