@@ -13,7 +13,7 @@
 #include <G4Trd.hh>
 
 // Create logical volume from solid and material
-G4LogicalVolume* logical(G4VSolid* solid, G4Material* material) {
+G4LogicalVolume* logical(G4Material* material, G4VSolid* solid) {
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
@@ -30,59 +30,49 @@ G4VPhysicalVolume* detector_construction::Construct() {
     return new G4PVPlacement{nullptr, position, logical, name, parent, bool_op, check_overlaps};
   };
 
-  // ----- Materials ------------------------------------------------------------
+  // ----- Materials --------------------------------------------------------------
   auto air    = material("G4_AIR");
   auto water  = material("G4_WATER");
   auto tissue = material("G4_A-150_TISSUE");
   auto bone   = material("G4_BONE_COMPACT_ICRU");
 
-  // ----- Shapes ---------------------------------------------------------------
+  // ----- Dimensions -------------------------------------------------------------
+  // Size of the detector
   G4double length_xy = 20 * cm;
   G4double length_z  = 30 * cm;
 
+  // G4Box requires half-lengths
   G4double e_xy = 0.5 * length_xy;
   G4double e_z  = 0.5 * length_z;
 
+  // World volume needs a margin around everything inside it
   G4double w_xy = 1.2 * e_xy;
   G4double w_z  = 1.2 * e_z;
 
-  // World ----------------------------------------------------------------------
-
-  auto logic_world = logical(new G4Box{"World", w_xy, w_xy, w_z }, air);
-
-  auto phys_world = place({}, logic_world);
-
-  // Envelope ----------------------------------------------------------------------
-  auto logic_env = logical(new G4Box{"Envelope", e_xy, e_xy, e_z}, water);
-
-  place({}, logic_env, logic_world);
+  // Trapezoid ---------------------------------------------------------------------
+  G4double t_dxa = 12 * cm / 2, t_dxb = 12 * cm / 2;
+  G4double t_dya = 10 * cm / 2, t_dyb = 16 * cm / 2;
+  G4double t_dz  =  6 * cm / 2;
 
   // Cone --------------------------------------------------------------------------
-  G4double cone_rmin_a  = 0 * cm,   cone_rmax_a = 2 * cm;
-  G4double cone_rmin_b  = 0 * cm,   cone_rmax_b = 4 * cm;
-  G4double cone_hz      = 3 * cm;
-  G4double cone_phi_min = 0 * deg, cone_phi_max = 360 * deg;
+  G4double c_rmin_a  = 0 * cm,   c_rmax_a = 2 * cm;
+  G4double c_rmin_b  = 0 * cm,   c_rmax_b = 4 * cm;
+  G4double c_hz      = 3 * cm;
+  G4double c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
 
-  place({0, 2*cm, -7*cm},
-        logical(new G4Cons{"TissueCone",
-                           cone_rmin_a, cone_rmax_a,
-                           cone_rmin_b, cone_rmax_b,
-                           cone_hz, cone_phi_min, cone_phi_max},
-                tissue),
-        logic_env);
+  // ----- Create the shapes -------------------------------------------------------
+  auto world     = logical(air   , new G4Box{"World"   , w_xy, w_xy, w_z});
+  auto envelope  = logical(water , new G4Box{"Envelope", e_xy, e_xy, e_z});
+  auto trapezoid = logical(bone  , new G4Trd{"BoneTrapezoid", t_dxa, t_dxb, t_dya, t_dyb, t_dz});
+  auto cone      = logical(tissue, new G4Cons{"TissueCone",
+                                              c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b,
+                                              c_hz, c_phi_min, c_phi_max});
 
-  // Trapezoid -------------------------------------------------------------------
-  G4double trapezoid_dxa = 12 * cm, trapezoid_dxb = 12 * cm;
-  G4double trapezoid_dya = 10 * cm, trapezoid_dyb = 16 * cm;
-  G4double trapezoid_dz  =  6 * cm;
-
-  auto trapezoid = logical
-    (new G4Trd{"BoneTrapezoid",
-               0.5 * trapezoid_dxa, 0.5 * trapezoid_dxb, 0.5 * trapezoid_dya,
-               0.5 * trapezoid_dyb, 0.5 * trapezoid_dz},
-     bone);
-
-  place({0, -1*cm, 7*cm}, trapezoid, logic_env);
+  // ----- Place the shapes at specific points in space ----------------------------
+  auto root = place({              }, world    , nullptr);
+  /*  */      place({              }, envelope , world);
+  /*  */      place({0, -1*cm, 7*cm}, trapezoid, envelope);
+  /*  */      place({0,  2*cm,-7*cm}, cone     , envelope);
 
   // --------------------------------------------------------------------------------
 
@@ -90,5 +80,5 @@ G4VPhysicalVolume* detector_construction::Construct() {
   this -> scoring_volume = trapezoid;
 
   //always return the physical World
-  return phys_world;
+  return root;
 }
