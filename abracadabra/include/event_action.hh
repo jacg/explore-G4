@@ -1,5 +1,5 @@
-#ifndef event_action_h
-#define event_action_h 1
+#ifndef event_action_hh
+#define event_action_hh 1
 
 #include <G4UserEventAction.hh>
 #include <globals.hh>

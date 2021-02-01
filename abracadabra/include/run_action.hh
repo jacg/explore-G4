@@ -1,5 +1,5 @@
-#ifndef run_action_h
-#define run_action_h 1
+#ifndef run_action_hh
+#define run_action_hh 1
 
 #include <G4Accumulable.hh>
 #include <G4UserRunAction.hh>
