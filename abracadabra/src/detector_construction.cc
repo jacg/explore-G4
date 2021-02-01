@@ -37,30 +37,23 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto bone   = material("G4_BONE_COMPACT_ICRU");
 
   // ----- Shapes ---------------------------------------------------------------
-  // Envelope parameters
-  G4double env_size_xy = 20 * cm;
-  G4double env_size_z  = 30 * cm;
+  G4double length_xy = 20 * cm;
+  G4double length_z  = 30 * cm;
+
+  G4double e_xy = 0.5 * length_xy;
+  G4double e_z  = 0.5 * length_z;
+
+  G4double w_xy = 1.2 * e_xy;
+  G4double w_z  = 1.2 * e_z;
 
   // World ----------------------------------------------------------------------
-  G4double world_size_xy = 1.2 * env_size_xy;
-  G4double world_size_z  = 1.2 * env_size_z;
 
-  auto logic_world = logical
-    (new G4Box{"World",
-               0.5 * world_size_xy,
-               0.5 * world_size_xy,
-               0.5 * world_size_z  },
-     air);
+  auto logic_world = logical(new G4Box{"World", w_xy, w_xy, w_z }, air);
 
-  G4VPhysicalVolume* phys_world = place({}, logic_world);
+  auto phys_world = place({}, logic_world);
 
   // Envelope ----------------------------------------------------------------------
-  auto logic_env = logical
-    (new G4Box{"Envelope",
-               0.5 * env_size_xy,
-               0.5 * env_size_xy,
-               0.5 * env_size_z},
-     water);
+  auto logic_env = logical(new G4Box{"Envelope", e_xy, e_xy, e_z}, water);
 
   place({}, logic_env, logic_world);
 
