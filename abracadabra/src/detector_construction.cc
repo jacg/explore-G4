@@ -14,8 +14,13 @@
 #include <G4ThreeVector.hh>
 #include <G4Trd.hh>
 
+
+#include <utility>
+
 // Create logical volume from solid and material
-G4LogicalVolume* logical(G4Material* material, G4VSolid* solid) {
+template<class SOLID, class... ArgTypes>
+G4LogicalVolume* logical(G4Material* material, ArgTypes&&... args) {
+  auto solid = new SOLID{std::forward<ArgTypes>(args)...};
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
@@ -132,12 +137,10 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
 
   // ----- Create the components of the detector ------------------------------------
-  auto world     = logical(air   , new G4Box{"World"   , w_xy, w_xy, w_z});
-  auto envelope  = logical(water , new G4Box{"Envelope", e_xy, e_xy, e_z});
-  auto trapezoid = logical(bone  , new G4Trd{"BoneTrapezoid", t_dxa, t_dxb, t_dya, t_dyb, t_dz});
-  auto cone      = logical(tissue, new G4Cons{"TissueCone",
-                                              c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b,
-                                              c_hz, c_phi_min, c_phi_max});
+  auto world     = logical<G4Box> (air   , "World", w_xy, w_xy, w_z);
+  auto envelope  = logical<G4Box> (water , "Envelope", e_xy, e_xy, e_z);
+  auto trapezoid = logical<G4Trd> (bone  , "BoneTrapezoid", t_dxa, t_dxb, t_dya, t_dyb, t_dz);
+  auto cone      = logical<G4Cons>(tissue, "TissueCone", c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b, c_hz, c_phi_min, c_phi_max);
 
   this->scoring_volume = trapezoid;
 
