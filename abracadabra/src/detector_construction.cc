@@ -58,17 +58,32 @@ public:
   G4PVPlacement* now() { return this->operator()(); }
 
   G4PVPlacement* operator()() {
-    // Maybe allow setting these later on
-    bool bool_op        = false;
+    // ----- Name --------------------------------------------------
+    // + By default, the name is copied from the child volume.
+    // + If a copy_number is specified, it is appended to the name.
+    // + All of this is overriden if a name is provided explicitly.
+    G4String the_name;
+    if (this->name) {
+      the_name = this -> name.value();
+    } else {
+      the_name = this -> child.value() -> GetName();
+      if (this -> copy_number) {
+        auto suffix = "-" + std::to_string(copy_number.value());
+        the_name += suffix;
+      }
+    }
+    // TODO: Think about these later
+    bool WTF_is_pMany = false;
     bool check_overlaps = true;
 
     return new G4PVPlacement {
-      rotation.value_or(nullptr),
-      position.value_or(G4ThreeVector{}),
-      child   .value(),
-      name    .value_or(child.value() -> GetName()),
-      parent  .value_or(nullptr),
-      bool_op,
+      rotation   .value_or(nullptr),
+      position   .value_or(G4ThreeVector{}),
+      child      .value(),
+      the_name,
+      parent     .value_or(nullptr),
+      WTF_is_pMany,
+      copy_number.value_or(0),
       check_overlaps
     };
   }
@@ -79,7 +94,7 @@ private:
   optional<G4ThreeVector>     position;
   optional<G4RotationMatrix*> rotation;
   optional<G4String>          name;
-  unsigned                    copy_number;
+  optional<int>               copy_number;
 };
 
 // ================================================================================
