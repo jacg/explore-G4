@@ -18,9 +18,9 @@
 #include <utility>
 
 // Create logical volume from solid and material
-template<class SOLID, class... ArgTypes>
-G4LogicalVolume* logical(G4String name, G4Material* material, ArgTypes&&... args) {
-  auto solid = new SOLID{name, std::forward<ArgTypes>(args)...};
+template<class SOLID, class NAME, class... ArgTypes>
+G4LogicalVolume* logical(NAME name, G4Material* material, ArgTypes&&... args) {
+  auto solid = new SOLID{std::forward<NAME>(name), std::forward<ArgTypes>(args)...};
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
