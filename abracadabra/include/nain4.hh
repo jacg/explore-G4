@@ -34,10 +34,10 @@ public:
   place(place const&) = default;
 
   place& at(double x, double y, double z)                 { return at({x, y, z}); }
-  place& at(G4ThreeVector pos)           { position.emplace(pos)  ; return *this; }
-  place& id(int id)                      { copy_number    = id    ; return *this; }
-  place& in(G4LogicalVolume* parent_)    { parent.emplace(parent_); return *this; }
-  place& name(G4String label_)           { label .emplace(label_ ); return *this; }
+  place& at(G4ThreeVector pos)             { position    = pos    ; return *this; }
+  place& id(int id)                        { copy_number = id     ; return *this; }
+  place& in(G4LogicalVolume* parent_)      { parent      = parent_; return *this; }
+  place& name(G4String label_)             { label       = label_ ; return *this; }
 
   G4PVPlacement* operator()()                                     { return now(); }
   G4PVPlacement* now();
