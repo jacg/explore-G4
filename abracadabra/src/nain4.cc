@@ -10,14 +10,13 @@ G4Material* material(G4String const& name) {
 };
 
 place& place::at(G4ThreeVector position_) {
-  auto xxx = make_optional(position_);
-  this->position.swap(xxx);
+  this->position.emplace(position_);
   return *this;
 }
 
 place& place::in(G4LogicalVolume* parent_) {
-  auto xxx = make_optional(parent_);
-  this->parent.swap(xxx);
+  this->parent.emplace(parent_);
+  return *this;
   return *this;
 }
 
