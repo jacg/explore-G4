@@ -31,7 +31,8 @@ using std::make_optional;
 class place {
 public:
   place(G4LogicalVolume* child)
-  : child(child ? make_optional(child) : nullopt) {}
+  : child(child ? make_optional(child) : nullopt)
+  , copy_number(0){}
 
   place(place const&) = default;
 
@@ -46,6 +47,11 @@ public:
   place& in(G4LogicalVolume* parent_) {
     auto xxx = make_optional(parent_);
     this->parent.swap(xxx);
+    return *this;
+  }
+
+  place& id(unsigned id) {
+    this->copy_number = id;
     return *this;
   }
 
@@ -73,6 +79,7 @@ private:
   optional<G4ThreeVector>     position;
   optional<G4RotationMatrix*> rotation;
   optional<G4String>          name;
+  unsigned                    copy_number;
 };
 
 // ================================================================================
