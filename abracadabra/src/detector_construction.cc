@@ -35,7 +35,7 @@ public:
 
   place(place const&) = default;
 
-  place& at(G4double x, G4double y, G4double z) { return this->at({x, y, z}); }
+  place& at(double x, double y, double z) { return this->at({x, y, z}); }
 
   place& at(G4ThreeVector position_) {
     auto xxx = make_optional(position_);
@@ -87,27 +87,27 @@ G4VPhysicalVolume* detector_construction::Construct() {
 
   // ----- Dimensions -------------------------------------------------------------
   // Size of the detector
-  G4double length_xy = 20 * cm;
-  G4double length_z  = 30 * cm;
+  auto length_xy = 20 * cm;
+  auto length_z  = 30 * cm;
 
   // Envelope: G4Box requires half-lengths
-  G4double e_xy = 0.5 * length_xy;
-  G4double e_z  = 0.5 * length_z;
+  auto e_xy = 0.5 * length_xy;
+  auto e_z  = 0.5 * length_z;
 
   // World volume needs a margin around everything inside it
-  G4double w_xy = 1.2 * e_xy;
-  G4double w_z  = 1.2 * e_z;
+  auto w_xy = 1.2 * e_xy;
+  auto w_z  = 1.2 * e_z;
 
   // Trapezoid ---------------------------------------------------------------------
-  G4double t_dxa = 12 * cm / 2, t_dxb = 12 * cm / 2;
-  G4double t_dya = 10 * cm / 2, t_dyb = 16 * cm / 2;
-  G4double t_dz  =  6 * cm / 2;
+  auto t_dxa = 12 * cm / 2, t_dxb = 12 * cm / 2;
+  auto t_dya = 10 * cm / 2, t_dyb = 16 * cm / 2;
+  auto t_dz  =  6 * cm / 2;
 
   // Cone --------------------------------------------------------------------------
-  G4double c_rmin_a  = 0 * cm,   c_rmax_a = 2 * cm;
-  G4double c_rmin_b  = 0 * cm,   c_rmax_b = 4 * cm;
-  G4double c_hz      = 3 * cm;
-  G4double c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
+  auto c_rmin_a  = 0 * cm,   c_rmax_a = 2 * cm;
+  auto c_rmin_b  = 0 * cm,   c_rmax_b = 4 * cm;
+  auto c_hz      = 3 * cm;
+  auto c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
 
   // ----- Create the components of the detector ------------------------------------
   auto world     = logical(air   , new G4Box{"World"   , w_xy, w_xy, w_z});
