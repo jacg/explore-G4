@@ -9,7 +9,7 @@
 #include <G4SystemOfUnits.hh>
 
 using nain4::material;
-using nain4::logical;
+using nain4::volume;
 using nain4::place;
 
 
@@ -46,10 +46,10 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
 
   // ----- Create the components of the detector ------------------------------------
-  auto world     = logical<G4Box> ("World"        , air   , w_xy, w_xy, w_z);
-  auto envelope  = logical<G4Box> ("Envelope"     , water , e_xy, e_xy, e_z);
-  auto trapezoid = logical<G4Trd> ("BoneTrapezoid", bone  , t_dxa, t_dxb, t_dya, t_dyb, t_dz);
-  auto cone      = logical<G4Cons>("TissueCone"   , tissue, c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b, c_hz, c_phi_min, c_phi_max);
+  auto world     = volume<G4Box> ("World"        , air   , w_xy, w_xy, w_z);
+  auto envelope  = volume<G4Box> ("Envelope"     , water , e_xy, e_xy, e_z);
+  auto trapezoid = volume<G4Trd> ("BoneTrapezoid", bone  , t_dxa, t_dxb, t_dya, t_dyb, t_dz);
+  auto cone      = volume<G4Cons>("TissueCone"   , tissue, c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b, c_hz, c_phi_min, c_phi_max);
 
   this->scoring_volume = trapezoid;
 
