@@ -1,5 +1,7 @@
 #include "detector_construction.hh"
 
+#include "nain4.hh"
+
 #include <G4Box.hh>
 #include <G4Cons.hh>
 #include <G4LogicalVolume.hh>
@@ -14,95 +16,10 @@
 #include <G4ThreeVector.hh>
 #include <G4Trd.hh>
 
+using nain4::material;
+using nain4::logical;
+using nain4::place;
 
-#include <utility>
-
-// Create logical volume from solid and material
-template<class SOLID, class NAME, class... ArgTypes>
-G4LogicalVolume* logical(NAME name, G4Material* material, ArgTypes&&... args) {
-  auto solid = new SOLID{std::forward<NAME>(name), std::forward<ArgTypes>(args)...};
-  return new G4LogicalVolume{solid, material, solid->GetName()};
-}
-
-// Utility for concisely creating materials from NIST code
-G4Material* material(G4String const& name) { return G4NistManager::Instance()->FindOrBuildMaterial(name); };
-
-// ================================================================================
-#include <optional>
-using std::nullopt;
-using std::optional;
-using std::make_optional;
-
-class place {
-public:
-  place(G4LogicalVolume* child)
-  : child(child ? make_optional(child) : nullopt)
-  , copy_number(0){}
-
-  place(place const&) = default;
-
-  place& at(double x, double y, double z) { return this->at({x, y, z}); }
-
-  place& at(G4ThreeVector position_) {
-    auto xxx = make_optional(position_);
-    this->position.swap(xxx);
-    return *this;
-  }
-
-  place& in(G4LogicalVolume* parent_) {
-    auto xxx = make_optional(parent_);
-    this->parent.swap(xxx);
-    return *this;
-  }
-
-  place& id(unsigned id) {
-    this->copy_number = id;
-    return *this;
-  }
-
-  G4PVPlacement* now() { return this->operator()(); }
-
-  G4PVPlacement* operator()() {
-    // ----- Name --------------------------------------------------
-    // + By default, the name is copied from the child volume.
-    // + If a copy_number is specified, it is appended to the name.
-    // + All of this is overriden if a name is provided explicitly.
-    G4String the_name;
-    if (this->name) {
-      the_name = this -> name.value();
-    } else {
-      the_name = this -> child.value() -> GetName();
-      if (this -> copy_number) {
-        auto suffix = "-" + std::to_string(copy_number.value());
-        the_name += suffix;
-      }
-    }
-    // TODO: Think about these later
-    bool WTF_is_pMany = false;
-    bool check_overlaps = true;
-
-    return new G4PVPlacement {
-      rotation   .value_or(nullptr),
-      position   .value_or(G4ThreeVector{}),
-      child      .value(),
-      the_name,
-      parent     .value_or(nullptr),
-      WTF_is_pMany,
-      copy_number.value_or(0),
-      check_overlaps
-    };
-  }
-
-private:
-  optional<G4LogicalVolume*>  child;
-  optional<G4LogicalVolume*>  parent;
-  optional<G4ThreeVector>     position;
-  optional<G4RotationMatrix*> rotation;
-  optional<G4String>          name;
-  optional<int>               copy_number;
-};
-
-// ================================================================================
 
 G4VPhysicalVolume* detector_construction::Construct() {
 
