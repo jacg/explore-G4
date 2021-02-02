@@ -10,21 +10,6 @@ G4Material* material(G4String const& name) {
   return G4NistManager::Instance()->FindOrBuildMaterial(name);
 };
 
-place& place::at(G4ThreeVector position_) {
-  this->position.emplace(position_);
-  return *this;
-}
-
-place& place::in(G4LogicalVolume* parent_) {
-  this->parent.emplace(parent_);
-  return *this;
-}
-
-place& place::name(G4String label_) {
-  this->label.emplace(label_);
-  return *this;
-}
-
 G4PVPlacement* place::now() {
   // ----- Name --------------------------------------------------
   // + By default, the name is copied from the child volume.

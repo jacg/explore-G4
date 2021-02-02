@@ -33,11 +33,11 @@ public:
   place(G4LogicalVolume* child)  : child(child ? make_optional(child) : nullopt) {}
   place(place const&) = default;
 
-  place& at(G4ThreeVector);
   place& at(double x, double y, double z)                 { return at({x, y, z}); }
-  place& id(int id)                             { copy_number = id; return *this; }
-  place& in(G4LogicalVolume* parent);
-  place& name(G4String);
+  place& at(G4ThreeVector pos)           { position.emplace(pos)  ; return *this; }
+  place& id(int id)                      { copy_number    = id    ; return *this; }
+  place& in(G4LogicalVolume* parent_)    { parent.emplace(parent_); return *this; }
+  place& name(G4String label_)           { label .emplace(label_ ); return *this; }
 
   G4PVPlacement* operator()()                                     { return now(); }
   G4PVPlacement* now();
