@@ -37,6 +37,7 @@ public:
   place& at(double x, double y, double z)                 { return at({x, y, z}); }
   place& id(int id)                             { copy_number = id; return *this; }
   place& in(G4LogicalVolume* parent);
+  place& name(G4String);
 
   G4PVPlacement* operator()()                                     { return now(); }
   G4PVPlacement* now();
@@ -46,7 +47,7 @@ private:
   optional<G4LogicalVolume*>  parent;
   optional<G4ThreeVector>     position;
   optional<G4RotationMatrix*> rotation;
-  optional<G4String>          name;
+  optional<G4String>          label;
   optional<int>               copy_number;
 };
 

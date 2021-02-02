@@ -2,6 +2,7 @@
 
 #include <G4NistManager.hh>
 #include <G4PVPlacement.hh>
+#include <G4String.hh>
 
 namespace nain4 {
 
@@ -17,6 +18,10 @@ place& place::at(G4ThreeVector position_) {
 place& place::in(G4LogicalVolume* parent_) {
   this->parent.emplace(parent_);
   return *this;
+}
+
+place& place::name(G4String label_) {
+  this->label.emplace(label_);
   return *this;
 }
 
@@ -26,8 +31,8 @@ G4PVPlacement* place::now() {
   // + If a copy_number is specified, it is appended to the name.
   // + All of this is overriden if a name is provided explicitly.
   G4String the_name;
-  if (this->name) {
-    the_name = this->name.value();
+  if (this->label) {
+    the_name = this->label.value();
   } else {
     the_name = this->child.value()->GetName();
     if (this->copy_number) {
