@@ -8,8 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
-add_executable(tests testy-westy.cc)
-target_link_libraries(tests PRIVATE Catch2::Catch2)
+file(GLOB TEST_SOURCES test/*.cc)
+add_executable(tests-trial ${TEST_SOURCES})
+target_link_libraries(tests-trial PRIVATE Catch2::Catch2 ${Geant4_LIBRARIES})
+include(CTest)
+include(Catch)
+catch_discover_tests(tests-trial)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
