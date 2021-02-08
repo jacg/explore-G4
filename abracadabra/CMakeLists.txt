@@ -6,8 +6,8 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
 endif()
 project(ABRACADABRA)
 
-# --------------- JMG trial ------------------------------
-set (CMAKE_CXX_STANDARD 17)
+# ----- No point in staying in pre-history: use modern standards ------------
+set(CMAKE_CXX_STANDARD 17)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
