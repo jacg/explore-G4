@@ -9,6 +9,11 @@ project(ABRACADABRA)
 # --------------- JMG trial ------------------------------
 set (CMAKE_CXX_STANDARD 17)
 
+# ----- Use Catch2 as C++ testing framework ---------------------------------
+find_package(Catch2 REQUIRED)
+add_executable(tests testy-westy.cc)
+target_link_libraries(tests PRIVATE Catch2::Catch2)
+
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui

@@ -17,6 +17,7 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
 #    pkgs.clang-tools
     pkgs.clang_11
     pkgs.cmake
+    pkgs.catch2
   ];
 
 }
