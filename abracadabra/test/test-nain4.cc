@@ -1,8 +1,7 @@
-#include "trivial.hh"
+#include "nain4.hh"
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("trivial dummy functions", "[two]") {
-  REQUIRE(trivial::two  () == 2);
-  REQUIRE(trivial::three() == 3);
+TEST_CASE("nain4 dummy functions", "[two]") {
+  REQUIRE(nain4::two() == 2);
 }

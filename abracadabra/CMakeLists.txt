@@ -6,13 +6,11 @@ project(ABRACADABRA)
 # ----- No point in staying in pre-history: use modern standards ------------
 set(CMAKE_CXX_STANDARD 17)
 
-# ----- Hacking linkable nani4
-add_library(trivial include/trivial.hh src/trivial.cc)
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
 file(GLOB TEST_SOURCES test/*.cc)
 add_executable(tests-trial ${TEST_SOURCES})
-target_link_libraries(tests-trial PRIVATE Catch2::Catch2 trivial)
+target_link_libraries(tests-trial PRIVATE Catch2::Catch2 ${Geant4_LIBRARIES})
 include(CTest)
 include(Catch)
 catch_discover_tests(tests-trial)
