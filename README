@@ -1,3 +1,0 @@
-cd abracadabra/build
-cmake -DGeant4_DIR=$(which geant4.sh)/../.. ..
-bear -- make
