@@ -6,11 +6,14 @@ project(ABRACADABRA)
 # ----- No point in staying in pre-history: use modern standards ------------
 set(CMAKE_CXX_STANDARD 17)
 
+
+add_subdirectory(nain4)
+
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
 file(GLOB TEST_SOURCES test/*.cc)
 add_executable(tests-trial ${TEST_SOURCES})
-target_link_libraries(tests-trial PRIVATE Catch2::Catch2 ${Geant4_LIBRARIES})
+target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests-trial)
@@ -33,6 +36,7 @@ endif()
 #
 include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/nain4)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -45,7 +49,12 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(abracadabra abracadabra.cc ${sources} ${headers})
-target_link_libraries(abracadabra ${Geant4_LIBRARIES})
+target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4)
+target_include_directories(
+  abracadabra PUBLIC
+  "${PROJECT_SOURCE_DIR}/include"
+  "${PROJECT_SOURCE_DIR}/nain4"
+  )
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
