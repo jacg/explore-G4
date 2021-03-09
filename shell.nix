@@ -19,6 +19,7 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     pkgs.cmake
     pkgs.catch2
     pkgs.cmake-language-server
+    pkgs.gdb
   ];
 
 }
