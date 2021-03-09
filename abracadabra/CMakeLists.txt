@@ -11,7 +11,7 @@ add_subdirectory(nain4)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
-file(GLOB TEST_SOURCES test/*.cc)
+file(GLOB TEST_SOURCES test/*.cc src/*.cc)
 add_executable(tests-trial ${TEST_SOURCES})
 target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4)
 include(CTest)
