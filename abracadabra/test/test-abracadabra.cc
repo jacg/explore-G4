@@ -17,7 +17,7 @@
 using std::make_unique;
 using std::unique_ptr;
 
-TEST_CASE("G4 stuff", "[tag1][tag2]") {
+TEST_CASE("abracadabra", "[abra]") {
 
   // ----- Fake CLI input --------------------------------------------------
   char  arg0[] = "the-executable";
@@ -49,6 +49,8 @@ TEST_CASE("G4 stuff", "[tag1][tag2]") {
   // User action initialization
   run_manager -> SetUserInitialization(new action_initialization{});
 
-  // Smart pointers should clean up all the stuff we made for G4
+  REQUIRE(1+2 == 3);
+  REQUIRE(3+2 == 5);
 
+  // Smart pointers should clean up all the stuff we made for G4
 }

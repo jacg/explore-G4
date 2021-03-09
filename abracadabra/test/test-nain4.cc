@@ -41,7 +41,7 @@ public:
   }
 };
 
-TEST_CASE("nain4", "[tag1][tag2]") {
+TEST_CASE("nain4", "[nain]") {
 
   // ----- Fake CLI input --------------------------------------------------
   char  arg0[] = "the-executable";
@@ -72,6 +72,9 @@ TEST_CASE("nain4", "[tag1][tag2]") {
 
   // User action initialization
   run_manager -> SetUserInitialization(new dummy_action_init{});
+
+  REQUIRE(1*2 == 2);
+  REQUIRE(3*2 == 6);
 
   // Smart pointers should clean up all the stuff we made for G4
 }
