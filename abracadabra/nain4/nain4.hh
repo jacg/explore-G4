@@ -12,9 +12,6 @@
 
 namespace nain4 {
 
-inline unsigned two() { return 2; }
-unsigned three();
-
 using std::make_optional;
 using std::nullopt;
 using std::optional;

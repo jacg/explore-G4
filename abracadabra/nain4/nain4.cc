@@ -39,6 +39,4 @@ G4PVPlacement* place::now() {
                            check_overlaps};
 }
 
-unsigned three() { return 3; }
-
 } // namespace nain4
