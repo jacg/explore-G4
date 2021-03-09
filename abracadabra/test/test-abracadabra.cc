@@ -49,6 +49,7 @@ TEST_CASE("abracadabra", "[abra]") {
   // User action initialization
   run_manager -> SetUserInitialization(new action_initialization{});
 
+  // ----- Now we can write some test assertions -------------------------
   REQUIRE(1+2 == 3);
   REQUIRE(3+2 == 5);
 

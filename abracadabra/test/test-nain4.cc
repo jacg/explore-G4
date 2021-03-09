@@ -73,6 +73,7 @@ TEST_CASE("nain4", "[nain]") {
   // User action initialization
   run_manager -> SetUserInitialization(new dummy_action_init{});
 
+  // ----- Now we can write some test assertions -------------------------
   REQUIRE(1*2 == 2);
   REQUIRE(3*2 == 6);
 
