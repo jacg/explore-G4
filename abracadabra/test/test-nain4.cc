@@ -2,7 +2,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("nain4", "[dummy functions]") {
+TEST_CASE("nain4", "[tag1][tag2]") {
 
   SECTION("two") {
     REQUIRE(nain4::two  () == 2);

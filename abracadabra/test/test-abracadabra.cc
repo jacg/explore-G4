@@ -17,7 +17,7 @@
 using std::make_unique;
 using std::unique_ptr;
 
-TEST_CASE("G4 stuff", "[what does this mean?]") {
+TEST_CASE("G4 stuff", "[tag1][tag2]") {
 
   // ----- Fake CLI input --------------------------------------------------
   char  arg0[] = "the-executable";
