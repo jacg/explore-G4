@@ -23,4 +23,15 @@ TEST_CASE("nain4", "[nain]") {
     REQUIRE(nain_material != nullptr);
   }
 
+  SECTION("material properties") {
+    SECTION("water") {
+      auto water = nain4::material("G4_WATER");
+      CHECK(water->GetName()                  == "G4_WATER");
+      CHECK(water->GetChemicalFormula()       == "H_2O");
+      CHECK(water->GetTemperature() /  kelvin == Approx(293.15));
+      CHECK(water->GetPressure() / atmosphere == Approx(1));
+      CHECK(water->GetDensity() /     (kg/m3) == Approx(1000));
+      CHECK(water->GetState()                 == G4State::kStateSolid); // WTF!?
+    }
+  }
 }
