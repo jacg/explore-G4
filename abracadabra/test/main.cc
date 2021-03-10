@@ -31,15 +31,8 @@ public:
 class dummy_action_init : public G4VUserActionInitialization {
 public:
   dummy_action_init() : G4VUserActionInitialization() {}
-  virtual void BuildForMaster() const override { /*SetUserAction(new dummy_run_action);*/ }
-  virtual void Build         () const override {
-    // SetUserAction(new dummy_primary_generator_action);
-    // auto run_action = new dummy_run_action;
-    // SetUserAction(run_action);
-    // auto event_action = new dummy_event_action{run_action};
-    // SetUserAction(event_action);
-    // SetUserAction(new dummy_stepping_action{event_action})
-  }
+  virtual void BuildForMaster() const override {}
+  virtual void Build         () const override {}
 };
 
 int main(int argc, char** argv) {
