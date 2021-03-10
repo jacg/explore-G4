@@ -20,8 +20,6 @@
 
 TEST_CASE("nain4", "[nain]") {
 
-  auto run_manager = G4RunManager::GetRunManager();
-
   SECTION("material NIST") {
     auto material_name = GENERATE("G4_AIR", "G4_WATER", "G4_H", "G4_A-150_TISSUE");
     auto nain_material = nain4::material(material_name);
