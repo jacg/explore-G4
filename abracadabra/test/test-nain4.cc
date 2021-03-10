@@ -11,6 +11,13 @@
 
 #include <catch2/catch.hpp>
 
+// Many of the tests below check physical quantities. Dividing physical
+// quantities by their units gives raw numbers which are easily understandable
+// by a human reader, which is important test failures are reported. Sometimes
+// this gives rise to the apparently superfluous division by the same unit on
+// both sides of an equation, in the source code.
+
+
 TEST_CASE("nain4", "[nain]") {
 
   auto run_manager = G4RunManager::GetRunManager();
