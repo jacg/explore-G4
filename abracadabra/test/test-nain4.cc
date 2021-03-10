@@ -59,4 +59,56 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(solid->GetSurfaceArea() / m2 == Approx(8 * (lx*ly + ly*lz + lz*lx) / m2));
     CHECK(solid->GetName()             == "test_box");
   }
+
+  SECTION("place") {
+    auto air = nain4::material("G4_AIR");
+    auto outer = nain4::volume<G4Box>("outer", air, 1*m, 2*m, 3*m);
+
+    SECTION("defaults") {
+      auto world = nain4::place(outer).now();
+
+      auto trans = world->GetObjectTranslation();
+      CHECK(trans == G4ThreeVector{});
+      CHECK(world -> GetName()          == "outer");
+      CHECK(world -> GetCopyNo()        == 0);
+      CHECK(world -> GetLogicalVolume() == outer);
+      CHECK(world -> GetMotherLogical() == nullptr);
+    }
+
+    SECTION("multiple options") {
+      G4ThreeVector translation = {1,2,3};
+      auto world = nain4::place(outer)
+        .at(translation) // 1-arg version of at()
+        .name("not outer")
+        .id(382)
+        .now();
+
+      CHECK(world -> GetObjectTranslation() == translation);
+      CHECK(world -> GetName()   == "not outer");
+      CHECK(world -> GetCopyNo() == 382);
+    }
+
+    SECTION("at 3-args") {
+      auto world = nain4::place(outer).at(4,5,6).now(); // 3-arg version of at()
+      CHECK(world->GetObjectTranslation() == G4ThreeVector{4,5,6});
+    }
+
+    SECTION("in") {
+      auto water = nain4::material("G4_WATER");
+      auto inner = nain4::volume<G4Box>("inner", water, 0.3*m, 0.2*m, 0.1*m);
+
+      auto inner_placed = nain4::place(inner)
+        .in(outer)
+        .at(0.1*m, 0.2*m, 0.3*m)
+        .now();
+
+      auto outer_placed = nain4::place(outer).now();
+
+      CHECK(inner_placed -> GetMotherLogical() == outer);
+      CHECK(outer_placed -> GetLogicalVolume() == outer);
+      CHECK(outer -> GetNoDaughters() == 1);
+      CHECK(outer -> GetDaughter(0) -> GetLogicalVolume() == inner);
+    }
+
+  }
 }
