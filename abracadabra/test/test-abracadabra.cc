@@ -39,7 +39,7 @@ TEST_CASE("abracadabra", "[abra]") {
   std::cout << std::endl;
 
   // 4 volumes make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 8);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 9);
 
 
 }

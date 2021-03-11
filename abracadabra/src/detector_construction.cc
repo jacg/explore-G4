@@ -67,7 +67,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   place(vol_sensors    ).in(vol_vacuum_out).now();
   place(vol_vacuum_out ).in(vol_steel_out ).now();
 
-  return place(vol_vacuum_out).now();
+  return place(vol_steel_out).now();
 
   //this->scoring_volume = trapezoid; // TODO
 
