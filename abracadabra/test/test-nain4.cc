@@ -117,7 +117,13 @@ TEST_CASE("nain4", "[nain]") {
 
       // Quick check that geometry_iterator works TODO expand
       for (const auto& v: outer_placed) {
-        std::cout << v.GetName() << std::endl;
+        std::cout << v.GetName() << ": ";
+        auto & l = *v.GetLogicalVolume();
+        std::cout
+          << l.GetMaterial()->GetName() << "  "
+          << l.GetMass() / kg << " kg  "
+          << l.GetSolid()->GetCubicVolume() / m3 << " m3  "
+          << std::endl;
       }
 
     }
