@@ -20,6 +20,7 @@
 
 TEST_CASE("nain4", "[nain]") {
 
+  // nain4::material finds the same materials as the verbose G4 style
   SECTION("material NIST") {
     auto material_name = GENERATE("G4_AIR", "G4_WATER", "G4_H", "G4_A-150_TISSUE");
     auto nain_material = nain4::material(material_name);
@@ -28,6 +29,7 @@ TEST_CASE("nain4", "[nain]") {
     REQUIRE(nain_material != nullptr);
   }
 
+  // Basic material properties make sense (except for solid water at RTP!)
   SECTION("material properties") {
     SECTION("water") {
       auto water = nain4::material("G4_WATER");
@@ -40,6 +42,7 @@ TEST_CASE("nain4", "[nain]") {
     }
   }
 
+  // nain4::volume produces objects with sensible sizes, masses, etc.
   SECTION("volume") {
     auto water = nain4::material("G4_WATER");
     auto lx = 1 * m;
@@ -58,10 +61,12 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(solid->GetName()             == "test_box");
   }
 
+  // nain4::place is a good replacement for G4PVPlacement
   SECTION("place") {
     auto air = nain4::material("G4_AIR");
     auto outer = nain4::volume<G4Box>("outer", air, 1*m, 2*m, 3*m);
 
+    // Default values are sensible
     SECTION("defaults") {
       auto world = nain4::place(outer).now();
 
@@ -73,6 +78,7 @@ TEST_CASE("nain4", "[nain]") {
       CHECK(world -> GetMotherLogical() == nullptr);
     }
 
+    // Multiple optional values can be set at once.
     SECTION("multiple options") {
       G4ThreeVector translation = {1,2,3};
       auto world = nain4::place(outer)
@@ -86,11 +92,13 @@ TEST_CASE("nain4", "[nain]") {
       CHECK(world -> GetCopyNo() == 382);
     }
 
+    // The at() option accepts vector components (as well as a whole vector)
     SECTION("at 3-args") {
       auto world = nain4::place(outer).at(4,5,6).now(); // 3-arg version of at()
       CHECK(world->GetObjectTranslation() == G4ThreeVector{4,5,6});
     }
 
+    // The in() option creates correct mother/daughter relationship
     SECTION("in") {
       auto water = nain4::material("G4_WATER");
       auto inner = nain4::volume<G4Box>("inner", water, 0.3*m, 0.2*m, 0.1*m);
