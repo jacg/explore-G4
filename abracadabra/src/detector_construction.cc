@@ -45,15 +45,15 @@ G4VPhysicalVolume* detector_construction::Construct() {
     return volume<G4Tubs>(name, material, 0.0, radius, half_length, 0.0, two_pi);
   };
 
-  auto vol_inner_space = vol("Inner space" , air    , inner_radius);
+  auto vol_inner_space = vol("Inner_space" , air    , inner_radius);
   auto vol_housing     = vol("Housing"     , housing, r_housing   );
-  auto vol_vacuum_in   = vol("Inner vacuum", vacuum , r_vacuum_in );
-  auto vol_steel_in    = vol("Inner steel" , steel  , r_steel_in  );
+  auto vol_vacuum_in   = vol("Inner_vacuum", vacuum , r_vacuum_in );
+  auto vol_steel_in    = vol("Inner_steel" , steel  , r_steel_in  );
   auto vol_LXe         = vol("LXe"         , LXe    , r_LXe       );
   auto vol_quartz      = vol("Quartz"      , quartz , r_quartz    );
   auto vol_sensors     = vol("Sensors"     , sensors, r_sensors   );
-  auto vol_vacuum_out  = vol("Outer vacuum", vacuum , r_vacuum_out);
-  auto vol_steel_out   = vol("Outer steel" , steel  , r_steel_out );
+  auto vol_vacuum_out  = vol("Outer_vacuum", vacuum , r_vacuum_out);
+  auto vol_steel_out   = vol("Outer_steel" , steel  , r_steel_out );
 
   // TODO world volume ?
 
