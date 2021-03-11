@@ -51,6 +51,59 @@ private:
   optional<int>               copy_number;
 };
 
-}
+} // namespace nain4
+
+// ================================================================================
+
+#include <iterator>
+#include <queue>
+
+// TODO Move into nain4 namespace
+// TODO This is breadth-first; how about depth-first?
+// TODO This is an input iterator; how about output/forward?
+// TODO Swich to C++ 20 and do it with concepts
+class geometry_iterator {
+public:
+  geometry_iterator() {}
+  geometry_iterator(G4VPhysicalVolume* v) { this->q.push(v); }
+  geometry_iterator(geometry_iterator const &) = default;
+  geometry_iterator(geometry_iterator      &&) = default;
+
+  using iterator_category = std::input_iterator_tag;
+  using value_type        = G4VPhysicalVolume;
+  using pointer           = value_type*;
+  using reference         = value_type&;
+
+  geometry_iterator  operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+  geometry_iterator& operator++(   ) {
+    if (!this->q.empty()) {
+      auto current = this->q.front();
+      this->q.pop();
+      auto logical = current->GetLogicalVolume();
+      for(size_t d=0; d<logical->GetNoDaughters(); ++d) {
+        this->q.push(logical->GetDaughter(d));
+      }
+    }
+    return *this;
+  }
+
+  pointer   operator->()       { return  this->q.front(); }
+  reference operator* () const { return *this->q.front(); }
+
+  friend bool operator== (const geometry_iterator& a, const geometry_iterator& b) { return a.q == b.q; };
+  friend bool operator!= (const geometry_iterator& a, const geometry_iterator& b) { return a.q != b.q; };
+
+private:
+  std::queue<G4VPhysicalVolume*> q{};
+};
+
+// By overloading begin and end, we can make G4PhysicalVolume
+// usable with the STL algorithms and range-based for loops.
+geometry_iterator begin(G4VPhysicalVolume&);
+geometry_iterator   end(G4VPhysicalVolume&);
+geometry_iterator begin(G4VPhysicalVolume*);
+geometry_iterator   end(G4VPhysicalVolume*);
+
+
 
 #endif

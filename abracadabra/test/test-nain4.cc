@@ -114,6 +114,12 @@ TEST_CASE("nain4", "[nain]") {
       CHECK(outer_placed -> GetLogicalVolume() == outer);
       CHECK(outer -> GetNoDaughters() == 1);
       CHECK(outer -> GetDaughter(0) -> GetLogicalVolume() == inner);
+
+      // Quick check that geometry_iterator works TODO expand
+      for (const auto& v: outer_placed) {
+        std::cout << v.GetName() << std::endl;
+      }
+
     }
 
   }
