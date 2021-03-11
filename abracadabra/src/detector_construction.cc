@@ -15,7 +15,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
-  auto steel   = material("G4_WATER");    // TODO
+  auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
   auto sensors = material("G4_WATER");    // TODO
   auto quartz  = material("G4_WATER");    // TODO

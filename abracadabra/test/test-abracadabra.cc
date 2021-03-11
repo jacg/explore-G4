@@ -31,7 +31,7 @@ TEST_CASE("abracadabra", "[abra]") {
     std::cout << setw(15) << v.GetName() << ": ";
     auto & l = *v.GetLogicalVolume();
     std::cout
-      << setw(12) << l.GetMaterial()->GetName()
+      << setw(18) << l.GetMaterial()->GetName()
       << setw(12) << G4BestUnit(l.GetMass(), "Mass")
       << setw(12) << G4BestUnit(l.GetSolid()->GetCubicVolume(), "Volume")
       << std::endl;
