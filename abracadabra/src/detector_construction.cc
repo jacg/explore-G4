@@ -2,9 +2,7 @@
 
 #include "nain4.hh"
 
-#include <G4Box.hh>
-#include <G4Cons.hh>
-#include <G4Trd.hh>
+#include <G4Tubs.hh>
 
 #include <G4SystemOfUnits.hh>
 
@@ -12,51 +10,65 @@ using nain4::material;
 using nain4::volume;
 using nain4::place;
 
-
 G4VPhysicalVolume* detector_construction::Construct() {
 
+
   // ----- Materials --------------------------------------------------------------
-  auto air    = material("G4_AIR");
-  auto water  = material("G4_WATER");
-  auto tissue = material("G4_A-150_TISSUE");
-  auto bone   = material("G4_BONE_COMPACT_ICRU");
+  auto air     = material("G4_AIR");
+  auto steel   = material("G4_WATER"); // TODO
+  auto vacuum  = material("G4_WATER"); // TODO
+  auto sensors = material("G4_WATER"); // TODO
+  auto quartz  = material("G4_WATER"); // TODO
+  auto LXe     = material("G4_lXe");
+  auto housing = material("G4_WATER"); // TODO
 
   // ----- Dimensions -------------------------------------------------------------
-  // Size of the detector
-  auto length_xy = 20 * cm;
-  auto length_z  = 30 * cm;
+  auto inner_radius = 325 * mm;
 
-  // Envelope: G4Box requires half-lengths
-  auto e_xy = 0.5 * length_xy;
-  auto e_z  = 0.5 * length_z;
+  // Thicknesses of each layer       // Outer radii of each layer
+  auto dr_housing    =   3 * mm;     auto r_housing    = inner_radius + dr_housing;
+  auto dr_vacuum_in  =  25 * mm;     auto r_vacuum_in  = r_housing    + dr_vacuum_in;
+  auto dr_steel_in   =   3 * mm;     auto r_steel_in   = r_vacuum_in  + dr_steel_in;
+  auto dr_LXe        =  40 * mm;     auto r_LXe        = r_steel_in   + dr_LXe;
+  auto dr_quartz     =  20 * mm;     auto r_quartz     = r_LXe        + dr_quartz;
+  auto dr_sensors    = 666 * mm;     auto r_sensors    = r_quartz     + dr_sensors;
+  auto dr_vacuum_out = 200 * mm;     auto r_vacuum_out = r_sensors    + dr_vacuum_out;
+  auto dr_steel_out  =   5 * mm;     auto r_steel_out  = r_vacuum_out + dr_steel_out;
 
-  // World volume needs a margin around everything inside it
-  auto w_xy = 1.2 * e_xy;
-  auto w_z  = 1.2 * e_z;
+  auto two_pi = 360 * deg;
+  auto length = 70 * cm, half_length = length / 2;
 
-  // Trapezoid ---------------------------------------------------------------------
-  auto t_dxa = 12 * cm / 2, t_dxb = 12 * cm / 2;
-  auto t_dya = 10 * cm / 2, t_dyb = 16 * cm / 2;
-  auto t_dz  =  6 * cm / 2;
+  // ----- Logical volumes making up the geometry ---------------------------------
 
-  // Cone --------------------------------------------------------------------------
-  auto c_rmin_a  = 0 * cm,   c_rmax_a = 2 * cm;
-  auto c_rmin_b  = 0 * cm,   c_rmax_b = 4 * cm;
-  auto c_hz      = 3 * cm;
-  auto c_phi_min = 0 * deg,  c_phi_max = 360 * deg;
+  // Bind invariant args (3, 5, 6 and 7) of volume
+  auto vol = [half_length, two_pi](auto name, auto material, auto radius) {
+    return volume<G4Tubs>(name, material, 0.0, radius, half_length, 0.0, two_pi);
+  };
 
-  // ----- Create the components of the detector ------------------------------------
-  auto world     = volume<G4Box> ("World"        , air   , w_xy, w_xy, w_z);
-  auto envelope  = volume<G4Box> ("Envelope"     , water , e_xy, e_xy, e_z);
-  auto trapezoid = volume<G4Trd> ("BoneTrapezoid", bone  , t_dxa, t_dxb, t_dya, t_dyb, t_dz);
-  auto cone      = volume<G4Cons>("TissueCone"   , tissue, c_rmin_a, c_rmax_a, c_rmin_b, c_rmax_b, c_hz, c_phi_min, c_phi_max);
+  auto vol_inner_space = vol("Inner space" , air    , inner_radius);
+  auto vol_housing     = vol("Housing"     , housing, r_housing   );
+  auto vol_vacuum_in   = vol("Inner vacuum", vacuum , r_vacuum_in );
+  auto vol_steel_in    = vol("Inner steel" , steel  , r_steel_in  );
+  auto vol_LXe         = vol("LXe"         , LXe    , r_LXe       );
+  auto vol_quartz      = vol("Quartz"      , quartz , r_quartz    );
+  auto vol_sensors     = vol("Sensors"     , sensors, r_sensors   );
+  auto vol_vacuum_out  = vol("Outer vacuum", vacuum , r_vacuum_out);
+  auto vol_steel_out   = vol("Outer steel" , steel  , r_steel_out );
 
-  this->scoring_volume = trapezoid;
+  // TODO world volume ?
 
-  // ----- Combine the components ---------------------------------------------------
-  place(trapezoid).in(envelope).at(0, -1*cm, 7*cm).now();
-  place(cone     ).in(envelope).at(0,  2*cm,-7*cm).now();
-  place(envelope ).in(world   )                   .now();
+  // ----- Build geometry by organizing volumes in a hierarchy --------------------
+  place(vol_inner_space).in(vol_housing   ).now();
+  place(vol_housing    ).in(vol_vacuum_in ).now();
+  place(vol_vacuum_in  ).in(vol_steel_in  ).now();
+  place(vol_steel_in   ).in(vol_LXe       ).now();
+  place(vol_LXe        ).in(vol_quartz    ).now();
+  place(vol_quartz     ).in(vol_sensors   ).now();
+  place(vol_sensors    ).in(vol_vacuum_out).now();
+  place(vol_vacuum_out ).in(vol_steel_out ).now();
 
-  return place(world).now();
+  return place(vol_vacuum_out).now();
+
+  //this->scoring_volume = trapezoid; // TODO
+
 }
