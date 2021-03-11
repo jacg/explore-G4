@@ -15,12 +15,12 @@ G4VPhysicalVolume* detector_construction::Construct() {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
-  auto steel   = material("G4_WATER"); // TODO
-  auto vacuum  = material("G4_WATER"); // TODO
-  auto sensors = material("G4_WATER"); // TODO
-  auto quartz  = material("G4_WATER"); // TODO
+  auto steel   = material("G4_WATER");    // TODO
+  auto vacuum  = material("G4_Galactic");
+  auto sensors = material("G4_WATER");    // TODO
+  auto quartz  = material("G4_WATER");    // TODO
   auto LXe     = material("G4_lXe");
-  auto housing = material("G4_WATER"); // TODO
+  auto housing = material("G4_WATER");    // TODO
 
   // ----- Dimensions -------------------------------------------------------------
   auto inner_radius = 325 * mm;
