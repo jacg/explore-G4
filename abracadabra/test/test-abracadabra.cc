@@ -1,3 +1,5 @@
+#include "nain4.hh"
+
 #include "action_initialization.hh"
 #include "detector_construction.hh"
 
@@ -7,34 +9,32 @@
 #include <G4UImanager.hh>
 #include <G4VisManager.hh>
 
+#include <G4SystemOfUnits.hh>
+
 #include <QBBC.hh>
 #include <Randomize.hh>
 
 #include <catch2/catch.hpp>
 
-#include <memory>
-
-using std::make_unique;
-using std::unique_ptr;
+#include <algorithm>
+#include <iterator>
 
 TEST_CASE("abracadabra", "[abra]") {
 
-  // // Set mandatory initialization classes
+  auto geometry = detector_construction{}.Construct();
 
-  // // run_manager takes ownership of detector_construction
-  // run_manager -> SetUserInitialization(new detector_construction{});
+  for (const auto& v: geometry) {
+    std::cout << v.GetName() << ": ";
+    auto & l = *v.GetLogicalVolume();
+    std::cout
+      << l.GetMaterial()->GetName() << "  "
+      << l.GetMass() / kg << " kg  "
+      << l.GetSolid()->GetCubicVolume() / m3 << " m3  "
+      << std::endl;
+  }
 
-  // { // Physics list
-  //   auto physics_list = new QBBC;
-  //   physics_list -> SetVerboseLevel(1);
-  //   run_manager  -> SetUserInitialization(physics_list);
-  // } // run_manager owns physics_list
+  // 4 volumes make up the geometry
+  CHECK(std::distance(begin(geometry), end(geometry)) == 4);
 
-  // // User action initialization
-  // run_manager -> SetUserInitialization(new action_initialization{});
-
-  // ----- Now we can write some test assertions -------------------------
-  REQUIRE(1+2 == 3);
-  REQUIRE(3+2 == 5);
 
 }
