@@ -73,6 +73,7 @@ public:
   using value_type        = G4VPhysicalVolume;
   using pointer           = value_type*;
   using reference         = value_type&;
+  using difference_type   = std::ptrdiff_t;
 
   geometry_iterator  operator++(int) { auto tmp = *this; ++(*this); return tmp; }
   geometry_iterator& operator++(   ) {
