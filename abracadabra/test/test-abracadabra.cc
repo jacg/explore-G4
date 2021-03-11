@@ -10,6 +10,7 @@
 #include <G4VisManager.hh>
 
 #include <G4SystemOfUnits.hh>
+#include <G4UnitsTable.hh>
 
 #include <QBBC.hh>
 #include <Randomize.hh>
@@ -21,17 +22,21 @@
 
 TEST_CASE("abracadabra", "[abra]") {
 
+  using std::setw;
+
   auto geometry = detector_construction{}.Construct();
 
+  std::cout << std::endl;
   for (const auto& v: geometry) {
-    std::cout << v.GetName() << ": ";
+    std::cout << setw(15) << v.GetName() << ": ";
     auto & l = *v.GetLogicalVolume();
     std::cout
-      << l.GetMaterial()->GetName() << "  "
-      << l.GetMass() / kg << " kg  "
-      << l.GetSolid()->GetCubicVolume() / m3 << " m3  "
+      << setw(12) << l.GetMaterial()->GetName()
+      << setw(12) << G4BestUnit(l.GetMass(), "Mass")
+      << setw(12) << G4BestUnit(l.GetSolid()->GetCubicVolume(), "Volume")
       << std::endl;
   }
+  std::cout << std::endl;
 
   // 4 volumes make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 8);

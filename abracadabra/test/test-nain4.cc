@@ -8,6 +8,7 @@
 #include <G4RunManager.hh>
 
 #include <G4SystemOfUnits.hh>
+#include <G4UnitsTable.hh>
 
 #include <catch2/catch.hpp>
 
@@ -116,15 +117,17 @@ TEST_CASE("nain4", "[nain]") {
       CHECK(outer -> GetDaughter(0) -> GetLogicalVolume() == inner);
 
       // Quick check that geometry_iterator works TODO expand
+      std::cout << std::endl;
       for (const auto& v: outer_placed) {
-        std::cout << v.GetName() << ": ";
+        std::cout << std::setw(15) << v.GetName() << ": ";
         auto & l = *v.GetLogicalVolume();
         std::cout
-          << l.GetMaterial()->GetName() << "  "
-          << l.GetMass() / kg << " kg  "
-          << l.GetSolid()->GetCubicVolume() / m3 << " m3  "
+          << std::setw(12) << l.GetMaterial()->GetName()
+          << std::setw(12) << G4BestUnit(l.GetMass(), "Mass")
+          << std::setw(12) << G4BestUnit(l.GetSolid()->GetCubicVolume(), "Volume")
           << std::endl;
       }
+      std::cout << std::endl;
 
     }
 
