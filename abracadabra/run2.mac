@@ -9,11 +9,11 @@
 /control/verbose 2
 /run/verbose 2
 #
-# gamma 6 MeV to the direction (0.,0.,1.)
+# gamma 511 keV to the direction (0.,0.,1.)
 # 10000 events
 #
 /gun/particle gamma
-/gun/energy 6 MeV
+/gun/energy 511 keV
 #
 /run/printProgress 100
 /run/beamOn 1000
