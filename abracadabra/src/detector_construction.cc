@@ -2,6 +2,7 @@
 
 #include "nain4.hh"
 
+#include <G4Box.hh>
 #include <G4Tubs.hh>
 
 #include <G4SystemOfUnits.hh>
@@ -38,6 +39,9 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto two_pi = 360 * deg;
   auto length = 70 * cm, half_length = length / 2;
 
+  auto envelope_length = 1.1 * length;
+  auto envelope_width  = 1.1 * r_steel_out;
+
   // ----- Logical volumes making up the geometry ---------------------------------
 
   // Bind invariant args (3, 5, 6 and 7) of volume
@@ -54,6 +58,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto vol_sensors     = vol("Sensors"     , sensors, r_sensors   );
   auto vol_vacuum_out  = vol("Outer_vacuum", vacuum , r_vacuum_out);
   auto vol_steel_out   = vol("Outer_steel" , steel  , r_steel_out );
+  auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
 
   // TODO world volume ?
 
@@ -66,8 +71,8 @@ G4VPhysicalVolume* detector_construction::Construct() {
   place(vol_quartz     ).in(vol_sensors   ).now();
   place(vol_sensors    ).in(vol_vacuum_out).now();
   place(vol_vacuum_out ).in(vol_steel_out ).now();
-
-  return place(vol_steel_out).now();
+  place(vol_steel_out  ).in(vol_envelope  ).now();
+  return place(vol_envelope).now();
 
   //this->scoring_volume = trapezoid; // TODO
 

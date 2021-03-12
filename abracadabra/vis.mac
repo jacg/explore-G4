@@ -100,6 +100,7 @@
 /vis/scene/add/text 6 7 10 cm 18 4 4 Bone
 #
 # To get nice view
+/vis/geometry/set/colour     Envelope     0  0  1  0 .1
 /vis/geometry/set/colour     Outer_steel  0 .7 .7 .7 .1
 /vis/geometry/set/colour     Outer_vacuum 0 .1 .1 .1 .1
 /vis/geometry/set/colour     Sensors      0  0  0  1 .1
@@ -110,7 +111,8 @@
 /vis/geometry/set/colour     Housing      0 .7 .7 .7 .1
 /vis/geometry/set/colour     Inner_space  0 .7 .7 .7 .1
 
-/vis/geometry/set/visibility Outer_steel  0 false
+/vis/geometry/set/visibility Envelope     0 true
+/vis/geometry/set/visibility Outer_steel  0 true
 /vis/geometry/set/visibility Outer_vacuum 0 false
 /vis/geometry/set/visibility Sensors      0 true
 /vis/geometry/set/visibility Quartz       0 true
