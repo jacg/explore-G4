@@ -100,6 +100,8 @@
 /vis/scene/add/text 6 7 10 cm 18 4 4 Bone
 #
 # To get nice view
+#/vis/viewer/set/sectionPlane  on 0 0 20   cm  0 0 1
+
 /vis/geometry/set/colour     Envelope     0  0  1  0 .1
 /vis/geometry/set/colour     Outer_steel  0 .7 .7 .7 .1
 /vis/geometry/set/colour     Outer_vacuum 0 .1 .1 .1 .1

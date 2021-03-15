@@ -14,14 +14,14 @@
 /event/verbose 0
 /tracking/verbose 1
 #
-# gamma 511 keV to the direction (0.,0.,1.)
+# gamma 511 keV to the direction (0, 0, 1)
 #
 /gun/particle gamma
 /gun/energy 511 keV
 #
 /run/beamOn 5
 #
-# proton 210 MeV to the direction (0.,0.,1.)
+# proton 210 MeV to the direction (0, 0, 1)
 #
 /gun/particle proton
 /gun/energy 210 MeV
