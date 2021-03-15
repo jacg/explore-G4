@@ -27,7 +27,7 @@ G4PVPlacement* place::now() {
   }
   // TODO: Think about these later
   bool WTF_is_pMany   = false;
-  bool check_overlaps = true;
+  bool check_overlaps = false;
 
   return new G4PVPlacement{rotation   .value_or(nullptr),
                            position   .value_or(G4ThreeVector{}),

@@ -12,7 +12,7 @@ TEST_CASE("abracadabra", "[abra]") {
 
   using std::setw;
 
-  auto geometry = imas_demonstrator();
+  auto& geometry = *imas_demonstrator();
 
   std::cout << std::endl;
   for (const auto& v: geometry) {
@@ -37,7 +37,7 @@ TEST_CASE("NEMA", "[nema]") {
 
   using std::setw;
 
-  auto geometry = nema_phantom();
+  auto& geometry = *nema_phantom();
 
   std::cout << std::endl;
   for (const auto& v: geometry) {
@@ -54,5 +54,7 @@ TEST_CASE("NEMA", "[nema]") {
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 8);
 
-
+  for (auto& volume: geometry) {
+    CHECK(volume.CheckOverlaps() == false);
+  }
 }

@@ -6,9 +6,10 @@
 #include <G4Tubs.hh>
 #include <G4Sphere.hh>
 
+#include <G4PVPlacement.hh>
+
 #include <G4SystemOfUnits.hh>
 
-#include <G4Types.hh>
 #include <initializer_list>
 #include <vector>
 #include <string>
@@ -18,7 +19,7 @@ using nain4::material;
 using nain4::volume;
 using nain4::place;
 
-G4VPhysicalVolume* imas_demonstrator() {
+G4PVPlacement* imas_demonstrator() {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
@@ -81,7 +82,7 @@ G4VPhysicalVolume* imas_demonstrator() {
   return place(vol_envelope).now();
 }
 
-G4VPhysicalVolume* nema_phantom(std::vector<G4double> diameters /* = default value in header */) {
+G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value in header */) {
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
 
