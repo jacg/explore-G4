@@ -1,7 +1,6 @@
 #include "nain4.hh"
 
-#include "action_initialization.hh"
-#include "detector_construction.hh"
+#include "geometries.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -24,7 +23,7 @@ TEST_CASE("abracadabra", "[abra]") {
 
   using std::setw;
 
-  auto geometry = detector_construction{}.Construct();
+  auto geometry = imas_demonstrator();
 
   std::cout << std::endl;
   for (const auto& v: geometry) {
@@ -38,7 +37,7 @@ TEST_CASE("abracadabra", "[abra]") {
   }
   std::cout << std::endl;
 
-  // 4 volumes make up the geometry
+  // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
 
