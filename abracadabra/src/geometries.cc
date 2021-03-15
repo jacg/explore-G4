@@ -116,7 +116,7 @@ G4VPhysicalVolume* nema_phantom() {
 	  auto x     = inner_radius * sin(angle);
 	  auto y     = inner_radius * cos(angle);
 	  place(ball).in(cylinder).at(x, y, 0).now();
-	  count += 1;
+	  ++count;
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
