@@ -4,6 +4,7 @@
 
 #include <G4Box.hh>
 #include <G4Tubs.hh>
+#include <G4Sphere.hh>
 
 #include <G4SystemOfUnits.hh>
 
@@ -73,4 +74,33 @@ G4VPhysicalVolume* imas_demonstrator() {
   place(vol_steel_out  ).in(vol_envelope  ).now();
   return place(vol_envelope).now();
 
+}
+
+G4VPhysicalVolume* nema_phantom() {
+  // ----- Materials --------------------------------------------------------------
+  auto air     = material("G4_AIR");
+
+  // ----- Dimensions -------------------------------------------------------------
+  auto inner_radius = 114.4 * mm;
+  auto outer_radius = 139   * mm;
+
+  auto sphere_1_radius = 10 * mm;
+
+  auto pi     = 180 * deg;
+  auto two_pi = 360 * deg;
+  auto length = 113 * mm, half_length = length / 2;
+
+  auto envelope_length = 1.1 * length;
+  auto envelope_width  = 1.1 * outer_radius;
+
+  auto cylinder = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
+  auto sphere_1 = volume<G4Sphere>("Sphere1", air, 0.0, sphere_1_radius, 0.0, two_pi, 0.0, pi);
+
+  auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
+
+  // ----- Build geometry by organizing volumes in a hierarchy --------------------
+  place(cylinder).in(vol_envelope).now();
+  place(sphere_1).in(cylinder    ).now();
+
+  return place(vol_envelope).now();
 }

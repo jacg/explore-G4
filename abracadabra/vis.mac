@@ -112,6 +112,7 @@
 /vis/geometry/set/colour     Inner_vacuum 0 .7 .7 .7 .1
 /vis/geometry/set/colour     Housing      0 .7 .7 .7 .1
 /vis/geometry/set/colour     Inner_space  0 .7 .7 .7 .1
+/vis/geometry/set/colour     Cylinder     0 .7 .7 .7 .1
 
 /vis/geometry/set/visibility Envelope     0 true
 /vis/geometry/set/visibility Outer_steel  0 true
