@@ -108,8 +108,8 @@ G4VPhysicalVolume* nema_phantom() {
   auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
 
   // Build and place spheres
-  int count = 0;
-  for (auto diameter: diameters){
+  int count = 0; // TODO move into for, once we switch to C++ 20
+  for (auto diameter: diameters) {
 	  std::string name = "Sphere_" + std::to_string(count);
 	  auto ball  = sphere(name, air, diameter);
 	  auto angle = count * 60 * deg;
@@ -118,7 +118,6 @@ G4VPhysicalVolume* nema_phantom() {
 	  place(ball).in(cylinder).at(x, y, 0).now();
 	  count += 1;
   }
-
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
   place(cylinder).in(vol_envelope).now();
