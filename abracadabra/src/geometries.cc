@@ -8,6 +8,8 @@
 
 #include <G4SystemOfUnits.hh>
 
+#include <G4Types.hh>
+#include <initializer_list>
 #include <vector>
 #include <string>
 #include <cmath>
@@ -77,10 +79,9 @@ G4VPhysicalVolume* imas_demonstrator() {
   place(vol_vacuum_out ).in(vol_steel_out ).now();
   place(vol_steel_out  ).in(vol_envelope  ).now();
   return place(vol_envelope).now();
-
 }
 
-G4VPhysicalVolume* nema_phantom() {
+G4VPhysicalVolume* nema_phantom(std::vector<G4double> diameters /* = default value in header */) {
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
 
@@ -88,7 +89,6 @@ G4VPhysicalVolume* nema_phantom() {
   auto inner_radius = 114.4 * mm;
   auto outer_radius = 152   * mm;
 
-  std::vector<G4double> diameters = {10, 13, 17, 22, 28, 37};
   for (auto& d: diameters) { d *= mm; }
 
   auto pi     = 180 * deg;
@@ -112,7 +112,7 @@ G4VPhysicalVolume* nema_phantom() {
   for (auto diameter: diameters) {
 	  std::string name = "Sphere_" + std::to_string(count);
 	  auto ball  = sphere(name, air, diameter);
-	  auto angle = count * 60 * deg;
+	  auto angle = count * 360 * deg / diameters.size();
 	  auto x     = inner_radius * sin(angle);
 	  auto y     = inner_radius * cos(angle);
 	  place(ball).in(cylinder).at(x, y, 0).now();
