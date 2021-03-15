@@ -88,8 +88,8 @@ G4VPhysicalVolume* nema_phantom() {
   auto inner_radius = 114.4 * mm;
   auto outer_radius = 152   * mm;
 
-  std::vector<G4double> diameters = {10 * mm, 13 * mm, 17 * mm,
-	                             22 * mm, 28 * mm, 37 * mm};
+  std::vector<G4double> diameters = {10, 13, 17, 22, 28, 37};
+  for (auto& d: diameters) { d *= mm; }
 
   auto pi     = 180 * deg;
   auto two_pi = 360 * deg;
