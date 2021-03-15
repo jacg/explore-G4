@@ -2,22 +2,11 @@
 
 #include "geometries.hh"
 
-#include <G4RunManager.hh>
-#include <G4RunManagerFactory.hh>
-#include <G4UIExecutive.hh>
-#include <G4UImanager.hh>
-#include <G4VisManager.hh>
-
+#include <G4VSolid.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
 
-#include <QBBC.hh>
-#include <Randomize.hh>
-
 #include <catch2/catch.hpp>
-
-#include <algorithm>
-#include <iterator>
 
 TEST_CASE("abracadabra", "[abra]") {
 
