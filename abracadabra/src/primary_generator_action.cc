@@ -18,7 +18,7 @@ primary_generator_action::primary_generator_action()
   // default particle kinematic
   G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable() -> FindParticle("gamma");
   particle_gun -> SetParticleDefinition(particle);
-  particle_gun -> SetParticleMomentumDirection(G4ThreeVector(0, 0, 1));
+  particle_gun -> SetParticleMomentumDirection({0, 0, 1});
   particle_gun -> SetParticleEnergy(6 * MeV);
 }
 
@@ -53,6 +53,6 @@ void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
   G4double y0   = size * envSizeXY * (G4UniformRand() - 0.5);
   G4double z0   = -0.5 * envSizeZ;
 
-  particle_gun -> SetParticlePosition(G4ThreeVector(x0, y0, z0));
+  particle_gun -> SetParticlePosition({x0, y0, z0});
   particle_gun -> GeneratePrimaryVertex(anEvent);
 }
