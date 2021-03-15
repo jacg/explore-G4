@@ -98,7 +98,7 @@ G4VPhysicalVolume* nema_phantom() {
   auto envelope_length = 1.1 * length;
   auto envelope_width  = 1.1 * outer_radius;
 
-  // Bind invariant args (3, 5, 6 and 7) of volume
+  // Bind invariant args (3, 5, 6, 7 and 8) of volume
   auto sphere = [pi, two_pi](auto name, auto material, auto diameter) {
     return volume<G4Sphere>(name, material, 0.0, diameter/2, 0.0, two_pi, 0.0, pi);
   };
