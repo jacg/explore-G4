@@ -8,6 +8,10 @@
 
 #include <G4SystemOfUnits.hh>
 
+#include <vector>
+#include <string>
+#include <cmath>
+
 using nain4::material;
 using nain4::volume;
 using nain4::place;
@@ -82,9 +86,10 @@ G4VPhysicalVolume* nema_phantom() {
 
   // ----- Dimensions -------------------------------------------------------------
   auto inner_radius = 114.4 * mm;
-  auto outer_radius = 139   * mm;
+  auto outer_radius = 152   * mm;
 
-  auto sphere_1_radius = 10 * mm;
+  std::vector<G4double> diameters = {10 * mm, 13 * mm, 17 * mm,
+	                             22 * mm, 28 * mm, 37 * mm};
 
   auto pi     = 180 * deg;
   auto two_pi = 360 * deg;
@@ -93,14 +98,30 @@ G4VPhysicalVolume* nema_phantom() {
   auto envelope_length = 1.1 * length;
   auto envelope_width  = 1.1 * outer_radius;
 
+  // Bind invariant args (3, 5, 6 and 7) of volume
+  auto sphere = [pi, two_pi](auto name, auto material, auto diameter) {
+    return volume<G4Sphere>(name, material, 0.0, diameter/2, 0.0, two_pi, 0.0, pi);
+  };
+
   auto cylinder = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
-  auto sphere_1 = volume<G4Sphere>("Sphere1", air, 0.0, sphere_1_radius, 0.0, two_pi, 0.0, pi);
 
   auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
 
+  // Build and place spheres
+  int count = 0;
+  for (auto diameter: diameters){
+	  std::string name = "Sphere_" + std::to_string(count);
+	  auto ball  = sphere(name, air, diameter);
+	  auto angle = count * 60 * deg;
+	  auto x     = inner_radius * sin(angle);
+	  auto y     = inner_radius * cos(angle);
+	  place(ball).in(cylinder).at(x, y, 0).now();
+	  count += 1;
+  }
+
+
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
   place(cylinder).in(vol_envelope).now();
-  place(sphere_1).in(cylinder    ).now();
 
   return place(vol_envelope).now();
 }
