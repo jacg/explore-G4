@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("abracadabra", "[abra]") {
+TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   using std::setw;
 
@@ -29,11 +29,10 @@ TEST_CASE("abracadabra", "[abra]") {
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
-
 }
 
 
-TEST_CASE("NEMA", "[nema]") {
+TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
   using std::setw;
 
