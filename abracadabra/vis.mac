@@ -95,9 +95,9 @@
 /vis/set/lineWidth     # Revert to default line width (1.)
 #
 # Attach text to one edge of cone, with a small, fixed offset
-/vis/scene/add/text 0 6 -4 cm 18 4 4 Tissue
+#/vis/scene/add/text 0 6 -4 cm 18 4 4 Tissue
 # Attach text to one corner of Trapezoid, with a small, fixed offset
-/vis/scene/add/text 6 7 10 cm 18 4 4 Bone
+#/vis/scene/add/text 6 7 10 cm 18 4 4 Bone
 #
 # To get nice view
 #/vis/viewer/set/sectionPlane  on 0 0 20   cm  0 0 1
