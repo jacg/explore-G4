@@ -29,6 +29,9 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
+  for (auto& volume: geometry) {
+    CHECK(volume.CheckOverlaps() == false);
+  }
 }
 
 
