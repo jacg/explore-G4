@@ -1,16 +1,20 @@
 #include "nain4.hh"
 
+// Solids
 #include <G4Box.hh>
 #include <G4Cons.hh>
 #include <G4Trd.hh>
 
-#include <G4Material.hh>
-
+// Managers
 #include <G4NistManager.hh>
 #include <G4RunManager.hh>
 
+// Units
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
+
+// Other G4
+#include <G4Material.hh>
 
 #include <catch2/catch.hpp>
 
