@@ -26,18 +26,52 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
+// --------------------------------------------------------------------------------
 // Utilies for concisely finding materials and elements
+
 G4Material* material(G4String const& name);
 G4Element * element (G4String const& name);
 
-G4Material* material_from_elements(std::string name,
-                                   G4double density,
-                                   G4State state,
-                                   std::vector<std::tuple<std::string, int>> components,
-                                   bool warn = false);
+// The G4Material::AddElement is overloaded on double/int in the second
+// parameter. Template argument deduction doesn't seem to be able to resolve
+// this, when the values are nested inside an std::initializer_list argument.
+// This forces the caller to specify the template argument explicitly, so we
+// provide wrappers (material_from_elements_N and material_from_elements_F) with
+// the hope that it's a slightly nicer interface.
+template<typename NUMBER>
+G4Material* material_from_elements(std::string name, G4double density, G4State state,
+                                   std::vector<std::tuple<std::string, NUMBER>> components,
+                                   bool warn = false)
+{
+  auto the_material = G4Material::GetMaterial(name, warn);
+  if (!the_material) {
+    auto n_components = static_cast<G4int>(components.size());
+    the_material = new G4Material{name, density, n_components, state};
+    for (auto [the_element, n_atoms]: components) {
+      the_material -> AddElement(element(the_element), n_atoms);
+    }
+  }
+  return the_material;
+}
 
 
-// ================================================================================
+// Wrapper for material_from_elements<G4int>
+inline
+G4Material* material_from_elements_N(std::string name, G4double density, G4State state,
+                                     std::vector<std::tuple<std::string, G4int>> components,
+                                     bool warn = false) {
+  return material_from_elements<G4int>(name, density, state, components, warn);
+}
+
+// Wrapper for material_from_elements<G4double>
+inline
+G4Material* material_from_elements_F(std::string name, G4double density, G4State state,
+                                     std::vector<std::tuple<std::string, G4double>> components,
+                                     bool warn = false) {
+  return material_from_elements<G4double>(name, density, state, components, warn);
+}
+
+// --------------------------------------------------------------------------------
 
 class place {
 public:
@@ -64,7 +98,7 @@ private:
 
 } // namespace nain4
 
-// ================================================================================
+// --------------------------------------------------------------------------------
 
 #include <iterator>
 #include <queue>

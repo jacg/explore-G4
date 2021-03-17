@@ -24,6 +24,7 @@
 // this gives rise to the apparently superfluous division by the same unit on
 // both sides of an equation, in the source code.
 
+#include<numeric>
 
 TEST_CASE("nain4", "[nain]") {
 
@@ -50,14 +51,108 @@ TEST_CASE("nain4", "[nain]") {
   }
 
   // Making and retrieving materials with nain4
-  SECTION("material creation") {
+  SECTION("material creation from N atoms") {
+
+    // The values used to construct the material
     auto name = "FR4";
     auto density = 1.85 * g/cm3;
-    auto fr4_made = nain4::material_from_elements(name, density, kStateSolid,
-                                                  {{"H", 12}, {"C", 18}, {"O", 3}});
+    auto state = kStateSolid;
+    auto [nH, nC, nO] = std::make_tuple(12, 18, 3);
+
+    // Make the material using nain4::material_from_elements
+    auto fr4 = nain4::material_from_elements_N(name, density, state,
+                                               {{"H", nH}, {"C", nC}, {"O", nO}});
+    CHECK(fr4 != nullptr);
+
+    // Verify that the material can be retrieved with nani4::material
     auto fr4_found = nain4::material(name);
-    CHECK(fr4_made == fr4_found);
-    CHECK(fr4_found != nullptr);
+    CHECK(fr4 == fr4_found);
+
+    // Grab elements and calculate some properties for use in tests lower down
+    auto H = nain4::element("H"); auto mH = H->GetAtomicMassAmu();
+    auto C = nain4::element("C"); auto mC = C->GetAtomicMassAmu();
+    auto O = nain4::element("O"); auto mO = O->GetAtomicMassAmu();
+    auto total_mass = nH*mH + nC*mC + nO*mO;
+
+    // Elements used correctly?
+    CHECK(fr4 -> GetElement(0) == H);
+    CHECK(fr4 -> GetElement(1) == C);
+    CHECK(fr4 -> GetElement(2) == O);
+
+    // Correct number of each element?
+    auto atoms = fr4 -> GetAtomsVector();
+    CHECK(atoms[0] == nH);
+    CHECK(atoms[1] == nC);
+    CHECK(atoms[2] == nO);
+
+    // Basic properties set corretly?
+    CHECK(fr4 -> GetNumberOfElements() == 3);
+    CHECK(fr4 -> GetDensity() == density);
+    CHECK(fr4 -> GetState() == state);
+
+    // Fractional composition correct?
+    auto fracs = fr4 -> GetFractionVector();
+    CHECK(fracs[0] == Approx(nH*mH / total_mass));
+    CHECK(fracs[1] == Approx(nC*mC / total_mass));
+    CHECK(fracs[2] == Approx(nO*mO / total_mass));
+
+    // Does fractional composition sum to 1?
+    CHECK(std::accumulate(fracs, fracs + fr4->GetNumberOfElements(), 0.0) == Approx(1));
+  }
+
+  // Making and retrieving materials with nain4
+  SECTION("material creation from fractions") {
+
+    // The values used to construct the material
+    auto name = "LYSO";
+    auto density = 7.1 * g/cm3;
+    auto state = kStateSolid;
+    auto [fLu, fY, fSi, fO] = std::make_tuple(0.714, 0.040, 0.064, 0.182);
+
+    // Make the material using nain4::material_from_elements
+    auto lyso = nain4::material_from_elements_F(name, density, state,
+                                                {{"Lu", fLu}, {"Y", fY}, {"Si", fSi}, {"O", fO}});
+    CHECK(lyso != nullptr);
+
+    // Verify that the material can be retrieved with nani4::material
+    auto fr4_found = nain4::material(name);
+    CHECK(lyso == fr4_found);
+
+    // Grab elements and calculate some properties for use in tests lower down
+    auto Lu = nain4::element("Lu");
+    auto Y  = nain4::element("Y" );
+    auto Si = nain4::element("Si");
+    auto O  = nain4::element("O" );
+    //auto total_mass = nH*mH + nC*mC + nO*mO;
+
+    // Elements used correctly?
+    CHECK(lyso -> GetElement(0) == Lu);
+    CHECK(lyso -> GetElement(1) == Y );
+    CHECK(lyso -> GetElement(2) == Si);
+    CHECK(lyso -> GetElement(3) == O );
+
+    // Atom counts produce nonsense when material built with mass fractions
+    auto atoms = lyso -> GetAtomsVector();
+    CHECK(atoms[0] == 1);
+    CHECK(atoms[1] == 0);
+    CHECK(atoms[2] == 0);
+    CHECK(atoms[3] == 2);
+
+    // Basic properties set corretly?
+    CHECK(lyso -> GetNumberOfElements() == 4);
+    CHECK(lyso -> GetDensity() == density);
+    CHECK(lyso -> GetState() == state);
+
+    // Fractional composition correct?
+    auto fracs = lyso -> GetFractionVector();
+    CHECK(fracs[0] == fLu);
+    CHECK(fracs[1] == fY );
+    CHECK(fracs[2] == fSi);
+    CHECK(fracs[3] == fO );
+
+    // Does fractional composition sum to 1?
+    CHECK(std::accumulate(fracs, fracs + lyso->GetNumberOfElements(), 0.0) == Approx(1));
+
   }
 
   // nain4::volume produces objects with sensible sizes, masses, etc.
