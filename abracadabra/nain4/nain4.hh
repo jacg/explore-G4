@@ -33,7 +33,8 @@ G4Element * element (G4String const& name);
 G4Material* material_from_elements(std::string name,
                                    G4double density,
                                    G4State state,
-                                   std::vector<std::tuple<std::string, int>> components);
+                                   std::vector<std::tuple<std::string, int>> components,
+                                   bool warn = false);
 
 
 // ================================================================================

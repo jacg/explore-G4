@@ -17,11 +17,16 @@ G4Element* element(G4String const& name) {
 G4Material* material_from_elements(std::string name,
                                    G4double density,
                                    G4State state,
-                                   std::vector<std::tuple<std::string, int>> components) {
-  auto n_components = static_cast<G4int>(components.size());
-  auto the_material = new G4Material{name, density, n_components, state};
-  for (auto [the_element, n_atoms]: components) {
-    the_material -> AddElement(element(the_element), n_atoms);
+                                   std::vector<std::tuple<std::string, int>> components,
+                                   bool warn)
+{
+  auto the_material = G4Material::GetMaterial(name, warn);
+  if (!the_material) {
+    auto n_components = static_cast<G4int>(components.size());
+    the_material = new G4Material{name, density, n_components, state};
+    for (auto [the_element, n_atoms]: components) {
+      the_material -> AddElement(element(the_element), n_atoms);
+    }
   }
   return the_material;
 }
