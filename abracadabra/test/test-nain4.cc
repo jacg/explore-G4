@@ -4,6 +4,8 @@
 #include <G4Cons.hh>
 #include <G4Trd.hh>
 
+#include <G4Material.hh>
+
 #include <G4NistManager.hh>
 #include <G4RunManager.hh>
 
@@ -41,6 +43,17 @@ TEST_CASE("nain4", "[nain]") {
       CHECK(water->GetDensity() /     (kg/m3) == Approx(1000));
       CHECK(water->GetState()                 == G4State::kStateSolid); // WTF!?
     }
+  }
+
+  // Making and retrieving materials with nain4
+  SECTION("material creation") {
+    auto name = "FR4";
+    auto density = 1.85 * g/cm3;
+    auto fr4_made = nain4::material_from_elements(name, density, kStateSolid,
+                                                  {{"H", 12}, {"C", 18}, {"O", 3}});
+    auto fr4_found = nain4::material(name);
+    CHECK(fr4_made == fr4_found);
+    CHECK(fr4_found != nullptr);
   }
 
   // nain4::volume produces objects with sensible sizes, masses, etc.

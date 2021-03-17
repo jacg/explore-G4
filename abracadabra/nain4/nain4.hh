@@ -7,7 +7,10 @@
 #include <G4String.hh>
 #include <G4ThreeVector.hh>
 
+#include <string>
 #include <utility>
+#include <vector>
+#include <tuple>
 #include <optional>
 
 namespace nain4 {
@@ -23,8 +26,15 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
   return new G4LogicalVolume{solid, material, solid->GetName()};
 }
 
-// Utility for concisely creating materials from NIST code
+// Utilies for concisely finding materials and elements
 G4Material* material(G4String const& name);
+G4Element * element (G4String const& name);
+
+G4Material* material_from_elements(std::string name,
+                                   G4double density,
+                                   G4State state,
+                                   std::vector<std::tuple<std::string, int>> components);
+
 
 // ================================================================================
 

@@ -10,6 +10,22 @@ G4Material* material(G4String const& name) {
   return G4NistManager::Instance()->FindOrBuildMaterial(name);
 };
 
+G4Element* element(G4String const& name) {
+  return G4NistManager::Instance()->FindOrBuildElement(name);
+};
+
+G4Material* material_from_elements(std::string name,
+                                   G4double density,
+                                   G4State state,
+                                   std::vector<std::tuple<std::string, int>> components) {
+  auto n_components = static_cast<G4int>(components.size());
+  auto the_material = new G4Material{name, density, n_components, state};
+  for (auto [the_element, n_atoms]: components) {
+    the_material -> AddElement(element(the_element), n_atoms);
+  }
+  return the_material;
+}
+
 G4PVPlacement* place::now() {
   // ----- Name --------------------------------------------------
   // + By default, the name is copied from the child volume.
