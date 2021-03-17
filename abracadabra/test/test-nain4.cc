@@ -101,7 +101,7 @@ TEST_CASE("nain4", "[nain]") {
   }
 
   // Making and retrieving materials with nain4
-  SECTION("material creation from fractions") {
+  SECTION("material creation from mass fractions") {
 
     // The values used to construct the material
     auto name = "n4test_LYSO";
