@@ -54,7 +54,7 @@ TEST_CASE("nain4", "[nain]") {
   SECTION("material creation from N atoms") {
 
     // The values used to construct the material
-    auto name = "FR4";
+    auto name = "n4test_FR4";
     auto density = 1.85 * g/cm3;
     auto state = kStateSolid;
     auto [nH, nC, nO] = std::make_tuple(12, 18, 3);
@@ -104,7 +104,7 @@ TEST_CASE("nain4", "[nain]") {
   SECTION("material creation from fractions") {
 
     // The values used to construct the material
-    auto name = "LYSO";
+    auto name = "n4test_LYSO";
     auto density = 7.1 * g/cm3;
     auto state = kStateSolid;
     auto [fLu, fY, fSi, fO] = std::make_tuple(0.714, 0.040, 0.064, 0.182);
