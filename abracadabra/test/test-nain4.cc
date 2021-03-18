@@ -249,4 +249,23 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(nain4::scale_by(eV, {1, 2.3, 4.5}) == std::vector<G4double>{1*eV, 2.3*eV, 4.5*eV});
     CHECK(nain4::scale_by(cm, {6, 7})        == std::vector<G4double>{6*cm, 7*cm});
   }
+
+  // Utility for more convenient configuration of G4VisAttributes
+  SECTION("vis_attributes") { // TODO could do with more extensive testing
+    auto convenient = nain4::vis_attributes({1,0,0})
+      .visible(true)
+      .start_time(1.23)
+      .end_time(4.56)
+      .force_line_segments_per_circle(20)
+      .force_solid(true)
+      .force_wireframe(false);
+    auto pita = G4VisAttributes({1,0,0});
+    pita.SetVisibility(true);
+    pita.SetStartTime(1.23);
+    pita.SetEndTime(4.56);
+    pita.SetForceLineSegmentsPerCircle(20);
+    pita.SetForceSolid(true);
+    pita.SetForceWireframe(false);
+    CHECK(convenient == pita);
+  }
 }
