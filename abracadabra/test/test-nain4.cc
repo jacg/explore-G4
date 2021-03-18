@@ -244,4 +244,9 @@ TEST_CASE("nain4", "[nain]") {
     }
 
   }
+
+  SECTION("scale_by") {
+    CHECK(nain4::scale_by(eV, {1, 2.3, 4.5}) == std::vector<G4double>{1*eV, 2.3*eV, 4.5*eV});
+    CHECK(nain4::scale_by(cm, {6, 7})        == std::vector<G4double>{6*cm, 7*cm});
+  }
 }

@@ -96,6 +96,13 @@ private:
   optional<int>               copy_number;
 };
 
+// --------------------------------------------------------------------------------
+// Utility for creating a vector of physical quantity data, without having to
+// repeat the physical unit in each element.
+
+// TODO const version?
+std::vector<G4double> scale_by(G4double factor, std::initializer_list<G4double> const& data);
+
 } // namespace nain4
 
 // --------------------------------------------------------------------------------
@@ -149,7 +156,5 @@ geometry_iterator begin(G4VPhysicalVolume&);
 geometry_iterator   end(G4VPhysicalVolume&);
 geometry_iterator begin(G4VPhysicalVolume*);
 geometry_iterator   end(G4VPhysicalVolume*);
-
-
 
 #endif

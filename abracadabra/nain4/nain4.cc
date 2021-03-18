@@ -4,6 +4,9 @@
 #include <G4PVPlacement.hh>
 #include <G4String.hh>
 
+#include <algorithm>
+#include <iterator>
+
 namespace nain4 {
 
 G4Material* material(G4String const& name) {
@@ -41,6 +44,13 @@ G4PVPlacement* place::now() {
                            WTF_is_pMany,
                            copy_number.value_or(0),
                            check_overlaps};
+}
+
+std::vector<G4double> scale_by(G4double factor, std::initializer_list<G4double> const& data) {
+  std::vector<G4double> out;
+  out.reserve(data.size());
+  std::transform(begin(data), end(data), back_inserter(out), [factor](auto d){ return d*factor; });
+  return out;
 }
 
 } // namespace nain4
