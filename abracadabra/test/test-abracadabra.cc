@@ -1,8 +1,8 @@
 #include "nain4.hh"
 
-#include "geometries.hh"
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
+#include "geometries/sipm_hamamatsu_blue.hh"
 
 #include <G4VSolid.hh>
 #include <G4SystemOfUnits.hh>

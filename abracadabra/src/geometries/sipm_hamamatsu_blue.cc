@@ -1,4 +1,4 @@
-#include "geometries.hh"
+#include "geometries/sipm_hamamatsu_blue.hh"
 
 #include "nain4.hh"
 

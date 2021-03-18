@@ -1,4 +1,4 @@
-#include "geometries.hh"
+#include "geometries/nema.hh"
 
 #include "nain4.hh"
 
