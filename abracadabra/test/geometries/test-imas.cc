@@ -1,7 +1,6 @@
 #include "nain4.hh"
 
-#include "geometries/nema.hh"
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/imas.hh"
 
 #include <G4VSolid.hh>
 #include <G4SystemOfUnits.hh>
@@ -9,11 +8,11 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
+TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   using std::setw;
 
-  auto& geometry = *nema_phantom();
+  auto& geometry = *imas_demonstrator();
 
   std::cout << std::endl;
   for (const auto& v: geometry) {
@@ -28,16 +27,9 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   std::cout << std::endl;
 
   // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 8);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
   for (auto& volume: geometry) {
     CHECK(volume.CheckOverlaps() == false);
   }
-}
-
-TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
-  auto& geometry = *sipm_hamamatsu_blue();
-  // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 2);
-
 }
