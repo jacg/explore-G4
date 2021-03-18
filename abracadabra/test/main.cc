@@ -1,5 +1,3 @@
-#include "nain4.hh"
-
 #include <G4Box.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4SystemOfUnits.hh>
@@ -20,12 +18,7 @@ using std::unique_ptr;
 class dummy_detector : public G4VUserDetectorConstruction {
 public:
   dummy_detector() : G4VUserDetectorConstruction() {}
-  virtual G4VPhysicalVolume* Construct() override {
-    auto air = nain4::material("G4_AIR");
-    auto l = 10 * cm;
-    auto world = nain4::volume<G4Box>("World", air, l, l, l);
-    return nain4::place(world).now();
-  };
+  virtual G4VPhysicalVolume* Construct() override { return nullptr; };
 };
 
 class dummy_action_init : public G4VUserActionInitialization {
