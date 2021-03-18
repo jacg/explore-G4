@@ -2,6 +2,7 @@
 
 #include "geometries.hh"
 #include "geometries/imas.hh"
+#include "geometries/nema.hh"
 
 #include <G4VSolid.hh>
 #include <G4SystemOfUnits.hh>

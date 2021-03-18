@@ -2,7 +2,7 @@
 
 #include "nain4.hh"
 
-#include "geometries.hh"
+#include "geometries/nema.hh"
 
 G4VPhysicalVolume* detector_construction::Construct() {
   //this->scoring_volume = trapezoid; // TODO
