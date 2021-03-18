@@ -5,7 +5,6 @@
 
 #include <vector>
 
-G4PVPlacement* imas_demonstrator();
 G4PVPlacement* nema_phantom(std::vector<G4double> diameters = {10, 13, 17, 22, 28, 37}); // in mm
 G4PVPlacement* sipm_hamamatsu_blue();
 
