@@ -44,9 +44,10 @@ set(ABRACADABRA_SOURCES
 )
 
 set(ABRACADABRA_TESTS
-  test/geometries/test-imas.cc
-  test/geometries/test-nema.cc
-  test/geometries/test-sipm_hamamatsu_blue.cc
+  test/test-nain4.cc
+  src/geometries/imas-test.cc
+  src/geometries/nema-test.cc
+  src/geometries/sipm_hamamatsu_blue-test.cc
 )
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
