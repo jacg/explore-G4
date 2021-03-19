@@ -1,5 +1,5 @@
-#include "action_initialization.hh"
-#include "detector_construction.hh"
+#include "g4-mandatory/action_initialization.hh"
+#include "g4-mandatory/detector_construction.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>

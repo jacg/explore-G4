@@ -9,21 +9,50 @@ project(ABRACADABRA
 # ----- No point in staying in pre-history: use modern standards ------------
 set(CMAKE_CXX_STANDARD 17)
 
-
 add_subdirectory(nain4)
+
+# The files that make up the headers/source/tests of the project
+set(ABRACADABRA_HEADERS
+  src/g4-mandatory/action_initialization.hh
+  src/g4-mandatory/detector_construction.hh
+  src/g4-mandatory/event_action.hh
+  src/g4-mandatory/primary_generator_action.hh
+  src/g4-mandatory/run_action.hh
+  src/g4-mandatory/stepping_action.hh
+  src/geometries/imas.hh
+  src/geometries/nema.hh
+  src/geometries/sipm_hamamatsu_blue.hh
+)
+
+set(ABRACADABRA_SOURCES
+  src/g4-mandatory/action_initialization.cc
+  src/g4-mandatory/detector_construction.cc
+  src/g4-mandatory/event_action.cc
+  src/g4-mandatory/primary_generator_action.cc
+  src/g4-mandatory/run_action.cc
+  src/g4-mandatory/stepping_action.cc
+  src/geometries/imas.cc
+  src/geometries/nema.cc
+  src/geometries/sipm_hamamatsu_blue.cc
+)
+
+set(ABRACADABRA_TESTS
+  test/geometries/test-imas.cc
+  test/geometries/test-nema.cc
+  test/geometries/test-sipm_hamamatsu_blue.cc
+)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
-file(GLOB TEST_SOURCES
-  *-test.cc
-  test/*.cc
-  test/geometries/*.cc
-  src/*.cc
-  src/geometries/*.cc
-  src/g4-mandatory/*.cc
-  )
+set(ALL_TEST_SOURCES
+  catch2-main-test.cc
+  ${ABRACADABRA_SOURCES}
+  ${ABRACADABRA_HEADERS}
+  ${ABRACADABRA_TESTS}
+)
+
 # TODO including headers in add_executable apparently makes them show up in IDEs
-add_executable(tests-trial ${TEST_SOURCES})
+add_executable(tests-trial ${ALL_TEST_SOURCES})
 target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4)
 include(CTest)
 include(Catch)
@@ -50,31 +79,20 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/nain4)
 
 #----------------------------------------------------------------------------
-# Locate sources and headers for this project
-# NB: headers are included so they will show up in IDEs
-#
-file(GLOB sources
-  ${PROJECT_SOURCE_DIR}/src/*.cc
-  ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
-  ${PROJECT_SOURCE_DIR}/src/g4-mandatory/*.cc
-  )
-file(GLOB headers
-  ${PROJECT_SOURCE_DIR}/include/*.hh
-  ${PROJECT_SOURCE_DIR}/include/geometries/*.hh
-  ${PROJECT_SOURCE_DIR}/include/g4-mandatory/*.hh
-  )
-
-#----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-# TODO including headers in add_executable apparently makes them show up in IDEs
-add_executable(abracadabra abracadabra.cc ${sources} ${headers})
+# NB: headers are included so they will show up in IDEs
+add_executable(abracadabra
+  abracadabra.cc
+  ${ABRACADABRA_SOURCES}
+  ${ABRACADABRA_HEADERS}
+)
 target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4)
 target_include_directories(
   abracadabra PUBLIC
-  "${PROJECT_SOURCE_DIR}/include"
+  ${ABRACADABRA_HEADERS}
   "${PROJECT_SOURCE_DIR}/nain4"
-  )
+)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
