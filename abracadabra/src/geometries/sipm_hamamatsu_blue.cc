@@ -55,7 +55,6 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
 
   // ----- visibility -------------------------------------------------------------
 
-  bool visible = true;
   if (visible) {
     vol_sipm  ->SetVisAttributes(               G4Colour::Yellow()                 );
     vol_active->SetVisAttributes(vis_attributes(G4Colour::Blue()).force_solid(true));
