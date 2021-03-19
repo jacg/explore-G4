@@ -6,6 +6,9 @@ project(ABRACADABRA
   DESCRIPTION "Trying to understand Geant4"
   LANGUAGES CXX)
 
+# ----- Generate compile_commands.json, unless otherwise instructed on CLI --
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+
 # ----- No point in staying in pre-history: use modern standards ------------
 set(CMAKE_CXX_STANDARD 17)
 
