@@ -12,11 +12,11 @@
 using nain4::material;
 using nain4::material_from_elements_N;
 using nain4::place;
-using nain4::scale_by;
+//using nain4::scale_by;
 using nain4::volume;
 using nain4::vis_attributes;
 
-G4PVPlacement* sipm_hamamatsu_blue() {
+G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
   // ----- Materials --------------------------------------------------------------
   auto silicon = material("G4_Si");
 
@@ -35,23 +35,23 @@ G4PVPlacement* sipm_hamamatsu_blue() {
   auto vol_sipm   = volume<G4Box>("SiPM_Hamamatsu_Blue", fr4, x_half_sipm,   y_half_sipm,   z_half_sipm);
   auto vol_active = volume<G4Box>("PHOTODIODES",     silicon, x_half_active, y_half_active, z_half_active);
 
-  // ----- Cover active window with optical surface -------------------------------
-  //         --- create optical surface with properties table ---
-  auto active_surface = new G4OpticalSurface{"SIPM_OPTSURF", unified, polished, dielectric_metal};
-  auto active_props   = new G4MaterialPropertiesTable{};
-  active_surface -> SetMaterialPropertiesTable(active_props);
-  //         --- insert properties into the table ---
-  auto photon_energy = scale_by(eV,
-    { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
-    , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
-  active_props -> AddProperty("EFFICIENCY"  , photon_energy,
-     { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
-     , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  });
-  active_props -> AddProperty("REFLECTIVITY", photon_energy,
-     std::vector<G4double>(0, photon_energy.size()));
+  // // ----- Cover active window with optical surface -------------------------------
+  // //         --- create optical surface with properties table ---
+  // auto active_surface = new G4OpticalSurface{"SIPM_OPTSURF", unified, polished, dielectric_metal};
+  // auto active_props   = new G4MaterialPropertiesTable{};
+  // active_surface -> SetMaterialPropertiesTable(active_props);
+  // //         --- insert properties into the table ---
+  // auto photon_energy = scale_by(eV,
+  //   { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
+  //   , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
+  // active_props -> AddProperty("EFFICIENCY"  , photon_energy,
+  //    { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
+  //    , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  });
+  // active_props -> AddProperty("REFLECTIVITY", photon_energy,
+  //    std::vector<G4double>(0, photon_energy.size()));
 
-  //         --- wrap active volume in optical surface ---
-  new G4LogicalSkinSurface{"SIPM_OPTSURF", vol_active, active_surface};
+  // //         --- wrap active volume in optical surface ---
+  // new G4LogicalSkinSurface{"SIPM_OPTSURF", vol_active, active_surface};
 
   // ----- visibility -------------------------------------------------------------
 
