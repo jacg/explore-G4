@@ -1,7 +1,10 @@
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 3.19)
-project(ABRACADABRA)
+project(ABRACADABRA
+  VERSION 0.1
+  DESCRIPTION "Trying to understand Geant4"
+  LANGUAGES CXX)
 
 # ----- No point in staying in pre-history: use modern standards ------------
 set(CMAKE_CXX_STANDARD 17)
