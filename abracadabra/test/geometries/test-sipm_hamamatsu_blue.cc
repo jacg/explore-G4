@@ -2,10 +2,6 @@
 
 #include "geometries/sipm_hamamatsu_blue.hh"
 
-#include <G4VSolid.hh>
-#include <G4SystemOfUnits.hh>
-#include <G4UnitsTable.hh>
-
 #include <catch2/catch.hpp>
 
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
