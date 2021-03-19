@@ -22,6 +22,7 @@ file(GLOB TEST_SOURCES
   src/geometries/*.cc
   src/g4-mandatory/*.cc
   )
+# TODO including headers in add_executable apparently makes them show up in IDEs
 add_executable(tests-trial ${TEST_SOURCES})
 target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4)
 include(CTest)
@@ -66,6 +67,7 @@ file(GLOB headers
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
+# TODO including headers in add_executable apparently makes them show up in IDEs
 add_executable(abracadabra abracadabra.cc ${sources} ${headers})
 target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4)
 target_include_directories(
