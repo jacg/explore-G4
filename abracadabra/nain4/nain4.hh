@@ -81,7 +81,7 @@ public:
 
   place& at(double x, double y, double z)                 { return at({x, y, z}); }
   place& at(G4ThreeVector    pos)          { position    = pos    ; return *this; }
-  place& id(int              id)           { copy_number = id     ; return *this; }
+  place& copy_no(int         n)            { copy_number = n      ; return *this; }
   place& in(G4LogicalVolume* parent_)      { parent      = parent_; return *this; }
   place& name(G4String       label_)       { label       = label_ ; return *this; }
 

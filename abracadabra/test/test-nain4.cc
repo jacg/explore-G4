@@ -197,7 +197,7 @@ TEST_CASE("nain4", "[nain]") {
       auto world = nain4::place(outer)
         .at(translation) // 1-arg version of at()
         .name("not outer")
-        .id(382)
+        .copy_no(382)
         .now();
 
       CHECK(world -> GetObjectTranslation() == translation);
