@@ -278,7 +278,7 @@ TEST_CASE("nain4", "[nain]") {
     // Can set colour via constructor
     CHECK(vis_attributes         {{0,1,0}} ==
           vis_attributes{}.colour({0,1,0}));
-    // Can set visibilty via constructor
+    // Can set visibility via constructor
     CHECK(vis_attributes          {true} ==
           vis_attributes{}.visible(true));
 
