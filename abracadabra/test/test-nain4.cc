@@ -299,4 +299,12 @@ TEST_CASE("nain4", "[nain]") {
     auto should_not_exist = nain4::find_logical("Hopefully this name hasn't been used anywhere");
     CHECK(should_not_exist == nullptr);
   }
+
+  SECTION("find_particle") {
+    auto name = "gamma";
+    auto pita = G4ParticleTable::GetParticleTable()->FindParticle(name);
+    auto convenient = nain4::find_particle(name);
+    CHECK(convenient == pita);
+  }
+
 }

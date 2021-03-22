@@ -6,6 +6,8 @@
 #include <G4Material.hh>
 #include <G4NistManager.hh>
 #include <G4PVPlacement.hh>
+#include <G4ParticleDefinition.hh>
+#include <G4ParticleTable.hh>
 #include <G4String.hh>
 #include <G4ThreeVector.hh>
 #include <G4VisAttributes.hh>
@@ -32,9 +34,10 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
 // --------------------------------------------------------------------------------
 // Utilies for concisely retrieving things from stores
 
-inline G4Material     * material    (G4String const& name) { return G4NistManager       ::   Instance()->FindOrBuildMaterial(name); }
-inline G4Element      * element     (G4String const& name) { return G4NistManager       ::   Instance()->FindOrBuildElement (name); }
-inline G4LogicalVolume* find_logical(G4String const& name) { return G4LogicalVolumeStore::GetInstance()->GetVolume          (name); }
+inline G4Material          * material     (G4String const& name) { return G4NistManager       ::   Instance()->FindOrBuildMaterial(name); }
+inline G4Element           * element      (G4String const& name) { return G4NistManager       ::   Instance()->FindOrBuildElement (name); }
+inline G4LogicalVolume     * find_logical (G4String const& name) { return G4LogicalVolumeStore::GetInstance()->GetVolume          (name); }
+inline G4ParticleDefinition* find_particle(G4String const& name) { return G4ParticleTable::GetParticleTable()->FindParticle       (name); }
 
 // The G4Material::AddElement is overloaded on double/int in the second
 // parameter. Template argument deduction doesn't seem to be able to resolve
