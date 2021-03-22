@@ -298,6 +298,13 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(found == find_me);
     auto should_not_exist = nain4::find_logical("Hopefully this name hasn't been used anywhere");
     CHECK(should_not_exist == nullptr);
+
+    SECTION("find_physical") {
+      auto placed = nain4::place(find_me).now();
+      auto found_placed = nain4::find_physical(long_name);
+      CHECK(found_placed == placed);
+      CHECK(found_placed != nullptr);
+    }
   }
 
   SECTION("find_particle") {
