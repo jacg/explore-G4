@@ -48,6 +48,7 @@ set(ABRACADABRA_TESTS
   src/geometries/imas-test.cc
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
+  test/trivial-full-app-test.cc
 )
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------

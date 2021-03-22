@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   run_manager -> SetUserInitialization(new dummy_detector{});
 
   { // Physics list
-    auto verbosity = 1;
+    auto verbosity = 0;
     auto physics_list = new QBBC(verbosity); // SetVerboseLevel method also exists
     run_manager  -> SetUserInitialization(physics_list);
   } // run_manager owns physics_list

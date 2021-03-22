@@ -10,9 +10,11 @@
 #include <G4ParticleTable.hh>
 #include <G4PhysicalVolumeStore.hh>
 #include <G4String.hh>
+#include <G4SDManager.hh>
 #include <G4ThreeVector.hh>
-#include <G4VisAttributes.hh>
 #include <G4VPhysicalVolume.hh>
+#include <G4VSensitiveDetector.hh>
+#include <G4VisAttributes.hh>
 
 #include <string>
 #include <utility>
@@ -41,6 +43,8 @@ inline G4Element           * element      (G4String const& name) { return G4Nist
 inline G4LogicalVolume     * find_logical (G4String const& name) { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name); }
 inline G4VPhysicalVolume   * find_physical(G4String const& name) { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name); }
 inline G4ParticleDefinition* find_particle(G4String const& name) { return G4ParticleTable:: GetParticleTable()->FindParticle       (name); }
+
+inline void add_sensitive(G4VSensitiveDetector* det) { G4SDManager::GetSDMpointer() -> AddNewDetector(det); }
 
 // The G4Material::AddElement is overloaded on double/int in the second
 // parameter. Template argument deduction doesn't seem to be able to resolve
