@@ -1,5 +1,7 @@
 #include "primary_generator_action.hh"
 
+#include "nain4.hh"
+
 #include <G4Box.hh>
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
@@ -16,7 +18,7 @@ primary_generator_action::primary_generator_action()
 , particle_gun{new G4ParticleGun{1}} // shoot 1 particle per invocation
 , envelope_box{nullptr} {
   // default particle kinematic
-  G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable() -> FindParticle("gamma");
+  G4ParticleDefinition* particle = nain4::find_particle("gamma");
   particle_gun -> SetParticleDefinition(particle);
   particle_gun -> SetParticleMomentumDirection({0, 0, 1});
   particle_gun -> SetParticleEnergy(6 * MeV);
