@@ -2,6 +2,7 @@
 #define nain4_hh
 
 #include <G4LogicalVolume.hh>
+#include <G4LogicalVolumeStore.hh>
 #include <G4Material.hh>
 #include <G4PVPlacement.hh>
 #include <G4String.hh>
@@ -28,10 +29,13 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
 }
 
 // --------------------------------------------------------------------------------
-// Utilies for concisely finding materials and elements
+// Utilies for concisely retrieving things from stores
 
-G4Material* material(G4String const& name);
-G4Element * element (G4String const& name);
+G4Material*      material    (G4String const& name);
+G4Element *      element     (G4String const& name);
+inline G4LogicalVolume* find_logical(G4String const& name) {
+  return G4LogicalVolumeStore::GetInstance()->GetVolume(name);
+}
 
 // The G4Material::AddElement is overloaded on double/int in the second
 // parameter. Template argument deduction doesn't seem to be able to resolve

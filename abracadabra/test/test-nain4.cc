@@ -288,4 +288,15 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(vis_attributes          {false ,       {1,1,0}} ==
           vis_attributes{}.visible(false).colour({1,1,0}));
   }
+
+  // Utilities for retrieving from stores
+  SECTION("find_logical") {
+    auto air       = nain4::material("G4_AIR");
+    auto long_name = "made just for find_logical test";
+    auto find_me   = nain4::volume<G4Box>(long_name, air, 1 * cm, 1 * cm, 1 * cm);
+    auto found     = nain4::find_logical(long_name);
+    CHECK(found == find_me);
+    auto should_not_exist = nain4::find_logical("Hopefully this name hasn't been used anywhere");
+    CHECK(should_not_exist == nullptr);
+  }
 }
