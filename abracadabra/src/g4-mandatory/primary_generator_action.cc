@@ -35,7 +35,7 @@ void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
   G4double envSizeZ  = 0;
 
   if (!envelope_box) {
-    G4LogicalVolume* envLV = G4LogicalVolumeStore::GetInstance() -> GetVolume("Envelope");
+    G4LogicalVolume* envLV = nain4::find_logical("Envelope");
     if (envLV) { envelope_box = dynamic_cast<G4Box*>(envLV -> GetSolid()); }
   }
 
