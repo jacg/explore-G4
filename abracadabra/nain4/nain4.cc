@@ -1,6 +1,5 @@
 #include "nain4.hh"
 
-#include <G4NistManager.hh>
 #include <G4PVPlacement.hh>
 #include <G4String.hh>
 
@@ -8,14 +7,6 @@
 #include <iterator>
 
 namespace nain4 {
-
-G4Material* material(G4String const& name) {
-  return G4NistManager::Instance()->FindOrBuildMaterial(name);
-};
-
-G4Element* element(G4String const& name) {
-  return G4NistManager::Instance()->FindOrBuildElement(name);
-};
 
 G4PVPlacement* place::now() {
   // ----- Name --------------------------------------------------
