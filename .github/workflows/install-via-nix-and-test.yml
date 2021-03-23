@@ -23,11 +23,8 @@ jobs:
           # If you chose API tokens for write access OR if you have a private cache
           authToken: '${{ secrets.CACHIX_JACG_NEXT_EXP }}'
       - name: Install dependencies via Nix
-        shell: 'script -q -e -c "bash {0}"'
         run: nix-shell --argstr py ${{ matrix.py }}
       - name: Build
-        shell: 'script -q -e -c "bash {0}"'
         run: nix-shell --argstr py ${{ matrix.py }} --run "mkdir -p abracadabra/build && cd abracadabra/build && cmake .. && make -j4"
       - name: Run tests
-        shell: 'script -q -e -c "bash {0}"'
         run: nix-shell --argstr py ${{ matrix.py }} --run "abracadabra/build/tests-trial"
