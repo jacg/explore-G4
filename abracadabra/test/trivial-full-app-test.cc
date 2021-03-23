@@ -222,10 +222,8 @@ public:
 
   virtual void Build() const override {
     SetUserAction(new primary_generator{n_gun, n_loop});
-    auto run_action_instance = new G4UserRunAction;
-    SetUserAction(run_action_instance);
-    auto event_action_instance = new G4UserEventAction{};
-    SetUserAction(event_action_instance);
+    SetUserAction(new G4UserRunAction);
+    SetUserAction(new G4UserEventAction);
     SetUserAction(new G4UserSteppingAction);
   }
 private:

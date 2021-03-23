@@ -8,13 +8,21 @@
 void action_initialization::BuildForMaster() const { SetUserAction(new run_action); }
 
 void action_initialization::Build() const {
-  SetUserAction(new primary_generator_action);
 
-  auto run_action_ = new run_action;
+  // Utility which sets the action, but also returns it, so that it can be
+  // passed on to the constructor of another action. This allows us to write the
+  // code much more clearly, by avoiding naming the objects, and showing their
+  // dependence explicitly by nesting.
+  // TODO: maybe provide this via a nain4 subclass of G4VUserActionInitialization
+  auto set_and_return = [this](auto action) {
+    SetUserAction(action);
+    return action;
+  };
 
-  SetUserAction(run_action_);
-  auto event_action_ = new event_action{run_action_};
+  // Use the above to set the actions
+  set_and_return(new primary_generator_action);
 
-  SetUserAction(event_action_);
-  SetUserAction(new stepping_action{event_action_});
+  set_and_return(new stepping_action {
+      set_and_return(new event_action {
+          set_and_return(new run_action)})});
 }
