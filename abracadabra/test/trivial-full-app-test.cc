@@ -207,7 +207,10 @@ private:
   unsigned primaries_to_generate;
 };
 
+// ----- Particle Generator and other hooks --------------------------------------
 
+// The primary particle generator MUST be set here in the Build method.
+// Optionally we MAY also set other user hooks.
 class actions : public G4VUserActionInitialization {
 public:
   actions(unsigned n_gun, unsigned n_loop)
@@ -216,12 +219,18 @@ public:
     , n_loop{n_loop}
   {}
 
+  // This one is relevant for multi-threaded mode TODO discuss
   virtual void BuildForMaster() const override {
-    SetUserAction(new G4UserRunAction);
+    //SetUserAction(new G4UserRunAction);
   };
 
   virtual void Build() const override {
+    // Geant4 will crash at runtime without this
     SetUserAction(new primary_generator{n_gun, n_loop});
+
+    // Other possibilities include subclasses of the following. The base classes
+    // provided by G4 do nothing, so leaving them out altogether has the same
+    // effect as setting them.
     SetUserAction(new G4UserRunAction);
     SetUserAction(new G4UserEventAction);
     SetUserAction(new G4UserSteppingAction);
@@ -231,7 +240,7 @@ private:
   unsigned n_loop;
 };
 
-
+// ----- TESTS -------------------------------------------------------------------
 
 TEST_CASE("trivial app", "[app]") {
 
