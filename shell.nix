@@ -33,6 +33,8 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     # For graphics hardware matching on non-NixOS
     pkgs.libGL
     (linux nixGL.nixGLDefault)
+    # Syntax colouring in gdb
+    pkgs.python3Packages.pygments
   ];
 
 }
