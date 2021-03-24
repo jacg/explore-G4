@@ -3,8 +3,8 @@
 #include "nain4.hh"
 
 #include <G4Box.hh>
+#include <G4Orb.hh>
 #include <G4Tubs.hh>
-#include <G4Sphere.hh>
 
 #include <G4PVPlacement.hh>
 
@@ -28,7 +28,6 @@ G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value i
 
   for (auto& d: diameters) { d *= mm; }
 
-  auto pi     = 180 * deg;
   auto two_pi = 360 * deg;
   auto length = 113 * mm, half_length = length / 2;
 
@@ -36,8 +35,8 @@ G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value i
   auto envelope_width  = 1.1 * outer_radius;
 
   // Bind invariant args (3, 5, 6, 7 and 8) of volume
-  auto sphere = [pi, two_pi](auto name, auto material, auto diameter) {
-    return volume<G4Sphere>(name, material, 0.0, diameter/2, 0.0, two_pi, 0.0, pi);
+  auto sphere = [](auto name, auto material, auto diameter) {
+    return volume<G4Orb>(name, material, diameter/2);
   };
 
   auto cylinder = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
