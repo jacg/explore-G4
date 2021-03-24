@@ -79,7 +79,7 @@
 // used to collect information about particles which reach those volumes
 class sensitive : public G4VSensitiveDetector {
 public:
-  sensitive(G4String name) : G4VSensitiveDetector{name} {}
+  sensitive(G4String name) : G4VSensitiveDetector{name} { reset_observations(); }
 
   // G4 will call this method whenever a simulation step takes place in a volume
   // to which an instance of this class has been attached by
@@ -100,12 +100,20 @@ public:
     return true; // TODO what is the meaning of this?
   }
 
+  void reset_observations() {
+    y_min =   std::numeric_limits<G4double>::infinity();
+    y_max = - std::numeric_limits<G4double>::infinity();
+    z_min =   std::numeric_limits<G4double>::infinity();
+    z_max = - std::numeric_limits<G4double>::infinity();
+    detected_particles = 0;
+  }
+
 public:
-  G4double y_min{  std::numeric_limits<G4double>::infinity()};
-  G4double y_max{- std::numeric_limits<G4double>::infinity()};
-  G4double z_min{  std::numeric_limits<G4double>::infinity()};
-  G4double z_max{- std::numeric_limits<G4double>::infinity()};
-  unsigned detected_particles = 0;
+  G4double y_min;
+  G4double y_max;
+  G4double z_min;
+  G4double z_max;
+  unsigned detected_particles;
 };
 
 // ----- The geometry ------------------------------------------------------------
