@@ -9,7 +9,9 @@
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTable.hh>
 #include <G4PhysicalVolumeStore.hh>
+#include <G4RunManager.hh>
 #include <G4String.hh>
+#include <G4SolidStore.hh>
 #include <G4SDManager.hh>
 #include <G4ThreeVector.hh>
 #include <G4VPhysicalVolume.hh>
@@ -42,7 +44,11 @@ inline G4Material          * material     (G4String const& name) { return G4Nist
 inline G4Element           * element      (G4String const& name) { return G4NistManager        ::   Instance()->FindOrBuildElement (name); }
 inline G4LogicalVolume     * find_logical (G4String const& name) { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name); }
 inline G4VPhysicalVolume   * find_physical(G4String const& name) { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name); }
+inline G4VSolid            * find_solid   (G4String const& name) { return G4SolidStore         ::GetInstance()->GetSolid           (name); }
 inline G4ParticleDefinition* find_particle(G4String const& name) { return G4ParticleTable:: GetParticleTable()->FindParticle       (name); }
+
+// Remove all, logical/physical volumes, solids and assemblies.
+inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }
 
 inline void add_sensitive(G4VSensitiveDetector* det) { G4SDManager::GetSDMpointer() -> AddNewDetector(det); }
 

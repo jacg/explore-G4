@@ -314,4 +314,33 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(convenient == pita);
   }
 
+  SECTION("clear geometry") {
+    auto name = "vanish";
+    auto air = nain4::material("G4_AIR");
+    auto logical = nain4::volume<G4Box>(name, air, 1*cm, 1*cm, 1*cm);
+    auto solid = logical -> GetSolid();
+    auto physical = nain4::place(logical).now();
+    {
+      auto found_solid    = nain4::find_solid   (name);
+      auto found_logical  = nain4::find_logical (name);
+      auto found_physical = nain4::find_physical(name);
+      CHECK(found_solid    != nullptr);
+      CHECK(found_logical  != nullptr);
+      CHECK(found_physical != nullptr);
+      CHECK(found_solid    == solid);
+      CHECK(found_logical  == logical);
+      CHECK(found_physical == physical);
+    }
+    // Clear geometry and verify they are all gone
+    nain4::clear_geometry();
+    {
+      auto found_solid    = nain4::find_solid   (name);
+      auto found_logical  = nain4::find_logical (name);
+      auto found_physical = nain4::find_physical(name);
+      CHECK(found_solid    == nullptr);
+      CHECK(found_logical  == nullptr);
+      CHECK(found_physical == nullptr);
+    }
+  }
+
 }
