@@ -26,7 +26,7 @@
 
 #include<numeric>
 
-TEST_CASE("nain4", "[nain]") {
+TEST_CASE("nain material", "[nain][material]") {
 
   // nain4::material finds the same materials as the verbose G4 style
   SECTION("material NIST") {
@@ -154,81 +154,83 @@ TEST_CASE("nain4", "[nain]") {
     CHECK(std::accumulate(fracs, fracs + lyso->GetNumberOfElements(), 0.0) == Approx(1));
 
   }
+}
 
+TEST_CASE("nain volume", "[nain][volume]") {
   // nain4::volume produces objects with sensible sizes, masses, etc.
-  SECTION("volume") {
-    auto water = nain4::material("G4_WATER");
-    auto lx = 1 * m;
-    auto ly = 2 * m;
-    auto lz = 3 * m;
-    auto box = nain4::volume<G4Box>("test_box", water, lx, ly, lz);
-    auto density = water->GetDensity();
-    CHECK(box->TotalVolumeEntities() == 1);
-    CHECK(box->GetMass() / kg        == Approx(8 * lx * ly * lz * density / kg));
-    CHECK(box->GetMaterial()         == water);
-    CHECK(box->GetName()             == "test_box");
+  auto water = nain4::material("G4_WATER");
+  auto lx = 1 * m;
+  auto ly = 2 * m;
+  auto lz = 3 * m;
+  auto box = nain4::volume<G4Box>("test_box", water, lx, ly, lz);
+  auto density = water->GetDensity();
+  CHECK(box->TotalVolumeEntities() == 1);
+  CHECK(box->GetMass() / kg        == Approx(8 * lx * ly * lz * density / kg));
+  CHECK(box->GetMaterial()         == water);
+  CHECK(box->GetName()             == "test_box");
 
-    auto solid = box->GetSolid();
-    CHECK(solid->GetCubicVolume() / m3 == Approx(8 *  lx    * ly    * lz     / m3));
-    CHECK(solid->GetSurfaceArea() / m2 == Approx(8 * (lx*ly + ly*lz + lz*lx) / m2));
-    CHECK(solid->GetName()             == "test_box");
+  auto solid = box->GetSolid();
+  CHECK(solid->GetCubicVolume() / m3 == Approx(8 *  lx    * ly    * lz     / m3));
+  CHECK(solid->GetSurfaceArea() / m2 == Approx(8 * (lx*ly + ly*lz + lz*lx) / m2));
+  CHECK(solid->GetName()             == "test_box");
+}
+
+TEST_CASE("nain place", "[nain][place]") {
+  // nain4::place is a good replacement for G4PVPlacement
+  auto air = nain4::material("G4_AIR");
+  auto outer = nain4::volume<G4Box>("outer", air, 1*m, 2*m, 3*m);
+
+  // Default values are sensible
+  SECTION("defaults") {
+    auto world = nain4::place(outer).now();
+
+    auto trans = world->GetObjectTranslation();
+    CHECK(trans == G4ThreeVector{});
+    CHECK(world -> GetName()          == "outer");
+    CHECK(world -> GetCopyNo()        == 0);
+    CHECK(world -> GetLogicalVolume() == outer);
+    CHECK(world -> GetMotherLogical() == nullptr);
   }
 
-  // nain4::place is a good replacement for G4PVPlacement
-  SECTION("place") {
-    auto air = nain4::material("G4_AIR");
-    auto outer = nain4::volume<G4Box>("outer", air, 1*m, 2*m, 3*m);
+  // Multiple optional values can be set at once.
+  SECTION("multiple options") {
+    G4ThreeVector translation = {1,2,3};
+    auto world = nain4::place(outer)
+      .at(translation) // 1-arg version of at()
+      .name("not outer")
+      .copy_no(382)
+      .now();
 
-    // Default values are sensible
-    SECTION("defaults") {
-      auto world = nain4::place(outer).now();
+    CHECK(world -> GetObjectTranslation() == translation);
+    CHECK(world -> GetName()   == "not outer");
+    CHECK(world -> GetCopyNo() == 382);
+  }
 
-      auto trans = world->GetObjectTranslation();
-      CHECK(trans == G4ThreeVector{});
-      CHECK(world -> GetName()          == "outer");
-      CHECK(world -> GetCopyNo()        == 0);
-      CHECK(world -> GetLogicalVolume() == outer);
-      CHECK(world -> GetMotherLogical() == nullptr);
-    }
+  // The at() option accepts vector components (as well as a whole vector)
+  SECTION("at 3-args") {
+    auto world = nain4::place(outer).at(4,5,6).now(); // 3-arg version of at()
+    CHECK(world->GetObjectTranslation() == G4ThreeVector{4,5,6});
+  }
 
-    // Multiple optional values can be set at once.
-    SECTION("multiple options") {
-      G4ThreeVector translation = {1,2,3};
-      auto world = nain4::place(outer)
-        .at(translation) // 1-arg version of at()
-        .name("not outer")
-        .copy_no(382)
-        .now();
+  // The in() option creates correct mother/daughter relationship
+  SECTION("in") {
+    auto water = nain4::material("G4_WATER");
+    auto inner = nain4::volume<G4Box>("inner", water, 0.3*m, 0.2*m, 0.1*m);
 
-      CHECK(world -> GetObjectTranslation() == translation);
-      CHECK(world -> GetName()   == "not outer");
-      CHECK(world -> GetCopyNo() == 382);
-    }
+    auto inner_placed = nain4::place(inner)
+      .in(outer)
+      .at(0.1*m, 0.2*m, 0.3*m)
+      .now();
 
-    // The at() option accepts vector components (as well as a whole vector)
-    SECTION("at 3-args") {
-      auto world = nain4::place(outer).at(4,5,6).now(); // 3-arg version of at()
-      CHECK(world->GetObjectTranslation() == G4ThreeVector{4,5,6});
-    }
+    auto outer_placed = nain4::place(outer).now();
 
-    // The in() option creates correct mother/daughter relationship
-    SECTION("in") {
-      auto water = nain4::material("G4_WATER");
-      auto inner = nain4::volume<G4Box>("inner", water, 0.3*m, 0.2*m, 0.1*m);
+    CHECK(inner_placed -> GetMotherLogical() == outer);
+    CHECK(outer_placed -> GetLogicalVolume() == outer);
+    CHECK(outer -> GetNoDaughters() == 1);
+    CHECK(outer -> GetDaughter(0) -> GetLogicalVolume() == inner);
 
-      auto inner_placed = nain4::place(inner)
-        .in(outer)
-        .at(0.1*m, 0.2*m, 0.3*m)
-        .now();
-
-      auto outer_placed = nain4::place(outer).now();
-
-      CHECK(inner_placed -> GetMotherLogical() == outer);
-      CHECK(outer_placed -> GetLogicalVolume() == outer);
-      CHECK(outer -> GetNoDaughters() == 1);
-      CHECK(outer -> GetDaughter(0) -> GetLogicalVolume() == inner);
-
-      // Quick check that geometry_iterator works TODO expand
+    // Quick visual check that geometry_iterator works TODO expand
+    SECTION("geometry iterator") {
       std::cout << std::endl;
       for (const auto& v: outer_placed) {
         std::cout << std::setw(15) << v.GetName() << ": ";
@@ -240,55 +242,56 @@ TEST_CASE("nain4", "[nain]") {
           << std::endl;
       }
       std::cout << std::endl;
-
     }
-
   }
+}
 
-  SECTION("scale_by") {
-    CHECK(nain4::scale_by(eV, {1, 2.3, 4.5}) == std::vector<G4double>{1*eV, 2.3*eV, 4.5*eV});
-    CHECK(nain4::scale_by(cm, {6, 7})        == std::vector<G4double>{6*cm, 7*cm});
-  }
+TEST_CASE("nain scale_by", "[nain][scale_by]") {
+  CHECK(nain4::scale_by(eV, {1, 2.3, 4.5}) == std::vector<G4double>{1*eV, 2.3*eV, 4.5*eV});
+  CHECK(nain4::scale_by(cm, {6, 7})        == std::vector<G4double>{6*cm, 7*cm});
+}
 
+TEST_CASE("nain vis_attributes", "[nain][vis_attributes]") {
   // Utility for more convenient configuration of G4VisAttributes
-  SECTION("vis_attributes") { // TODO could do with more extensive testing
-    using nain4::vis_attributes;
-    auto convenient = vis_attributes{}
-      .visible(true)
-      .colour({1,0,0})
-      .start_time(1.23)
-      .end_time(4.56)
-      .force_line_segments_per_circle(20)
-      .force_solid(true)
-      .force_wireframe(false);
-    auto pita = G4VisAttributes{};
-    pita.SetVisibility(true);
-    pita.SetColour({1,0,0});
-    pita.SetStartTime(1.23);
-    pita.SetEndTime(4.56);
-    pita.SetForceLineSegmentsPerCircle(20);
-    pita.SetForceSolid(true);
-    pita.SetForceWireframe(false);
-    CHECK(convenient == pita);
+  // TODO could do with more extensive testing
+  using nain4::vis_attributes;
+  auto convenient = vis_attributes{}
+    .visible(true)
+    .colour({1,0,0})
+    .start_time(1.23)
+    .end_time(4.56)
+    .force_line_segments_per_circle(20)
+    .force_solid(true)
+    .force_wireframe(false);
+  auto pita = G4VisAttributes{};
+  pita.SetVisibility(true);
+  pita.SetColour({1,0,0});
+  pita.SetStartTime(1.23);
+  pita.SetEndTime(4.56);
+  pita.SetForceLineSegmentsPerCircle(20);
+  pita.SetForceSolid(true);
+  pita.SetForceWireframe(false);
+  CHECK(convenient == pita);
 
-    // The meaning of the different constructors
+  // The meaning of the different constructors
 
-    // Default constructor sets colour: white, visibility: true
-    CHECK(vis_attributes{} == vis_attributes{}.colour({1,1,1}).visible(true));
-    // Can set colour via constructor
-    CHECK(vis_attributes         {{0,1,0}} ==
-          vis_attributes{}.colour({0,1,0}));
-    // Can set visibility via constructor
-    CHECK(vis_attributes          {true} ==
-          vis_attributes{}.visible(true));
+  // Default constructor sets colour: white, visibility: true
+  CHECK(vis_attributes{} == vis_attributes{}.colour({1,1,1}).visible(true));
+  // Can set colour via constructor
+  CHECK(vis_attributes         {{0,1,0}} ==
+        vis_attributes{}.colour({0,1,0}));
+  // Can set visibility via constructor
+  CHECK(vis_attributes          {true} ==
+        vis_attributes{}.visible(true));
 
-    CHECK(vis_attributes          {false} ==
-          vis_attributes{}.visible(false));
-    // Can set both visibility and colour via constructor
-    CHECK(vis_attributes          {false ,       {1,1,0}} ==
-          vis_attributes{}.visible(false).colour({1,1,0}));
-  }
+  CHECK(vis_attributes          {false} ==
+        vis_attributes{}.visible(false));
+  // Can set both visibility and colour via constructor
+  CHECK(vis_attributes          {false ,       {1,1,0}} ==
+        vis_attributes{}.visible(false).colour({1,1,0}));
+}
 
+TEST_CASE("nain find", "[nain][find]") {
   // Utilities for retrieving from stores
   SECTION("find_logical") {
     auto air       = nain4::material("G4_AIR");
@@ -313,34 +316,34 @@ TEST_CASE("nain4", "[nain]") {
     auto convenient = nain4::find_particle(name);
     CHECK(convenient == pita);
   }
+}
 
-  SECTION("clear geometry") {
-    auto name = "vanish";
-    auto air = nain4::material("G4_AIR");
-    auto logical = nain4::volume<G4Box>(name, air, 1*cm, 1*cm, 1*cm);
-    auto solid = logical -> GetSolid();
-    auto physical = nain4::place(logical).now();
-    {
-      auto found_solid    = nain4::find_solid   (name);
-      auto found_logical  = nain4::find_logical (name);
-      auto found_physical = nain4::find_physical(name);
-      CHECK(found_solid    != nullptr);
-      CHECK(found_logical  != nullptr);
-      CHECK(found_physical != nullptr);
-      CHECK(found_solid    == solid);
-      CHECK(found_logical  == logical);
-      CHECK(found_physical == physical);
-    }
-    // Clear geometry and verify they are all gone
-    nain4::clear_geometry();
-    {
-      auto found_solid    = nain4::find_solid   (name);
-      auto found_logical  = nain4::find_logical (name);
-      auto found_physical = nain4::find_physical(name);
-      CHECK(found_solid    == nullptr);
-      CHECK(found_logical  == nullptr);
-      CHECK(found_physical == nullptr);
-    }
+TEST_CASE("nain clear_geometry", "[nain][clear_geometry]") {
+  auto name = "vanish";
+  auto air = nain4::material("G4_AIR");
+  auto logical = nain4::volume<G4Box>(name, air, 1*cm, 1*cm, 1*cm);
+  auto solid = logical -> GetSolid();
+  auto physical = nain4::place(logical).now();
+  {
+    auto found_solid    = nain4::find_solid   (name);
+    auto found_logical  = nain4::find_logical (name);
+    auto found_physical = nain4::find_physical(name);
+    CHECK(found_solid    != nullptr);
+    CHECK(found_logical  != nullptr);
+    CHECK(found_physical != nullptr);
+    CHECK(found_solid    == solid);
+    CHECK(found_logical  == logical);
+    CHECK(found_physical == physical);
+  }
+  // Clear geometry and verify they are all gone
+  nain4::clear_geometry();
+  {
+    auto found_solid    = nain4::find_solid   (name);
+    auto found_logical  = nain4::find_logical (name);
+    auto found_physical = nain4::find_physical(name);
+    CHECK(found_solid    == nullptr);
+    CHECK(found_logical  == nullptr);
+    CHECK(found_physical == nullptr);
   }
 
 }
