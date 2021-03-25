@@ -40,12 +40,12 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
 // --------------------------------------------------------------------------------
 // Utilies for concisely retrieving things from stores
 // clang-format off
-inline G4Material          * material     (G4String const& name) { return G4NistManager        ::   Instance()->FindOrBuildMaterial(name); }
-inline G4Element           * element      (G4String const& name) { return G4NistManager        ::   Instance()->FindOrBuildElement (name); }
-inline G4LogicalVolume     * find_logical (G4String const& name) { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name); }
-inline G4VPhysicalVolume   * find_physical(G4String const& name) { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name); }
-inline G4VSolid            * find_solid   (G4String const& name) { return G4SolidStore         ::GetInstance()->GetSolid           (name); }
-inline G4ParticleDefinition* find_particle(G4String const& name) { return G4ParticleTable:: GetParticleTable()->FindParticle       (name); }
+inline G4Material          * material     (G4String const& name                     ) { return G4NistManager        ::   Instance()->FindOrBuildMaterial(name         ); }
+inline G4Element           * element      (G4String const& name                     ) { return G4NistManager        ::   Instance()->FindOrBuildElement (name         ); }
+inline G4LogicalVolume     * find_logical (G4String const& name, G4bool verbose=true) { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name, verbose); }
+inline G4VPhysicalVolume   * find_physical(G4String const& name, G4bool verbose=true) { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name, verbose); }
+inline G4VSolid            * find_solid   (G4String const& name, G4bool verbose=true) { return G4SolidStore         ::GetInstance()->GetSolid           (name, verbose); }
+inline G4ParticleDefinition* find_particle(G4String const& name                     ) { return G4ParticleTable:: GetParticleTable()->FindParticle       (name         ); }
 
 // Remove all, logical/physical volumes, solids and assemblies.
 inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }

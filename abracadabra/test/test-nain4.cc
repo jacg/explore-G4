@@ -299,7 +299,7 @@ TEST_CASE("nain find", "[nain][find]") {
     auto find_me   = nain4::volume<G4Box>(long_name, air, 1 * cm, 1 * cm, 1 * cm);
     auto found     = nain4::find_logical(long_name);
     CHECK(found == find_me);
-    auto should_not_exist = nain4::find_logical("Hopefully this name hasn't been used anywhere");
+    auto should_not_exist = nain4::find_logical("Hopefully this name hasn't been used anywhere", false);
     CHECK(should_not_exist == nullptr);
 
     SECTION("find_physical") {
@@ -324,10 +324,11 @@ TEST_CASE("nain clear_geometry", "[nain][clear_geometry]") {
   auto logical = nain4::volume<G4Box>(name, air, 1*cm, 1*cm, 1*cm);
   auto solid = logical -> GetSolid();
   auto physical = nain4::place(logical).now();
+  auto verbose = false;
   {
-    auto found_solid    = nain4::find_solid   (name);
-    auto found_logical  = nain4::find_logical (name);
-    auto found_physical = nain4::find_physical(name);
+    auto found_solid    = nain4::find_solid   (name, verbose);
+    auto found_logical  = nain4::find_logical (name, verbose);
+    auto found_physical = nain4::find_physical(name, verbose);
     CHECK(found_solid    != nullptr);
     CHECK(found_logical  != nullptr);
     CHECK(found_physical != nullptr);
@@ -338,9 +339,9 @@ TEST_CASE("nain clear_geometry", "[nain][clear_geometry]") {
   // Clear geometry and verify they are all gone
   nain4::clear_geometry();
   {
-    auto found_solid    = nain4::find_solid   (name);
-    auto found_logical  = nain4::find_logical (name);
-    auto found_physical = nain4::find_physical(name);
+    auto found_solid    = nain4::find_solid   (name, verbose);
+    auto found_logical  = nain4::find_logical (name, verbose);
+    auto found_physical = nain4::find_physical(name, verbose);
     CHECK(found_solid    == nullptr);
     CHECK(found_logical  == nullptr);
     CHECK(found_physical == nullptr);
