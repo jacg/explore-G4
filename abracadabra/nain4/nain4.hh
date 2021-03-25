@@ -42,12 +42,14 @@ G4LogicalVolume* volume(NAME name, G4Material* material, ArgTypes&&... args) {
 // clang-format off
 #define NAME     (G4String const& name)
 #define NAME_VRB (G4String const& name, G4bool verbose=true)
-inline auto material      NAME     { return G4NistManager        ::   Instance()->FindOrBuildMaterial(name         ); }
-inline auto element       NAME     { return G4NistManager        ::   Instance()->FindOrBuildElement (name         ); }
-inline auto find_logical  NAME_VRB { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name, verbose); }
-inline auto find_physical NAME_VRB { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name, verbose); }
-inline auto find_solid    NAME_VRB { return G4SolidStore         ::GetInstance()->GetSolid           (name, verbose); }
-inline auto find_particle NAME     { return G4ParticleTable:: GetParticleTable()->FindParticle       (name         ); }
+#define IA inline auto
+IA material      NAME     { return G4NistManager        ::   Instance()->FindOrBuildMaterial(name         ); }
+IA element       NAME     { return G4NistManager        ::   Instance()->FindOrBuildElement (name         ); }
+IA find_logical  NAME_VRB { return G4LogicalVolumeStore ::GetInstance()->GetVolume          (name, verbose); }
+IA find_physical NAME_VRB { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name, verbose); }
+IA find_solid    NAME_VRB { return G4SolidStore         ::GetInstance()->GetSolid           (name, verbose); }
+IA find_particle NAME     { return G4ParticleTable:: GetParticleTable()->FindParticle       (name         ); }
+#undef IA
 #undef NAME
 #undef NAME_VRB
 
