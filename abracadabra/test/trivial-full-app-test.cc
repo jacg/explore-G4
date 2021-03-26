@@ -6,7 +6,6 @@
 
 #include <G4EventManager.hh>
 #include <G4LogicalVolumeStore.hh>
-#include <G4ParticleDefinition.hh>
 #include <G4ParticleGun.hh>
 #include <G4RunManager.hh>
 #include <G4String.hh>
@@ -178,8 +177,7 @@ public:
   {
     // Geantinos don't interact with anything, so we can easily predict their
     // trajectory, which is very useful for writing the test.
-    G4ParticleDefinition* geantino = nain4::find_particle("geantino");
-    gun->SetParticleDefinition(geantino);
+    gun->SetParticleDefinition(nain4::find_particle("geantino"));
     // Shoot along the x-axis, so the y and z coordinates won't change during
     // flight; again, very useful for the test.
     gun->SetParticleMomentumDirection({1, 0, 0});
