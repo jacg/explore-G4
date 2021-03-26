@@ -12,7 +12,6 @@
 
 #include <memory>
 
-using std::make_unique;
 using std::unique_ptr;
 
 class dummy_detector : public G4VUserDetectorConstruction {
@@ -30,17 +29,7 @@ public:
 
 int main(int argc, char** argv) {
 
-  // ----- Fake CLI input for Geant4 ---------------------------------------
-  char  arg0_g4[] = "the-executable";
-  char* argv_g4[] = {&arg0_g4[0], nullptr};
-  int   argc_g4   = (int)(sizeof(argv_g4) / sizeof(argv_g4[0])) - 1;
-
   // ----- Pre-testing setup: G4 boilerplate -------------------------------
-
-  // Detect interactive mode (if no arguments) and define UI session
-  auto ui = argc == 1
-    ? make_unique<G4UIExecutive>(argc_g4, argv_g4)
-    : unique_ptr <G4UIExecutive>{nullptr};
 
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
