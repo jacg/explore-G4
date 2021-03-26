@@ -18,15 +18,15 @@ using nain4::material;
 using nain4::place;
 using nain4::volume;
 
-G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value in header */) {
+build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activity) {
+    spheres.emplace_back(radius, activity);
+    return *this;
+  };
+
+
+G4PVPlacement* nema_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
-
-  // ----- Dimensions -------------------------------------------------------------
-  auto inner_radius = 114.4 * mm;
-  auto outer_radius = 152   * mm;
-
-  for (auto& d: diameters) { d *= mm; }
 
   auto two_pi = 360 * deg;
   auto length = 113 * mm, half_length = length / 2;
@@ -35,7 +35,7 @@ G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value i
   auto envelope_width  = 1.1 * outer_radius;
 
   // Bind invariant args (3, 5, 6, 7 and 8) of volume
-  auto sphere = [](auto name, auto material, auto diameter) {
+  auto orb = [](auto name, auto material, auto diameter) {
     return volume<G4Orb>(name, material, diameter/2);
   };
 
@@ -44,10 +44,10 @@ G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value i
 
   // Build and place spheres
   int count = 0; // TODO move into for, once we switch to C++ 20
-  for (auto diameter: diameters) {
+  for (auto& sphere: spheres) {
 	  std::string name = "Sphere_" + std::to_string(count);
-	  auto ball  = sphere(name, air, diameter);
-	  auto angle = count * 360 * deg / diameters.size();
+	  auto ball  = orb(name, air, sphere.diameter);
+	  auto angle = count * 360 * deg / spheres.size();
 	  auto x     = inner_radius * sin(angle);
 	  auto y     = inner_radius * cos(angle);
 	  place(ball).in(cylinder).at(x, y, 0).now();
