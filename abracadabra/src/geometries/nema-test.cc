@@ -30,6 +30,6 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   CHECK(std::distance(begin(geometry), end(geometry)) == 8);
 
   for (auto volume: geometry) {
-    CHECK(volume->CheckOverlaps() == false);
+    CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 }

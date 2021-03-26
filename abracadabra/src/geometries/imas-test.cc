@@ -30,6 +30,6 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
   for (auto volume: geometry) {
-    CHECK(volume->CheckOverlaps() == false);
+    CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 }
