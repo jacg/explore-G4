@@ -39,9 +39,8 @@ G4PVPlacement* nema_phantom(std::vector<G4double> diameters /* = default value i
     return volume<G4Orb>(name, material, diameter/2);
   };
 
-  auto cylinder = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
-
-  auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
+  auto cylinder     = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
+  auto vol_envelope = volume<G4Box> ("Envelope", air, envelope_width, envelope_width, envelope_length);
 
   // Build and place spheres
   int count = 0; // TODO move into for, once we switch to C++ 20
