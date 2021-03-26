@@ -261,13 +261,15 @@ TEST_CASE("trivial app", "[app]") {
   auto expected_hits = n_gun * n_beam_on * n_inside_generator;
 
   // Tell Geant4 all it needs to know about the simulation, initialze and go!
-  auto run_manager = G4RunManager::GetRunManager();
-  run_manager -> SetUserInitialization(new geometry{y_min, y_max, z_min, z_max});
-  run_manager -> SetUserInitialization(new QBBC{0});
-  run_manager -> SetUserInitialization(new actions{n_gun, n_inside_generator});
-  run_manager -> Initialize();
-  run_manager -> BeamOn(n_beam_on);
-
+  {
+    nain4::silence _{G4cout};
+    auto run_manager = G4RunManager::GetRunManager();
+    run_manager -> SetUserInitialization(new geometry{y_min, y_max, z_min, z_max});
+    run_manager -> SetUserInitialization(new QBBC{0});
+    run_manager -> SetUserInitialization(new actions{n_gun, n_inside_generator});
+    run_manager -> Initialize();
+    run_manager -> BeamOn(n_beam_on);
+  }
   // Verify that all the geantinos coming out from the source, hit the detector
   // in the source's x-axis-projection onto the detector
   auto sd = dynamic_cast<sensitive*>(nain4::find_logical("detector") -> GetSensitiveDetector());
