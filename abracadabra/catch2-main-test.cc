@@ -10,6 +10,7 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 
+#include <fstream>
 #include <memory>
 
 using std::unique_ptr;
@@ -31,9 +32,16 @@ int main(int argc, char** argv) {
 
   // ----- Pre-testing setup: G4 boilerplate -------------------------------
 
+  // Redirect G4cout to /dev/null while banner is printed
+  auto g4cout_buf = G4cout.rdbuf();
+  G4cout.rdbuf(std::ofstream{"/dev/null"}.rdbuf());
+
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::SerialOnly)};
+
+  // Stop redicecting G4cout to /dev/null
+  G4cout.rdbuf(g4cout_buf);
 
   // Set mandatory initialization classes
 
