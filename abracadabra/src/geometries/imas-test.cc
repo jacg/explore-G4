@@ -15,13 +15,13 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   auto& geometry = *imas_demonstrator();
 
   std::cout << std::endl;
-  for (const auto& v: geometry) {
-    std::cout << setw(15) << v.GetName() << ": ";
-    auto & l = *v.GetLogicalVolume();
+  for (auto v: geometry) {
+    std::cout << setw(15) << v->GetName() << ": ";
+    auto l = v->GetLogicalVolume();
     std::cout
-      << setw(18) << l.GetMaterial()->GetName()
-      << setw(12) << G4BestUnit(l.GetMass(), "Mass")
-      << setw(12) << G4BestUnit(l.GetSolid()->GetCubicVolume(), "Volume")
+      << setw(18) << l->GetMaterial()->GetName()
+      << setw(12) << G4BestUnit(l->GetMass(), "Mass")
+      << setw(12) << G4BestUnit(l->GetSolid()->GetCubicVolume(), "Volume")
       << std::endl;
   }
   std::cout << std::endl;
@@ -29,7 +29,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(geometry), end(geometry)) == 10);
 
-  for (auto& volume: geometry) {
-    CHECK(volume.CheckOverlaps() == false);
+  for (auto volume: geometry) {
+    CHECK(volume->CheckOverlaps() == false);
   }
 }

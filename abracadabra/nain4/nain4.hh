@@ -202,8 +202,8 @@ public:
 
   using iterator_category = std::input_iterator_tag;
   using value_type        = G4VPhysicalVolume;
-  using pointer           = value_type*;
-  using reference         = value_type&;
+  using pointer           = value_type *; // TODO should this be pointer to pointer?
+  using reference         = value_type * const &;
   using difference_type   = std::ptrdiff_t;
 
   geometry_iterator  operator++(int) { auto tmp = *this; ++(*this); return tmp; }
@@ -219,8 +219,8 @@ public:
     return *this;
   }
 
-  pointer   operator->()       { return  this->q.front(); }
-  reference operator* () const { return *this->q.front(); }
+  pointer   operator->()       { return this->q.front(); }
+  reference operator* () const { return this->q.front(); }
 
   friend bool operator== (const geometry_iterator& a, const geometry_iterator& b) { return a.q == b.q; };
   friend bool operator!= (const geometry_iterator& a, const geometry_iterator& b) { return a.q != b.q; };

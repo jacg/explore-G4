@@ -18,7 +18,7 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 
   auto number_of_sensitive_detectors =
     std::count_if(begin(whole), end(whole),
-                  [](auto& v) { return v.GetLogicalVolume()->GetSensitiveDetector() != nullptr;});
+                  [](auto v) { return v->GetLogicalVolume()->GetSensitiveDetector() != nullptr;});
   CHECK(number_of_sensitive_detectors == 0);
 
 }

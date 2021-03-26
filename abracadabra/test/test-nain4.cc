@@ -232,13 +232,13 @@ TEST_CASE("nain place", "[nain][place]") {
     // Quick visual check that geometry_iterator works TODO expand
     SECTION("geometry iterator") {
       std::cout << std::endl;
-      for (const auto& v: outer_placed) {
-        std::cout << std::setw(15) << v.GetName() << ": ";
-        auto & l = *v.GetLogicalVolume();
+      for (const auto v: outer_placed) {
+        std::cout << std::setw(15) << v->GetName() << ": ";
+        auto l = v->GetLogicalVolume();
         std::cout
-          << std::setw(12) << l.GetMaterial()->GetName()
-          << std::setw(12) << G4BestUnit(l.GetMass(), "Mass")
-          << std::setw(12) << G4BestUnit(l.GetSolid()->GetCubicVolume(), "Volume")
+          << std::setw(12) << l->GetMaterial()->GetName()
+          << std::setw(12) << G4BestUnit(l->GetMass(), "Mass")
+          << std::setw(12) << G4BestUnit(l->GetSolid()->GetCubicVolume(), "Volume")
           << std::endl;
       }
       std::cout << std::endl;
