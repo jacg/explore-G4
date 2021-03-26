@@ -12,14 +12,13 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
   using std::setw;
 
-  auto const& phantom = nema_phantom::builder{}
+  auto const phantom = nema_phantom{}
     .sphere(10*mm, 2.8)
     .sphere(13*mm, 2.8)
     .sphere(17*mm, 2.8)
     .sphere(22*mm, 2.8)
     .sphere(28*mm, 0)
-    .sphere(37*mm, 0)
-    .build();
+    .sphere(37*mm, 0);
 
   auto geometry = phantom.geometry();
 
