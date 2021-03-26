@@ -32,16 +32,14 @@ int main(int argc, char** argv) {
 
   // ----- Pre-testing setup: G4 boilerplate -------------------------------
 
-  // Redirect G4cout to /dev/null while banner is printed
+  // Redirect G4cout to /dev/null while Geant4 makes noise
+  std::ofstream dev_null{"/dev/null"};
   auto g4cout_buf = G4cout.rdbuf();
-  G4cout.rdbuf(std::ofstream{"/dev/null"}.rdbuf());
+  G4cout.rdbuf(dev_null.rdbuf());
 
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::SerialOnly)};
-
-  // Stop redicecting G4cout to /dev/null
-  G4cout.rdbuf(g4cout_buf);
 
   // Set mandatory initialization classes
 
@@ -56,6 +54,9 @@ int main(int argc, char** argv) {
 
   // User action initialization
   run_manager -> SetUserInitialization(new dummy_action_init{});
+
+  // Stop redicecting G4cout to /dev/null
+  G4cout.rdbuf(g4cout_buf);
 
   // ----- Catch2 session --------------------------------------------------
   int result = Catch::Session().run(argc, argv);
