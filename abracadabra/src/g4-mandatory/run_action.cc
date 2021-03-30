@@ -64,10 +64,10 @@ void run_action::EndOfRunAction(const G4Run* run) {
      (G4RunManager::GetRunManager() -> GetUserPrimaryGeneratorAction());
   G4String runCondition;
   if (generator) {
-    const auto* particleGun = generator -> GetParticleGun();
-    runCondition += particleGun -> GetParticleDefinition() -> GetParticleName();
+    auto const& particleGun = generator -> get_particle_gun();
+    runCondition += particleGun.GetParticleDefinition() -> GetParticleName();
     runCondition += " of ";
-    G4double particleEnergy = particleGun -> GetParticleEnergy();
+    G4double particleEnergy = particleGun.GetParticleEnergy();
     runCondition += G4BestUnit(particleEnergy, "Energy");
   }
 

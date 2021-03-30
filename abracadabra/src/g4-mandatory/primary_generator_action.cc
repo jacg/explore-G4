@@ -15,16 +15,16 @@
 
 primary_generator_action::primary_generator_action()
 : G4VUserPrimaryGeneratorAction{}
-, particle_gun{new G4ParticleGun{1}} // shoot 1 particle per invocation
+, gun{1} // shoot 1 particle per invocation
 , envelope_box{nullptr} {
   // default particle kinematic
   G4ParticleDefinition* particle = nain4::find_particle("gamma");
-  particle_gun -> SetParticleDefinition(particle);
-  particle_gun -> SetParticleMomentumDirection({0, 0, 1});
-  particle_gun -> SetParticleEnergy(6 * MeV);
+  gun.SetParticleDefinition(particle);
+  gun.SetParticleMomentumDirection({0, 0, 1});
+  gun.SetParticleEnergy(6 * MeV);
 }
 
-void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
+void primary_generator_action::GeneratePrimaries(G4Event* event) {
   // this function is called at the begining of each event
 
   // In order to avoid dependence of PrimaryGeneratorAction
@@ -55,6 +55,6 @@ void primary_generator_action::GeneratePrimaries(G4Event* anEvent) {
   G4double y0   = size * envSizeXY * (G4UniformRand() - 0.5);
   G4double z0   = -0.5 * envSizeZ;
 
-  particle_gun -> SetParticlePosition({x0, y0, z0});
-  particle_gun -> GeneratePrimaryVertex(anEvent);
+  gun.SetParticlePosition({x0, y0, z0});
+  gun.GeneratePrimaryVertex(event);
 }

@@ -5,10 +5,6 @@
 #include <G4VUserPrimaryGeneratorAction.hh>
 #include <globals.hh>
 
-#include <memory>
-
-using std::unique_ptr;
-
 class G4ParticleGun;
 class G4Event;
 class G4Box;
@@ -25,11 +21,11 @@ public:
 
   virtual void GeneratePrimaries(G4Event*) override;
 
-  const G4ParticleGun* GetParticleGun() const { return particle_gun.get(); }
+  const G4ParticleGun& get_particle_gun() const { return gun; }
 
 private:
-  unique_ptr<G4ParticleGun> particle_gun;
-  G4Box*                    envelope_box;
+  G4ParticleGun gun;
+  G4Box* envelope_box;
 };
 
 #endif
