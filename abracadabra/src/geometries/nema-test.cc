@@ -40,4 +40,39 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   for (auto volume: geometry) {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
+
+}
+
+TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
+  // Vertex location and time
+  auto where_x =  1.2*mm;
+  auto where_y = -3.4*mm;
+  auto where_z =  9.8*mm;
+  G4ThreeVector where{where_x, where_y, where_z};
+  auto when = 123.456 * ns;
+
+  // Generate the vertex
+  G4Event event;
+  generate_back_to_back_511_keV_gammas(&event, where, when);
+  auto& vertex = *event.GetPrimaryVertex();
+  vertex.Print();
+
+  // Get all the particles in the vertex
+  // AAAARGH! Geant4 stores them in an ad-hoc linked list
+  // TODO write a nain4 iterator for this?
+  std::vector<G4PrimaryParticle*> particles;
+  auto particle = vertex.GetPrimary();
+  while (particle) {
+    particles.push_back(particle);
+    particle = particle -> GetNext();
+  }
+
+  // Verify expected properties
+  CHECK(vertex.GetPosition() == where);
+  CHECK(vertex.GetT0()       == when);
+  CHECK(particles.size() == 2);
+  CHECK(particles[0]->GetMomentum() +
+        particles[1]->GetMomentum() == G4ThreeVector{});
+  CHECK(particles[0]->GetMomentum().mag() == 511*keV);
+
 }

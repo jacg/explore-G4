@@ -6,6 +6,7 @@
 #include <G4Orb.hh>
 #include <G4Tubs.hh>
 
+#include <G4RandomDirection.hh>
 #include <G4PVPlacement.hh>
 
 #include <G4SystemOfUnits.hh>
@@ -58,4 +59,16 @@ G4PVPlacement* nema_phantom::geometry() const {
   place(cylinder).in(vol_envelope).now();
 
   return place(vol_envelope).now();
+}
+
+void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position, G4double time) {
+
+  auto gamma = nain4::find_particle("gamma");
+  auto p = 511*keV * G4RandomDirection();
+
+  auto vertex =      new G4PrimaryVertex(position, time);
+  vertex->SetPrimary(new G4PrimaryParticle(gamma,  p.x(),  p.y(),  p.z()));
+  vertex->SetPrimary(new G4PrimaryParticle(gamma, -p.x(), -p.y(), -p.z()));
+
+  event -> AddPrimaryVertex(vertex);
 }
