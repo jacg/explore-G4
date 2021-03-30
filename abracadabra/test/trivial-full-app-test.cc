@@ -23,7 +23,6 @@
 #include <Randomize.hh>
 #include <catch2/catch.hpp>
 
-#include <memory>
 #include <tuple>
 #include <algorithm>
 
@@ -172,15 +171,15 @@ private:
 class primary_generator : public G4VUserPrimaryGeneratorAction {
 public:
   primary_generator(unsigned n_gun, unsigned n_loop)
-  : gun{new G4ParticleGun{(G4int)n_gun}}
+  : gun{(G4int)n_gun}
   , primaries_to_generate{n_loop}
   {
     // Geantinos don't interact with anything, so we can easily predict their
     // trajectory, which is very useful for writing the test.
-    gun->SetParticleDefinition(nain4::find_particle("geantino"));
+    gun.SetParticleDefinition(nain4::find_particle("geantino"));
     // Shoot along the x-axis, so the y and z coordinates won't change during
     // flight; again, very useful for the test.
-    gun->SetParticleMomentumDirection({1, 0, 0});
+    gun.SetParticleMomentumDirection({1, 0, 0});
   }
 
   // G4 calls this when it needs primary particles
@@ -202,13 +201,13 @@ public:
       auto x = tx + dx * (G4UniformRand() - 0.5);
       auto y = ty + dy * (G4UniformRand() - 0.5);
       auto z = tz + dz * (G4UniformRand() - 0.5);
-      gun -> SetParticlePosition({x, y, z});
-      gun -> GeneratePrimaryVertex(event);
+      gun.SetParticlePosition({x, y, z});
+      gun.GeneratePrimaryVertex(event);
     }
   }
 
 private:
-  std::unique_ptr<G4ParticleGun> gun;
+  G4ParticleGun gun;
   std::optional<std::tuple<G4double, G4double, G4double, G4double, G4double, G4double>> source;
   unsigned primaries_to_generate;
 };
