@@ -1,5 +1,6 @@
 #include "g4-mandatory/action_initialization.hh"
 #include "g4-mandatory/detector_construction.hh"
+#include "writer/persistency_manager.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -28,6 +29,9 @@ int main(int argc, char** argv) {
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default)};
+
+  // Add persistency manager
+  auto persistency = new persistency_manager{};
 
   // Set mandatory initialization classes
 
@@ -68,4 +72,6 @@ int main(int argc, char** argv) {
   // Free the store: user actions, physics_list and detector_description are
   // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
+
+   persistency->close_file();
 }

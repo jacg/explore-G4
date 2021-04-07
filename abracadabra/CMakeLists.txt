@@ -29,6 +29,9 @@ set(ABRACADABRA_HEADERS
   src/geometries/imas.hh
   src/geometries/nema.hh
   src/geometries/sipm_hamamatsu_blue.hh
+  src/writer/hdf5_functions.hh
+  src/writer/hdf5_writer.hh
+  src/writer/persistency_manager.hh
 )
 
 set(ABRACADABRA_SOURCES
@@ -41,6 +44,9 @@ set(ABRACADABRA_SOURCES
   src/geometries/imas.cc
   src/geometries/nema.cc
   src/geometries/sipm_hamamatsu_blue.cc
+  src/writer/hdf5_functions.cc
+  src/writer/hdf5_writer.cc
+  src/writer/persistency_manager.cc
 )
 
 set(ABRACADABRA_TESTS
@@ -63,7 +69,7 @@ set(ALL_TEST_SOURCES
 
 # TODO including headers in add_executable apparently makes them show up in IDEs
 add_executable(tests-trial ${ALL_TEST_SOURCES})
-target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4)
+target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4 hdf5)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests-trial)
@@ -97,7 +103,7 @@ add_executable(abracadabra
   ${ABRACADABRA_SOURCES}
   ${ABRACADABRA_HEADERS}
 )
-target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4)
+target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4 hdf5)
 target_include_directories(
   abracadabra PUBLIC
   ${ABRACADABRA_HEADERS}
