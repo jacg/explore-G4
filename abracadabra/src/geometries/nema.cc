@@ -72,3 +72,11 @@ void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position
 
   event -> AddPrimaryVertex(vertex);
 }
+
+void nema_phantom::generate_primaries(G4Event* event) const {
+
+  G4ThreeVector position{10*mm, 20*mm, 30*mm};
+  G4double time = 0;
+
+  generate_back_to_back_511_keV_gammas(event, position, time);
+}

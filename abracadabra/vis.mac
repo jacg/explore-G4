@@ -5,7 +5,7 @@
 # Use these open statements to open selected visualization
 #
 # Use this open statement to create an OpenGL view:
-/vis/open OGL 800x600-0+0
+/vis/open OGL 1000x700-0+0
 #
 # Use this open statement to create an OpenInventor view:
 #/vis/open OI
@@ -102,6 +102,7 @@
 # To get nice view
 #/vis/viewer/set/sectionPlane  on 0 0 20   cm  0 0 1
 
+/vis/geometry/set/colour     world        0  0  1  0 .1
 /vis/geometry/set/colour     Envelope     0  0  1  0 .1
 /vis/geometry/set/colour     Outer_steel  0 .7 .7 .7 .1
 /vis/geometry/set/colour     Outer_vacuum 0 .1 .1 .1 .1
