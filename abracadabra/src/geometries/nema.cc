@@ -1,5 +1,8 @@
 #include "geometries/nema.hh"
 
+#include "random/random.hh"
+#include "utils/enumerate.hh"
+
 #include "nain4.hh"
 
 #include <G4Box.hh>
@@ -19,11 +22,45 @@ using nain4::material;
 using nain4::place;
 using nain4::volume;
 
+
 build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activity) {
   spheres.emplace_back(radius, activity);
   return *this;
 };
 
+
+nema_phantom build_nema_phantom::build() {
+
+  //
+
+  // We care about the relative, not absolute, volumes: ignore factor of 4/3 pi
+  G4double spheres_total_volume = 0;
+  std::vector<G4double> weights{};
+  weights.reserve(spheres.size() + 1); // Extra element for phantom body
+  for (auto& sphere : spheres) {
+    auto d = sphere.diameter;
+    auto volume = d * d * d;
+    spheres_total_volume += volume;
+    weights.push_back(volume * sphere.activity);
+  }
+  {
+    auto d = outer_radius * 2;
+    auto d_cubed = d * d * d;
+    auto body_volume = d_cubed - spheres_total_volume;
+    auto body_weight = body_volume * background;
+    weights.push_back(body_weight);
+  }
+  pick_region.reset(new biased_choice(weights));
+
+  return std::move(*this);
+}
+
+G4ThreeVector nema_phantom::sphere_position(unsigned n) const {
+  auto angle = n * 360 * deg / spheres.size();
+  auto x     = inner_radius * sin(angle);
+  auto y     = inner_radius * cos(angle);
+  return {x, y, 0};
+}
 
 G4PVPlacement* nema_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
@@ -44,15 +81,11 @@ G4PVPlacement* nema_phantom::geometry() const {
   auto vol_envelope = volume<G4Box> ("Envelope", air, envelope_width, envelope_width, envelope_length);
 
   // Build and place spheres
-  int count = 0; // TODO move into for, once we switch to C++ 20
-  for (auto& sphere: spheres) {
+  for (auto [count, sphere]: enumerate(spheres)) {
 	  std::string name = "Sphere_" + std::to_string(count);
 	  auto ball  = orb(name, air, sphere.diameter);
-	  auto angle = count * 360 * deg / spheres.size();
-	  auto x     = inner_radius * sin(angle);
-	  auto y     = inner_radius * cos(angle);
-	  place(ball).in(cylinder).at(x, y, 0).now();
-	  ++count;
+    auto position = sphere_position(count);
+	  place(ball).in(cylinder).at(position).now();
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
@@ -75,8 +108,46 @@ void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position
 
 void nema_phantom::generate_primaries(G4Event* event) const {
 
-  G4ThreeVector position{10*mm, 20*mm, 30*mm};
+  auto position = generate_vertex();
   G4double time = 0;
 
   generate_back_to_back_511_keV_gammas(event, position, time);
+}
+
+G4ThreeVector random_in_sphere(G4double) { return {}; } // TODO implement
+
+G4ThreeVector nema_phantom::generate_vertex() const {
+  G4ThreeVector offset; // TODO adjust for physical placement of logical geometry
+  G4ThreeVector local_position;
+  auto region = (*pick_region)();
+  if (region < spheres.size()) { // One of the spheres
+    auto centre = sphere_position(region);
+    local_position = centre + random_in_sphere(spheres[region].diameter / 2);
+  } else { // The phantom's body
+    do {
+      local_position = {};
+    } while (inside_a_sphere(local_position));
+  }
+   return local_position + offset;
+}
+
+bool nema_phantom::inside_sphere(unsigned n, G4ThreeVector& position) const {
+    auto r = spheres[n].diameter / 2;
+    auto r2 = r*r;
+    auto centre = sphere_position(n);
+    return (position - centre).mag2() < r2;
+}
+
+bool nema_phantom::inside_a_sphere(G4ThreeVector& position) const {
+  auto region = in_which_region(position);
+  return region && region.value() < spheres.size();
+}
+
+std::optional<unsigned> nema_phantom::in_which_region(G4ThreeVector& position) const {
+  for (unsigned n=0; n<spheres.size(); ++n) {
+    if (inside_sphere(n, position)) { return n; }
+  }
+  if (inside_whole(position)) { return spheres.size(); }
+  return {};
+
 }

@@ -12,7 +12,8 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
   using std::setw;
 
-  auto geometry = build_nema_phantom{}
+  auto geometry =
+    build_nema_phantom{}
     .sphere(10*mm, 2.8)
     .sphere(13*mm, 2.8)
     .sphere(17*mm, 2.8)
@@ -41,6 +42,26 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 
+}
+
+TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
+  auto phantom = build_nema_phantom{100*mm, 60*mm, 5}
+    .sphere(20*mm, 0)
+    .sphere(10*mm, 10)
+    .sphere(20*mm, 10)
+    .sphere(10*mm, 20)
+    .build();
+  std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
+  for (unsigned i=0; i<1000000; ++i) {
+    auto vertex = phantom.generate_vertex();
+    auto region = phantom.in_which_region(vertex);
+    hit_count[region.value()]++; // TODO remove hard-wired .value()
+  }
+  CHECK(hit_count[0] == 0); // Inactive sphere should get no hits
+  CHECK(hit_count[2] / hit_count[1] == Approx(8).epsilon(0.05)); // 2 x radius   -> 8 x weight
+  CHECK(hit_count[3] / hit_count[1] == Approx(2).epsilon(0.05)); // 2 x activity -> 2 x weight
+  // TODO: body
+  CHECK(hit_count[4] > hit_count[1] + hit_count[2] + hit_count[3]);
 }
 
 TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
