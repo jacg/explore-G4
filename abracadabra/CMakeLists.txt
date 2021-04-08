@@ -26,6 +26,7 @@ set(ABRACADABRA_HEADERS
   src/g4-mandatory/primary_generator_action.hh
   src/g4-mandatory/run_action.hh
   src/g4-mandatory/stepping_action.hh
+  src/g4-mandatory/tracking_action.hh
   src/geometries/imas.hh
   src/geometries/nema.hh
   src/geometries/sipm_hamamatsu_blue.hh
@@ -41,6 +42,7 @@ set(ABRACADABRA_SOURCES
   src/g4-mandatory/primary_generator_action.cc
   src/g4-mandatory/run_action.cc
   src/g4-mandatory/stepping_action.cc
+  src/g4-mandatory/tracking_action.cc
   src/geometries/imas.cc
   src/geometries/nema.cc
   src/geometries/sipm_hamamatsu_blue.cc

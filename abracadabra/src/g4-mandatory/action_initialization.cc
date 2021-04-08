@@ -3,6 +3,7 @@
 #include "primary_generator_action.hh"
 #include "run_action.hh"
 #include "stepping_action.hh"
+#include "tracking_action.hh"
 
 // See README for explanation of the role of this method in multi-threaded mode.
 void action_initialization::BuildForMaster() const { SetUserAction(new run_action); }
@@ -22,7 +23,8 @@ void action_initialization::Build() const {
   // Use the above to set the actions
   set_and_return(new primary_generator_action);
 
-  set_and_return(new stepping_action {
-      set_and_return(new event_action {
-          set_and_return(new run_action)})});
+  set_and_return(new tracking_action {
+      set_and_return(new stepping_action {
+          set_and_return(new event_action {
+              set_and_return(new run_action)})})});
 }
