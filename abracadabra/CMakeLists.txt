@@ -29,6 +29,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/imas.hh
   src/geometries/nema.hh
   src/geometries/sipm_hamamatsu_blue.hh
+  src/random/random.hh
 )
 
 set(ABRACADABRA_SOURCES
@@ -41,6 +42,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/imas.cc
   src/geometries/nema.cc
   src/geometries/sipm_hamamatsu_blue.cc
+  src/random/random.cc
 )
 
 set(ABRACADABRA_TESTS
@@ -50,6 +52,7 @@ set(ABRACADABRA_TESTS
   src/geometries/sipm_hamamatsu_blue-test.cc
   test/trivial-full-app-test.cc
   #test/nema-phantom-generator-test.cc
+  src/random/random-test.cc
 )
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
