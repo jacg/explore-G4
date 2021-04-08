@@ -20,9 +20,9 @@ using nain4::place;
 using nain4::volume;
 
 build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activity) {
-    spheres.emplace_back(radius, activity);
-    return *this;
-  };
+  spheres.emplace_back(radius, activity);
+  return *this;
+};
 
 
 G4PVPlacement* nema_phantom::geometry() const {
