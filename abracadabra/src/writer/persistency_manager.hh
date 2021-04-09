@@ -32,6 +32,8 @@ private:
     int nevt;
 };
 
+inline G4bool persistency_manager::Store(const G4VPhysicalVolume* run) { return true; }
+
 inline G4bool persistency_manager::Retrieve(G4Event*&)           { return false; }
 inline G4bool persistency_manager::Retrieve(G4Run*&)             { return false; }
 inline G4bool persistency_manager::Retrieve(G4VPhysicalVolume*&) { return false; }

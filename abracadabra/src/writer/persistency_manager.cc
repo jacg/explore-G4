@@ -3,12 +3,10 @@
 
 
 persistency_manager::persistency_manager() {
-    std::cout << "Create persistency manager" << std::endl;
     G4String hdf5file = "test_file.h5";
     nevt = 0;
     open_file(hdf5file);
 }
-
 
 void persistency_manager::open_file(G4String filename) {
     h5writer = new hdf5_writer();
@@ -17,14 +15,11 @@ void persistency_manager::open_file(G4String filename) {
 
 
 void persistency_manager::close_file() {
-    std::cout << "close file" << std::endl;
     h5writer->close();
 }
 
 
 G4bool persistency_manager::Store(const G4Event* event) {
-    std::cout << "Store event" << std::endl;
-
     G4TrajectoryContainer* trajectories = event->GetTrajectoryContainer();
     if (trajectories) {
         store_trajectories(trajectories);
@@ -36,8 +31,6 @@ G4bool persistency_manager::Store(const G4Event* event) {
 
 
 G4bool persistency_manager::Store(const G4Run* run) {
-    std::cout << "Store run" << std::endl;
-
     // Store the number of events to be processed
     auto* app = G4RunManager::GetRunManager();
     G4int num_events = app->GetNumberOfEventsToBeProcessed();
@@ -48,16 +41,8 @@ G4bool persistency_manager::Store(const G4Run* run) {
     return true;
 }
 
-G4bool persistency_manager::Store(const G4VPhysicalVolume* run) {
-    std::cout << "Store volume" << std::endl;
-    return true;
-}
-
-
 void persistency_manager::store_trajectories(G4TrajectoryContainer* trajectories) {
     for(int i=0; i<trajectories->size(); i++) {
-        std::cout << "trajectory " << i << std::endl;
-
         trajectory* trj = dynamic_cast<trajectory*>((*trajectories)[i]);
         if (!trj) continue;
 
