@@ -1,6 +1,8 @@
 #include "hdf5_functions.hh"
 
-hsize_t create_run_type(){
+#include <vector>
+
+hsize_t create_run_type() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   H5Tset_size (strtype, CONFLEN);
 
@@ -11,7 +13,7 @@ hsize_t create_run_type(){
   return memtype;
 }
 
-hsize_t create_particle_type(){
+hsize_t create_particle_type() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   H5Tset_size (strtype, STRLEN);
 
@@ -45,19 +47,18 @@ hsize_t create_particle_type(){
   return memtype;
 }
 
-hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype){
+hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype) {
   //Create 1D dataspace (evt number). First dimension is unlimited (initially 0)
-  const hsize_t ndims = 1;
-  hsize_t dims[ndims] = {0};
-  hsize_t max_dims[ndims] = {H5S_UNLIMITED};
-  hsize_t file_space = H5Screate_simple(ndims, dims, max_dims);
+  std::vector<hsize_t> dims     = {0};
+  std::vector<hsize_t> max_dims = {H5S_UNLIMITED};
+  hsize_t file_space = H5Screate_simple(dims.size(), dims.data(), max_dims.data());
 
   // Create a dataset creation property list
   // The layout of the dataset have to be chunked when using unlimited dimensions
   hid_t plist = H5Pcreate(H5P_DATASET_CREATE);
   H5Pset_layout(plist, H5D_CHUNKED);
-  hsize_t chunk_dims[ndims] = {32768};
-  H5Pset_chunk(plist, ndims, chunk_dims);
+  std::vector<hsize_t> chunk_dims = {32768};
+  H5Pset_chunk(plist, chunk_dims.size(), chunk_dims.data());
 
   //Set compression
   //  int clevel = 0;
@@ -70,8 +71,7 @@ hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype){
   return dataset;
 }
 
-hid_t create_group(hid_t file, std::string& group_name){
-  //Create group
+hid_t create_group(hid_t file, std::string& group_name) {
   hid_t wfgroup;
   wfgroup = H5Gcreate2(file, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT,
                        H5P_DEFAULT);
@@ -83,12 +83,11 @@ void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter)
 {
   hid_t memspace, file_space;
 
-  const hsize_t n_dims = 1;
-  hsize_t dims[n_dims] = {1};
-  memspace = H5Screate_simple(n_dims, dims, NULL);
+  std::vector<hsize_t> dims = {1};
+  memspace = H5Screate_simple(dims.size(), dims.data(), NULL);
 
   dims[0] = counter+1;
-  H5Dset_extent(dataset, dims);
+  H5Dset_extent(dataset, dims.data());
 
   file_space = H5Dget_space(dataset);
   hsize_t start[1] = {counter};
