@@ -12,7 +12,7 @@
 class persistency_manager: public G4VPersistencyManager {
 public:
     persistency_manager();
-    virtual ~persistency_manager() override {}
+    virtual ~persistency_manager() override { this->close_file(); };
 
     virtual G4bool Store(const G4Event*)           override;
     virtual G4bool Store(const G4Run*)             override ;
