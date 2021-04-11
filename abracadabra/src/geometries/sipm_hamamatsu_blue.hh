@@ -11,7 +11,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible=true);
 class hamamatsu_sensitive : public G4VSensitiveDetector {
 public:
   hamamatsu_sensitive(G4String name) : G4VSensitiveDetector{name} {}
-  virtual G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
+  G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
 
 public:
   std::vector<G4ThreeVector> hits {};

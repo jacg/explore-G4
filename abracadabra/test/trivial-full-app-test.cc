@@ -83,7 +83,7 @@ public:
   // to which an instance of this class has been attached by
   // SetSensitiveDetector(). Thus, this method is used to collect information
   // about particles which reach the detector.
-  virtual G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override {
+  G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override {
     // Store the min and max y and z positions of particles reaching the detector
     auto pos = step -> GetPreStepPoint() -> GetPosition();
     auto y = pos.y();
@@ -183,7 +183,7 @@ public:
   }
 
   // G4 calls this when it needs primary particles
-  virtual void GeneratePrimaries(G4Event* event) override {
+  void GeneratePrimaries(G4Event* event) override {
     if (!source) {
       auto source_physical = nain4::find_physical("source");
       auto source_logical = source_physical -> GetLogicalVolume();
@@ -225,11 +225,11 @@ public:
   {}
 
   // This one is relevant for multi-threaded mode TODO discuss
-  virtual void BuildForMaster() const override {
+ void BuildForMaster() const override {
     //SetUserAction(new G4UserRunAction);
   };
 
-  virtual void Build() const override {
+ void Build() const override {
     // Geant4 will crash at runtime without this
     SetUserAction(new primary_generator{n_gun, n_loop});
 

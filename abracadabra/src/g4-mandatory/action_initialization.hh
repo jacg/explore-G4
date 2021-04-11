@@ -8,10 +8,10 @@
 class action_initialization : public G4VUserActionInitialization {
 public:
   action_initialization() : G4VUserActionInitialization() {}
-  virtual ~action_initialization() override{};
+  ~action_initialization() override{};
 
-  virtual void BuildForMaster() const override;
-  virtual void Build()          const override;
+  void BuildForMaster() const override;
+  void Build()          const override;
 };
 
 #endif

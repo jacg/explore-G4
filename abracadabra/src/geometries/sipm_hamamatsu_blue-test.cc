@@ -75,7 +75,7 @@ TEST_CASE("hamamatsu app", "[app]") {
       gun.SetParticleMomentumDirection({0, 0, 1});
     }
 
-    virtual void GeneratePrimaries(G4Event* event) override {
+    void GeneratePrimaries(G4Event* event) override {
       for (int x=-35; x<35; x+=7) {
         for (int y=-35; y<35; y+=7) {
           gun.SetParticlePosition({x*mm, y*mm, 0*mm});
@@ -90,8 +90,8 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // ----- Actions ------------------------------------------------------------
   class actions : public G4VUserActionInitialization {
-    virtual void BuildForMaster() const override {}
-    virtual void Build         () const override { SetUserAction(new primary_generator); }
+    void BuildForMaster() const override {}
+    void Build         () const override { SetUserAction(new primary_generator); }
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------

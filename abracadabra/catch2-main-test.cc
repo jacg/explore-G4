@@ -18,14 +18,14 @@ using std::unique_ptr;
 class dummy_detector : public G4VUserDetectorConstruction {
 public:
   dummy_detector() : G4VUserDetectorConstruction() {}
-  virtual G4VPhysicalVolume* Construct() override { return nullptr; };
+  G4VPhysicalVolume* Construct() override { return nullptr; };
 };
 
 class dummy_action_init : public G4VUserActionInitialization {
 public:
   dummy_action_init() : G4VUserActionInitialization() {}
-  virtual void BuildForMaster() const override {}
-  virtual void Build         () const override {}
+  void BuildForMaster() const override {}
+  void Build         () const override {}
 };
 
 int main(int argc, char** argv) {

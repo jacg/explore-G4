@@ -12,8 +12,8 @@ class G4LogicalVolume;
 class detector_construction : public G4VUserDetectorConstruction {
 public:
   detector_construction() : G4VUserDetectorConstruction(), scoring_volume(nullptr) {}
-  virtual ~detector_construction() override {}
-  virtual G4VPhysicalVolume* Construct() override;
+  ~detector_construction() override {}
+  G4VPhysicalVolume* Construct() override;
   G4LogicalVolume* GetScoringVolume() const { return scoring_volume; }
 
 protected:

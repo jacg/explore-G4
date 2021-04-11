@@ -14,11 +14,11 @@ class G4Run;
 class run_action : public G4UserRunAction {
 public:
   run_action();
-  virtual ~run_action() override {}
+  ~run_action() override {}
 
-  //virtual G4Run* GenerateRun() override;
-  virtual void BeginOfRunAction(const G4Run*) override;
-  virtual void   EndOfRunAction(const G4Run*) override;
+  // G4Run* GenerateRun() override;
+  void BeginOfRunAction(const G4Run*) override;
+  void   EndOfRunAction(const G4Run*) override;
 
   void AddEdep (G4double edep);
 
