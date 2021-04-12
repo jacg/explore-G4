@@ -9,25 +9,22 @@
 G4Allocator<trajectory> TrjAllocator;
 
 trajectory::trajectory(const G4Track* track)
-: G4VTrajectory()
-, pdef_(0)
-, trackId_(-1)
-, parentId_(-1)
-, initial_time_(0.)
-, final_time_(0)
-, length_(0.)
-, edep_(0.)
-, record_trjpoints_(true)
-, trjpoints_(0) {
+: G4VTrajectory{}
+, pdef_{0}
+, trackId_{-1}
+, parentId_{-1}
+, initial_time_{0.}
+, final_time_{0}
+, length_{0.}
+, edep_{0.}
+, record_trjpoints_{true}
+, trjpoints_{0} {
 
   pdef_     = track->GetDefinition();
   trackId_  = track->GetTrackID();
   parentId_ = track->GetParentID();
 
-  if (parentId_ == 0)
-    creator_process_ = "none";
-  else
-    creator_process_ = track->GetCreatorProcess()->GetProcessName();
+  creator_process_ = (parentId_ == 0) ? "none" : track->GetCreatorProcess()->GetProcessName();
 
   initial_momentum_ = track->GetMomentum();
   initial_position_ = track->GetVertexPosition();
@@ -38,19 +35,20 @@ trajectory::trajectory(const G4Track* track)
 
   // Add this trajectory in the map, but only if no other
   // trajectory for this track id has been registered yet
-  if (!trajectory_map::Get(track->GetTrackID()))
+  if (!trajectory_map::Get(track->GetTrackID())) {
 	trajectory_map::Add(this);
+  }
 }
 
 
-trajectory::trajectory(const trajectory& other): G4VTrajectory() {
-  pdef_ = other.pdef_;
-}
+trajectory::trajectory(const trajectory& other): G4VTrajectory{}
+, pdef_{other.pdef_} {}
 
 
 trajectory::~trajectory() {
-  for (unsigned int i=0; i<trjpoints_->size(); ++i)
+  for (unsigned int i=0; i<trjpoints_->size(); ++i) {
     delete (*trjpoints_)[i];
+  }
   trjpoints_->clear();
   delete trjpoints_;
 }
@@ -60,10 +58,8 @@ trajectory::~trajectory() {
 void trajectory::AppendStep(const G4Step* step) {
   if (!record_trjpoints_) return;
 
-  trajectory_point* point =
-    new trajectory_point(step->GetPostStepPoint()->GetPosition(),
-                        step->GetPostStepPoint()->GetGlobalTime());
-  trjpoints_->push_back(point);
+  trjpoints_->push_back(new trajectory_point(step->GetPostStepPoint()->GetPosition(),
+                                             step->GetPostStepPoint()->GetGlobalTime()));
 }
 
 
