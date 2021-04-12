@@ -72,12 +72,34 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 
+  auto z_min =  std::numeric_limits<G4double>::infinity();
+  auto z_max = -std::numeric_limits<G4double>::infinity();
+  auto r2_max =  0.0;
+
+  // ----- Generate sample data --------------------------------------------------
   std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
   for (unsigned i=0; i<1e6; ++i) {
     auto vertex = phantom.generate_vertex();
     auto region = phantom.in_which_region(vertex);
+    //std::cout << region.value() << ' ' << vertex << std::endl;
+
+    // Keep track of how many times each region was hit
     hit_count[region.value()]++; // TODO remove hard-wired .value()
+
+    // Keep track of maximum vertex distances from centre
+    auto [x, y, z] = std::make_tuple(vertex.x(), vertex.y(), vertex.z());
+    z_min  = std::min( z_min, z);
+    z_max  = std::max( z_max, z);
+    r2_max = std::max(r2_max, x*x + y*y);
+
   }
+
+  // ----- Vertices approach edges of the phantom, but all are inside ------------
+  CHECK( z_min == Approx(-H/2).epsilon(0.001));
+  CHECK( z_max == Approx( H/2).epsilon(0.001));
+  CHECK(r2_max == Approx( R*R).epsilon(0.001));
+
+  // ----- Verify expected distribution of vertices among regions ----------------
   CHECK(hit_count[0] == 0); // Inactive sphere should get no hits
   CHECK(hit_count[2] / hit_count[1] == Approx(8).epsilon(0.05)); // 2 x radius   -> 8 x weight
   CHECK(hit_count[3] / hit_count[1] == Approx(2).epsilon(0.05)); // 2 x activity -> 2 x weight

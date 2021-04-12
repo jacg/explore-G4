@@ -128,10 +128,12 @@ G4ThreeVector nema_phantom::generate_vertex() const {
     local_position = centre + random_in_sphere(spheres[region].diameter / 2);
   } else { // The phantom's body
     do {
-      local_position = {};
+      auto [x, y] = random_on_disc(outer_r);
+      auto z = uniform(-half_length, half_length);
+      local_position = {x, y, z};
     } while (inside_a_sphere(local_position));
   }
-   return local_position + offset;
+  return local_position + offset; // TODO: rotation!
 }
 
 bool nema_phantom::inside_sphere(size_t n, G4ThreeVector& position) const {
