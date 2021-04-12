@@ -1,18 +1,8 @@
 #include "random/random.hh"
 
-#include <Randomize.hh>
-
 #include <cmath>
 #include <stack>
 #include <numeric>
-
-// Random result generation utilities
-inline G4double uniform    ()                         { return G4Random().flat(); }
-inline G4double uniform    (G4double lo, G4double hi) { return (hi - lo) * uniform() + lo; }
-inline bool     biased_coin(G4double chance_of_true)  { return uniform() < chance_of_true; }
-inline unsigned fair_die   (unsigned sides)           { return std::floor(uniform() * sides); }
-
-
 
 // Going with rejection sampling, for now
 // TODO: test done, now benchmark other approaches
