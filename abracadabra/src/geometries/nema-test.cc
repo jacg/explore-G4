@@ -46,8 +46,9 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
 TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
 
-  G4double a = 10, r = 10*mm;
-  G4double A =  1, R = 40*mm, H = 50*mm;
+  // Activities (intensities), radii and cylinder length
+  G4double a = 10, r = 10*mm;            // Inner spheres basis
+  G4double A =  1, R = 40*mm, H = 50*mm; // Phantom body cylinder
 
   auto phantom = build_nema_phantom{}
     // inner hot/cold spheres
@@ -62,6 +63,7 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     .length(H)
     .build();
 
+  // ----- Calculate expected ratio of intensities of regions --------------------
   auto pi = 3.14; // The PIs cancel, value irrelevant
   auto sphere_1_vol = 4*pi/3 * r * r * r;
   auto     body_vol =   pi   * R * R * H;
@@ -103,8 +105,10 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   CHECK(hit_count[0] == 0); // Inactive sphere should get no hits
   CHECK(hit_count[2] / hit_count[1] == Approx(8).epsilon(0.05)); // 2 x radius   -> 8 x weight
   CHECK(hit_count[3] / hit_count[1] == Approx(2).epsilon(0.05)); // 2 x activity -> 2 x weight
-  CHECK(hit_count[4] / hit_count[1] == Approx(body_to_1_ratio).epsilon(0.05));
-  // TODO: check that hits cover the whole subregions
+  CHECK(hit_count[4] / hit_count[1] == Approx(body_to_1_ratio).epsilon(0.05)); // Region 4: body
+
+  // ----- Check that hits cover the whole subregions ----------------------------
+  // TODO
 }
 
 TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
