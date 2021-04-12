@@ -44,7 +44,7 @@ nema_phantom build_nema_phantom::build() {
   std::vector<G4double> weights{};
   weights.reserve(spheres.size() + 1); // Extra element for phantom body
   for (auto& sphere : spheres) {
-    auto r = sphere.diameter;
+    auto r = sphere.radius;
     auto volume = r * r * r * 4/3;
     spheres_total_volume += volume;
     weights.push_back(volume * sphere.activity);
@@ -93,7 +93,7 @@ G4PVPlacement* nema_phantom::geometry() const {
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
 	  std::string name = "Sphere_" + std::to_string(count);
-	  auto ball  = orb(name, air, sphere.diameter/2);
+	  auto ball  = orb(name, air, sphere.radius);
     auto position = sphere_position(count);
 	  place(ball).in(cylinder).at(position).now();
   }
@@ -130,7 +130,7 @@ G4ThreeVector nema_phantom::generate_vertex() const {
   auto region = (*pick_region)();
   if (region < spheres.size()) { // One of the spheres
     auto centre = sphere_position(region);
-    local_position = centre + random_in_sphere(spheres[region].diameter / 2);
+    local_position = centre + random_in_sphere(spheres[region].radius);
   } else { // The phantom's body
     do {
       auto [x, y] = random_on_disc(outer_r);
@@ -142,7 +142,7 @@ G4ThreeVector nema_phantom::generate_vertex() const {
 }
 
 bool nema_phantom::inside_sphere(size_t n, G4ThreeVector& position) const {
-    auto r = spheres[n].diameter / 2;
+    auto r = spheres[n].radius;
     auto r2 = r*r;
     auto centre = sphere_position(n);
     return (position - centre).mag2() < r2;

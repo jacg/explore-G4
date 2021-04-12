@@ -26,12 +26,12 @@ G4VPhysicalVolume* detector_construction::Construct() {
     .length(140*mm)
     .inner_radius(114.4*mm)
     .outer_radius(152.0*mm)
-    .sphere(10*mm, 2.8)
-    .sphere(13*mm, 2.8)
-    .sphere(17*mm, 2.8)
-    .sphere(22*mm, 2.8)
-    .sphere(28*mm, 0)
-    .sphere(37*mm, 0)
+    .sphere(10*mm / 2, 2.8)
+    .sphere(13*mm / 2, 2.8)
+    .sphere(17*mm / 2, 2.8)
+    .sphere(22*mm / 2, 2.8)
+    .sphere(28*mm / 2, 0)
+    .sphere(37*mm / 2, 0)
     .build()
     .geometry();
 }

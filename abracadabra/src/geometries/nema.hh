@@ -25,8 +25,8 @@ public:
 
 private:
   struct one_sphere {
-    one_sphere(G4double diameter, G4double activity) : diameter{diameter}, activity{activity} {}
-    G4double diameter;
+    one_sphere(G4double radius, G4double activity) : radius{radius}, activity{activity} {}
+    G4double radius;
     G4double activity;
   };
 
@@ -46,7 +46,7 @@ public:
   build_nema_phantom& inner_radius(G4double);
   build_nema_phantom& outer_radius(G4double);
   build_nema_phantom& activity(G4double);
-  build_nema_phantom& sphere(G4double diameter, G4double activity);
+  build_nema_phantom& sphere(G4double radius, G4double activity);
   nema_phantom build();
 };
 // ------------------------------------------------------------------------------------
