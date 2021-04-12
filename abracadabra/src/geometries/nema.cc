@@ -48,9 +48,7 @@ nema_phantom build_nema_phantom::build() {
     auto volume = r * r * r * 4/3;
     spheres_total_volume += volume;
     weights.push_back(volume * sphere.activity);
-    std::cout << "sphere: " << volume << ' ' << r << std::endl;
   }
-  std::cout << "total: " << spheres_total_volume << std::endl;
   {
     auto r = outer_r;
     auto h = half_length * 2;
@@ -58,8 +56,6 @@ nema_phantom build_nema_phantom::build() {
     auto body_volume = cylinder_volume - spheres_total_volume;
     auto body_weight = body_volume * background;
     weights.push_back(body_weight);
-    std::cout << "cylinder: " << cylinder_volume << std::endl;
-    std::cout << "body    : " <<     body_volume << std::endl;
   }
   pick_region.reset(new biased_choice(weights));
 

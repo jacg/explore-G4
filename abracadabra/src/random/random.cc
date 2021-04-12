@@ -40,7 +40,6 @@ biased_choice::biased_choice(std::vector<G4double> weights)
   auto total_weight = std::accumulate(begin(weights), end(weights), 0e0);
   for (auto& weight : weights) {
     weight *= (N / total_weight);
-    std::cout << "weight " << weight << std::endl;
   }
   // Separate into above-average and below-average probabilities
   std::stack<unsigned> under;

@@ -85,7 +85,6 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   for (unsigned i=0; i<1e6; ++i) {
     auto vertex = phantom.generate_vertex();
     auto region = phantom.in_which_region(vertex);
-    //std::cout << region.value() << ' ' << vertex << std::endl;
 
     // Keep track of how many times each region was hit
     hit_count[region.value()]++; // TODO remove hard-wired .value()
@@ -124,7 +123,7 @@ TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
   G4Event event;
   generate_back_to_back_511_keV_gammas(&event, where, when);
   auto& vertex = *event.GetPrimaryVertex();
-  vertex.Print();
+  //vertex.Print();
 
   // Get all the particles in the vertex
   // AAAARGH! Geant4 stores them in an ad-hoc linked list
