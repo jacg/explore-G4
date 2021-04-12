@@ -14,13 +14,13 @@ public:
     persistency_manager();
     virtual ~persistency_manager() override { this->close_file(); };
 
-    virtual G4bool Store(const G4Event*)           override;
-    virtual G4bool Store(const G4Run*)             override ;
-    virtual G4bool Store(const G4VPhysicalVolume*) override;
+    G4bool Store(const G4Event*)           override;
+    G4bool Store(const G4Run*)             override;
+    G4bool Store(const G4VPhysicalVolume*) override { return true; }
 
-    virtual G4bool Retrieve(G4Event*&)           override;
-    virtual G4bool Retrieve(G4Run*&)             override;
-    virtual G4bool Retrieve(G4VPhysicalVolume*&) override;
+    G4bool Retrieve(G4Event*&)           override { return false; }
+    G4bool Retrieve(G4Run*&)             override { return false; }
+    G4bool Retrieve(G4VPhysicalVolume*&) override { return false; }
 
     void open_file(G4String);
     void close_file();
@@ -31,11 +31,5 @@ private:
     hdf5_writer* h5writer;
     int nevt;
 };
-
-inline G4bool persistency_manager::Store(const G4VPhysicalVolume* run) { return true; }
-
-inline G4bool persistency_manager::Retrieve(G4Event*&)           { return false; }
-inline G4bool persistency_manager::Retrieve(G4Run*&)             { return false; }
-inline G4bool persistency_manager::Retrieve(G4VPhysicalVolume*&) { return false; }
 
 #endif
