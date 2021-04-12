@@ -61,7 +61,7 @@ nema_phantom build_nema_phantom::build() {
   return std::move(*this);
 }
 
-G4ThreeVector nema_phantom::sphere_position(unsigned n) const {
+G4ThreeVector nema_phantom::sphere_position(size_t n) const {
   auto angle = n * 360 * deg / spheres.size();
   auto x     = inner_r * sin(angle);
   auto y     = inner_r * cos(angle);
@@ -134,7 +134,7 @@ G4ThreeVector nema_phantom::generate_vertex() const {
    return local_position + offset;
 }
 
-bool nema_phantom::inside_sphere(unsigned n, G4ThreeVector& position) const {
+bool nema_phantom::inside_sphere(size_t n, G4ThreeVector& position) const {
     auto r = spheres[n].diameter / 2;
     auto r2 = r*r;
     auto centre = sphere_position(n);
@@ -146,8 +146,8 @@ bool nema_phantom::inside_a_sphere(G4ThreeVector& position) const {
   return region && region.value() < spheres.size();
 }
 
-std::optional<unsigned> nema_phantom::in_which_region(G4ThreeVector& position) const {
-  for (unsigned n=0; n<spheres.size(); ++n) {
+std::optional<size_t> nema_phantom::in_which_region(G4ThreeVector& position) const {
+  for (size_t n=0; n<spheres.size(); ++n) {
     if (inside_sphere(n, position)) { return n; }
   }
   if (inside_whole(position)) { return spheres.size(); }

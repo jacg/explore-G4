@@ -17,11 +17,11 @@ public:
   void generate_primaries(G4Event* event) const;
   G4ThreeVector generate_vertex() const;
 
-  G4ThreeVector sphere_position(unsigned n) const;
+  G4ThreeVector sphere_position(size_t n) const;
   bool inside_a_sphere(G4ThreeVector&) const;
-  bool inside_sphere(unsigned, G4ThreeVector&) const;
+  bool inside_sphere(size_t, G4ThreeVector&) const;
   bool inside_whole(G4ThreeVector&) const { return true; }
-  std::optional<unsigned> in_which_region(G4ThreeVector&) const;
+  std::optional<size_t> in_which_region(G4ThreeVector&) const;
 
 private:
   struct one_sphere {
