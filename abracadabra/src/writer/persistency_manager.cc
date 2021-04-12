@@ -3,9 +3,8 @@
 
 
 persistency_manager::persistency_manager() {
-    G4String hdf5file = "test_file.h5";
     nevt = 0;
-    open_file(hdf5file);
+    open_file("test_file.h5");
 }
 
 void persistency_manager::open_file(G4String filename) {

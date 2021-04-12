@@ -43,8 +43,8 @@ typedef struct {
 hsize_t create_run_type();
 hsize_t create_particle_type();
 
-hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype);
-hid_t create_group(hid_t file, std::string& group_name);
+hid_t create_table(hid_t group, std::string const table_name, hsize_t memtype);
+hid_t create_group(hid_t file , std::string const group_name);
 
 void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter);
 

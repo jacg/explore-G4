@@ -47,7 +47,7 @@ hsize_t create_particle_type() {
   return memtype;
 }
 
-hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype) {
+hid_t create_table(hid_t group, std::string const table_name, hsize_t memtype) {
   //Create 1D dataspace (evt number). First dimension is unlimited (initially 0)
   std::vector<hsize_t> dims     = {0};
   std::vector<hsize_t> max_dims = {H5S_UNLIMITED};
@@ -71,7 +71,7 @@ hid_t create_table(hid_t group, std::string& table_name, hsize_t memtype) {
   return dataset;
 }
 
-hid_t create_group(hid_t file, std::string& group_name) {
+hid_t create_group(hid_t file, std::string const group_name) {
   hid_t wfgroup;
   wfgroup = H5Gcreate2(file, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT,
                        H5P_DEFAULT);

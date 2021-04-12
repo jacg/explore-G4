@@ -3,23 +3,23 @@
 #include <cstring>
 
 
-hdf5_writer::hdf5_writer():
-    file_(0), irun_(0), iparticle_(0) {}
+hdf5_writer::hdf5_writer()
+: file_{0}
+, group_{0}
+, run_table_{0}
+, particle_table_{0}
+, memtype_run_{0}
+, memtype_particle_{0}
+, irun_{0}
+, iparticle_{0} {}
 
 
 void hdf5_writer::open(std::string file_name) {
     file_ = H5Fcreate(file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    std::string group_name = "/MC";
-    group_ = create_group(file_, group_name);
-
-    std::string run_table_name = "configuration";
-    memtype_run_ = create_run_type();
-    run_table_   = create_table(group_, run_table_name, memtype_run_);
-
-    std::string particle_table_name = "particles";
-    memtype_particle_ = create_particle_type();
-    particle_table_ = create_table(group_, particle_table_name, memtype_particle_);
+    group_          = create_group(file_, "/MC");
+    run_table_      = create_table(group_, "configuration", memtype_run_      = create_run_type());
+    particle_table_ = create_table(group_, "particles",     memtype_particle_ = create_particle_type());
 
 }
 
