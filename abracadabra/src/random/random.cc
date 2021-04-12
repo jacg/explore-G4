@@ -14,6 +14,16 @@ G4ThreeVector random_in_sphere(G4double radius) {
   return point * radius;
 }
 
+// TODO: test and benchmark
+std::tuple<G4double, G4double> random_on_disc(G4double radius) {
+  G4double x, y;
+  do {
+    x = uniform(-radius, radius);
+    y = uniform(-radius, radius);
+  } while (x*x + y*y > radius * radius);
+  return {x, y};
+}
+
 
 // Stack utilities
 using STACK = std::stack<unsigned>;

@@ -26,5 +26,6 @@ private:
 };
 
 G4ThreeVector random_in_sphere(G4double radius);
+std::tuple<G4double, G4double> random_on_disc(G4double radius);
 
 #endif
