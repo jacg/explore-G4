@@ -1,5 +1,6 @@
 #include "g4-mandatory/action_initialization.hh"
 #include "g4-mandatory/detector_construction.hh"
+#include "writer/persistency_manager.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -33,6 +34,9 @@ int main(int argc, char** argv) {
 
   // run_manager takes ownership of detector_construction
   run_manager -> SetUserInitialization(new detector_construction{});
+
+  // Add persistency manager
+  auto persistency = new persistency_manager{};
 
   { // Physics list
     auto verbosity = 1;
