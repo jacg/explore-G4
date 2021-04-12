@@ -12,13 +12,6 @@
 
 class nema_phantom {
 
-protected:
-  nema_phantom(G4double outer_diameter, G4double inner_diameter, G4double activity)
-    : background{activity}
-    , inner_radius{inner_diameter / 2}
-    , outer_radius{outer_diameter / 2}
-  {}
-
 public:
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const;
@@ -39,21 +32,24 @@ private:
 
 protected:
   std::vector<one_sphere> spheres;
-  G4double background;
-  G4double inner_radius;
-  G4double outer_radius;
+  G4double background  = 1;
+  G4double inner_r     = 114.4*mm;
+  G4double outer_r     = 152.0*mm;
+  G4double half_length =  70.0*mm;
   std::unique_ptr<biased_choice> pick_region;
 };
 
+// ----- Builder ----------------------------------------------------------------------
 class build_nema_phantom : private nema_phantom {
 public:
+  build_nema_phantom& length(G4double);
+  build_nema_phantom& inner_radius(G4double);
+  build_nema_phantom& outer_radius(G4double);
+  build_nema_phantom& activity(G4double);
   build_nema_phantom& sphere(G4double diameter, G4double activity);
-  build_nema_phantom() : build_nema_phantom{304*mm, 228.8*mm, 1} {}
-  build_nema_phantom(G4double outer_diameter, G4double inner_diameter, G4double activity=1)
-    : nema_phantom{outer_diameter, inner_diameter, activity} {}
   nema_phantom build();
 };
-
+// ------------------------------------------------------------------------------------
 
 void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position, G4double time);
 

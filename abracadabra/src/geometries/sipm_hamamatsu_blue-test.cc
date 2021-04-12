@@ -122,7 +122,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   // }
   // std::cout << std::endl;
 
-  unsigned n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
+  size_t n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
 
   CHECK(std::distance(begin(world), end(world)) == n_sipms * volumes_per_sipm + n_worlds);
 

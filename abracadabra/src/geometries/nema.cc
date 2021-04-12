@@ -28,6 +28,12 @@ build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activit
   return *this;
 };
 
+build_nema_phantom& build_nema_phantom::length(G4double l) { half_length = l / 2;  return *this; };
+build_nema_phantom& build_nema_phantom::inner_radius(G4double r) { inner_r = r;    return *this; };
+build_nema_phantom& build_nema_phantom::outer_radius(G4double r) { outer_r = r;    return *this; };
+build_nema_phantom& build_nema_phantom::activity    (G4double a) { background = a; return *this; };
+
+
 
 nema_phantom build_nema_phantom::build() {
 
@@ -44,7 +50,7 @@ nema_phantom build_nema_phantom::build() {
     weights.push_back(volume * sphere.activity);
   }
   {
-    auto d = outer_radius * 2;
+    auto d = outer_r * 2;
     auto d_cubed = d * d * d;
     auto body_volume = d_cubed - spheres_total_volume;
     auto body_weight = body_volume * background;
@@ -57,8 +63,8 @@ nema_phantom build_nema_phantom::build() {
 
 G4ThreeVector nema_phantom::sphere_position(unsigned n) const {
   auto angle = n * 360 * deg / spheres.size();
-  auto x     = inner_radius * sin(angle);
-  auto y     = inner_radius * cos(angle);
+  auto x     = inner_r * sin(angle);
+  auto y     = inner_r * cos(angle);
   return {x, y, 0};
 }
 
@@ -67,18 +73,17 @@ G4PVPlacement* nema_phantom::geometry() const {
   auto air     = material("G4_AIR");
 
   auto two_pi = 360 * deg;
-  auto length = 113 * mm, half_length = length / 2;
 
-  auto envelope_length = 1.1 * length;
-  auto envelope_width  = 1.1 * outer_radius;
+  auto env_half_length = 1.1 * half_length;
+  auto env_half_width  = 1.1 * outer_r;
 
   // Bind invariant args (3, 5, 6, 7 and 8) of volume
   auto orb = [](auto name, auto material, auto diameter) {
     return volume<G4Orb>(name, material, diameter/2);
   };
 
-  auto cylinder     = volume<G4Tubs>("Cylinder", air, 0.0, outer_radius, half_length, 0.0, two_pi);
-  auto vol_envelope = volume<G4Box> ("Envelope", air, envelope_width, envelope_width, envelope_length);
+  auto cylinder     = volume<G4Tubs>("Cylinder", air, 0.0, outer_r, half_length, 0.0, two_pi);
+  auto vol_envelope = volume<G4Box> ("Envelope", air, env_half_width, env_half_width, env_half_length);
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
@@ -113,7 +118,6 @@ void nema_phantom::generate_primaries(G4Event* event) const {
 
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
-
 
 G4ThreeVector nema_phantom::generate_vertex() const {
   G4ThreeVector offset; // TODO adjust for physical placement of logical geometry

@@ -45,14 +45,35 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 }
 
 TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
-  auto phantom = build_nema_phantom{100*mm, 60*mm, 5}
-    .sphere(20*mm, 0)
-    .sphere(10*mm, 10)
-    .sphere(20*mm, 10)
-    .sphere(10*mm, 20)
+
+  G4double a = 10, r = 10*mm;
+  G4double A =  1, R = 40*mm, H = 50*mm;
+
+  auto phantom = build_nema_phantom{}
+    // inner hot/cold spheres
+    .sphere(2*r,   0) // region 0
+    .sphere(  r,   a) //        1
+    .sphere(2*r,   a) //        2
+    .sphere(  r, 2*a) //        3
+    // main cylinder            4
+    .activity(A)
+    .inner_radius(20*mm)
+    .outer_radius(40*mm)
+    .length(H)
     .build();
+
+  auto pi = 3.14; // The PIs cancel, value irrelevant
+  auto sphere_1_vol = 4*pi/3 * r * r * r;
+  auto     body_vol =   pi   * R * R * H;
+  auto all_spheres = sphere_1_vol * 18; // 2(1^3) + 2(2^3) = 2 x 9 = 18
+  auto body_to_1_ratio = A * (body_vol - all_spheres) / (a * sphere_1_vol);
+
+  for (auto volume: phantom.geometry()) {
+    CHECK(volume->CheckOverlaps(1000, 0, false) == false);
+  }
+
   std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
-  for (unsigned i=0; i<1000000; ++i) {
+  for (unsigned i=0; i<1e6; ++i) {
     auto vertex = phantom.generate_vertex();
     auto region = phantom.in_which_region(vertex);
     hit_count[region.value()]++; // TODO remove hard-wired .value()
@@ -60,8 +81,8 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   CHECK(hit_count[0] == 0); // Inactive sphere should get no hits
   CHECK(hit_count[2] / hit_count[1] == Approx(8).epsilon(0.05)); // 2 x radius   -> 8 x weight
   CHECK(hit_count[3] / hit_count[1] == Approx(2).epsilon(0.05)); // 2 x activity -> 2 x weight
-  // TODO: body
-  CHECK(hit_count[4] > hit_count[1] + hit_count[2] + hit_count[3]);
+  CHECK(hit_count[4] / hit_count[1] == Approx(body_to_1_ratio).epsilon(0.05));
+  // TODO: check that hits cover the whole subregions
 }
 
 TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
