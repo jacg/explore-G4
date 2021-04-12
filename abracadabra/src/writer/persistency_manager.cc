@@ -42,7 +42,7 @@ G4bool persistency_manager::Store(const G4Run* run) {
 }
 
 void persistency_manager::store_trajectories(G4TrajectoryContainer* trajectories) {
-    for(int i=0; i<trajectories->size(); i++) {
+    for(unsigned int i=0; i<trajectories->size(); i++) {
         trajectory* trj = dynamic_cast<trajectory*>((*trajectories)[i]);
         if (!trj) continue;
 
@@ -51,13 +51,8 @@ void persistency_manager::store_trajectories(G4TrajectoryContainer* trajectories
         G4double      energy  = sqrt(ini_mom.mag2() + mass*mass);
 
         float kin_energy = energy - mass;
-        char primary = 0;
-        G4int mother_id = 0;
-        if (!trj->GetParentID()) {
-            primary = 1;
-        } else {
-            mother_id = trj->GetParentID();
-        }
+        auto mother_id   = trj->GetParentID();
+        bool primary     = !mother_id;
 
         h5writer->write_particle_info(nevt, trj, primary, mother_id, kin_energy);
     }
