@@ -39,22 +39,27 @@ nema_phantom build_nema_phantom::build() {
 
   //
 
-  // We care about the relative, not absolute, volumes: ignore factor of 4/3 pi
+  // We care about the relative, not absolute, volumes: ignore factors of pi
   G4double spheres_total_volume = 0;
   std::vector<G4double> weights{};
   weights.reserve(spheres.size() + 1); // Extra element for phantom body
   for (auto& sphere : spheres) {
-    auto d = sphere.diameter;
-    auto volume = d * d * d;
+    auto r = sphere.diameter;
+    auto volume = r * r * r * 4/3;
     spheres_total_volume += volume;
     weights.push_back(volume * sphere.activity);
+    std::cout << "sphere: " << volume << ' ' << r << std::endl;
   }
+  std::cout << "total: " << spheres_total_volume << std::endl;
   {
-    auto d = outer_r * 2;
-    auto d_cubed = d * d * d;
-    auto body_volume = d_cubed - spheres_total_volume;
+    auto r = outer_r;
+    auto h = half_length * 2;
+    auto cylinder_volume = r * r * h;
+    auto body_volume = cylinder_volume - spheres_total_volume;
     auto body_weight = body_volume * background;
     weights.push_back(body_weight);
+    std::cout << "cylinder: " << cylinder_volume << std::endl;
+    std::cout << "body    : " <<     body_volume << std::endl;
   }
   pick_region.reset(new biased_choice(weights));
 

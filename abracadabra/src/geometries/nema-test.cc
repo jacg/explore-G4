@@ -59,27 +59,29 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     // main cylinder            4
     .activity(A)
     .inner_radius(20*mm)
-    .outer_radius(40*mm)
+    .outer_radius(R)
     .length(H)
     .build();
 
-  // ----- Calculate expected ratio of intensities of regions --------------------
+  // ----- Expected ratio of vertices in   body : (sphere 1) ---------------------
   auto pi = 3.14; // The PIs cancel, value irrelevant
   auto sphere_1_vol = 4*pi/3 * r * r * r;
   auto     body_vol =   pi   * R * R * H;
-  auto all_spheres = sphere_1_vol * 18; // 2(1^3) + 2(2^3) = 2 x 9 = 18
-  auto body_to_1_ratio = A * (body_vol - all_spheres) / (a * sphere_1_vol);
+  auto all_spheres_vol = sphere_1_vol * 18; // 2(1^3) + 2(2^3) = 2 x 9 = 18
+  auto body_to_1_ratio = A * (body_vol - all_spheres_vol) / (a * sphere_1_vol);
 
+  // ----- Ensure no volume overlaps ---------------------------------------------
   for (auto volume: phantom.geometry()) {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 
-  auto z_min =  std::numeric_limits<G4double>::infinity();
-  auto z_max = -std::numeric_limits<G4double>::infinity();
+  // ----- Space for gathering statistics ----------------------------------------
+  auto  z_min =  std::numeric_limits<G4double>::infinity();
+  auto  z_max = -std::numeric_limits<G4double>::infinity();
   auto r2_max =  0.0;
+  std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
 
   // ----- Generate sample data --------------------------------------------------
-  std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
   for (unsigned i=0; i<1e6; ++i) {
     auto vertex = phantom.generate_vertex();
     auto region = phantom.in_which_region(vertex);
@@ -93,7 +95,6 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     z_min  = std::min( z_min, z);
     z_max  = std::max( z_max, z);
     r2_max = std::max(r2_max, x*x + y*y);
-
   }
 
   // ----- Vertices approach edges of the phantom, but all are inside ------------
