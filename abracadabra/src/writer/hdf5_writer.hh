@@ -5,7 +5,6 @@
 #include "g4-mandatory/trajectory.hh"
 
 #include <hdf5.h>
-#include <iostream>
 
 
 class hdf5_writer {

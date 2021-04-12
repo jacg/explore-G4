@@ -47,5 +47,7 @@ hid_t create_table(hid_t group, std::string const table_name, hsize_t memtype);
 hid_t create_group(hid_t file , std::string const group_name);
 
 void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter);
+void set_param(char * const to, char const * const from);
+void set_string(char * const to, std::string const& from);
 
 #endif

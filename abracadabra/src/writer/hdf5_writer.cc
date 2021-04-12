@@ -1,8 +1,5 @@
 #include "hdf5_writer.hh"
 
-#include <cstring>
-
-
 hdf5_writer::hdf5_writer()
 : file_{0}
 , group_{0}
@@ -25,10 +22,8 @@ void hdf5_writer::open(std::string file_name) {
 
 void hdf5_writer::write_run_info(const char* param_key, const char* param_value) {
     run_info_t run_data;
-    memset(run_data.param_key,   0, CONFLEN);
-    memset(run_data.param_value, 0, CONFLEN);
-    strcpy(run_data.param_key, param_key);
-    strcpy(run_data.param_value, param_value);
+	set_param(run_data.param_key  , param_key);
+	set_param(run_data.param_value, param_value);
     write_table_data((void*) &run_data, run_table_, memtype_run_, irun_);
 
     irun_++;
@@ -45,19 +40,11 @@ void hdf5_writer::write_particle_info(int evt_id, trajectory * trj, bool primary
     particle.kin_energy  = kin_energy;
     particle.length      = trj->GetTrackLength();
 
-    // Initialize strings with 0's
-    memset(particle.particle_name , 0, STRLEN);
-    memset(particle.initial_volume, 0, STRLEN);
-    memset(particle.final_volume  , 0, STRLEN);
-    memset(particle.creator_proc  , 0, STRLEN);
-    memset(particle.final_proc    , 0, STRLEN);
-
-    // Copy actual values
-    strcpy(particle.particle_name , trj->GetParticleName()  .c_str());
-    strcpy(particle.initial_volume, trj->GetInitialVolume() .c_str());
-    strcpy(particle.final_volume  , trj->GetFinalVolume()   .c_str());
-    strcpy(particle.creator_proc  , trj->GetCreatorProcess().c_str());
-    strcpy(particle.final_proc    , trj->GetFinalProcess()  .c_str());
+	set_string(particle.particle_name , trj->GetParticleName());
+	set_string(particle.initial_volume, trj->GetInitialVolume());
+	set_string(particle.final_volume  , trj->GetFinalVolume());
+	set_string(particle.creator_proc  , trj->GetCreatorProcess());
+	set_string(particle.final_proc    , trj->GetFinalProcess());
 
     particle.initial_x = trj->GetInitialPosition().x();
     particle.initial_y = trj->GetInitialPosition().y();

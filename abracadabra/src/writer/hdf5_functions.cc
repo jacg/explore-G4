@@ -1,6 +1,7 @@
 #include "hdf5_functions.hh"
 
 #include <vector>
+#include <cstring>
 
 hsize_t create_run_type() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
@@ -96,4 +97,14 @@ void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter)
   H5Dwrite(dataset, memtype, memspace, file_space, H5P_DEFAULT, data);
   H5Sclose(file_space);
   H5Sclose(memspace);
+}
+
+void set_param(char * const to, char const * const from) {
+  memset(to, 0, CONFLEN);
+  strcpy(to, from);
+}
+
+void set_string(char * const to, std::string const& from) {
+  memset(to, 0, STRLEN);
+  strcpy(to, from.c_str());
 }
