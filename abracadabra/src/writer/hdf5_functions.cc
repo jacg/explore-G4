@@ -84,7 +84,7 @@ void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter)
   hid_t memspace, file_space;
 
   std::vector<hsize_t> dims = {1};
-  memspace = H5Screate_simple(dims.size(), dims.data(), NULL);
+  memspace = H5Screate_simple(dims.size(), dims.data(), nullptr);
 
   dims[0] = counter+1;
   H5Dset_extent(dataset, dims.data());
@@ -92,7 +92,7 @@ void write_table_data(void* data, hid_t dataset, hid_t memtype, hsize_t counter)
   file_space = H5Dget_space(dataset);
   hsize_t start[1] = {counter};
   hsize_t count[1] = {1};
-  H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+  H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, nullptr, count, nullptr);
   H5Dwrite(dataset, memtype, memspace, file_space, H5P_DEFAULT, data);
   H5Sclose(file_space);
   H5Sclose(memspace);
