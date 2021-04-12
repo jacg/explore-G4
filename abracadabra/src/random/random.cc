@@ -7,9 +7,23 @@
 #include <numeric>
 
 // Random result generation utilities
-inline G4double uniform    ()                        { return G4Random().flat(); }
-inline bool     biased_coin(G4double chance_of_true) { return uniform() < chance_of_true; }
-inline unsigned fair_die   (unsigned sides)          { return std::floor(uniform() * sides); }
+inline G4double uniform    ()                         { return G4Random().flat(); }
+inline G4double uniform    (G4double lo, G4double hi) { return (hi - lo) * uniform() + lo; }
+inline bool     biased_coin(G4double chance_of_true)  { return uniform() < chance_of_true; }
+inline unsigned fair_die   (unsigned sides)           { return std::floor(uniform() * sides); }
+
+
+
+// Going with rejection sampling, for now
+// TODO: test done, now benchmark other approaches
+G4ThreeVector random_in_sphere(G4double radius) {
+  G4ThreeVector point;
+  do {
+    point = {uniform(-1, 1), uniform(-1, 1), uniform(-1, 1)};
+  } while (point.mag2() > 1);
+  return point * radius;
+}
+
 
 // Stack utilities
 using STACK = std::stack<unsigned>;

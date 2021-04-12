@@ -114,7 +114,6 @@ void nema_phantom::generate_primaries(G4Event* event) const {
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
-G4ThreeVector random_in_sphere(G4double) { return {}; } // TODO implement
 
 G4ThreeVector nema_phantom::generate_vertex() const {
   G4ThreeVector offset; // TODO adjust for physical placement of logical geometry
