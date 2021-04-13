@@ -12,7 +12,15 @@ typedef struct {
 	char param_value[CONFLEN];
 } run_info_t;
 
+typedef struct{
+	unsigned int event_id;
+	double x;
+	double y;
+	double z;
+} hit_t;
+
 hsize_t create_run_type();
+hsize_t create_hit_type();
 
 hid_t create_table(hid_t group, std::string const table_name, hsize_t memtype);
 hid_t create_group(hid_t file , std::string const group_name);

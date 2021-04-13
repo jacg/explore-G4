@@ -14,6 +14,15 @@ hsize_t create_run_type() {
   return memtype;
 }
 
+hsize_t create_hit_type() {
+  hsize_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (hit_t));
+  H5Tinsert (memtype, "event_id", HOFFSET(hit_t, event_id), H5T_NATIVE_UINT32);
+  H5Tinsert (memtype, "x"       , HOFFSET(hit_t, x       ), H5T_NATIVE_DOUBLE);
+  H5Tinsert (memtype, "y"       , HOFFSET(hit_t, y       ), H5T_NATIVE_DOUBLE);
+  H5Tinsert (memtype, "z"       , HOFFSET(hit_t, z       ), H5T_NATIVE_DOUBLE);
+  return memtype;
+}
+
 hid_t create_table(hid_t group, std::string const table_name, hsize_t memtype) {
   //Create 1D dataspace (evt number). First dimension is unlimited (initially 0)
   std::vector<hsize_t> dims     = {0};
