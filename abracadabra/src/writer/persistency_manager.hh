@@ -23,6 +23,8 @@ public:
     void open_file(G4String);
     void close_file();
 
+    void store_hits(G4HCofThisEvent*);
+
 private:
     hdf5_writer* h5writer;
     int nevt;
