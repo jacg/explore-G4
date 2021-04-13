@@ -9,6 +9,8 @@
 #include <G4LogicalSkinSurface.hh>
 #include <G4OpticalSurface.hh>
 
+#include <G4SDManager.hh>
+
 using nain4::material;
 using nain4::material_from_elements_N;
 using nain4::place;
@@ -55,7 +57,10 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
   new G4LogicalSkinSurface{"SIPM_OPTSURF", vol_active, active_surface};
 
   //         --- attach sensitive detector to the active logical volume ---
-  vol_active -> SetSensitiveDetector(new hamamatsu_sensitive("/does/this/matter?"));
+  auto sens_det = new hamamatsu_sensitive("/sipms");
+  G4SDManager::GetSDMpointer()->AddNewDetector(sens_det);
+  G4SDManager::GetSDMpointer()->AddNewCollection("/sipm", "/hamamatsu");
+  vol_active -> SetSensitiveDetector(sens_det);
 
   // ----- visibility -------------------------------------------------------------
 
@@ -72,10 +77,20 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
   return place(vol_sipm).now();
 }
 
+// void hamamatsu_sensitive::EndOfEvent(G4HCofThisEvent*) {
+// }
+
+
+void hamamatsu_sensitive::Initialize(G4HCofThisEvent* hit_collections) {
+	hits = new sensor_hits_collection("sipms", "hits");
+	G4int hcid = 0; // TODO: How to procude HitCollection ID's? SDManager?
+	hit_collections->AddHitsCollection(hcid, hits);
+}
 
 G4bool hamamatsu_sensitive::ProcessHits(G4Step* step, G4TouchableHistory*) {
   // Store the min and max y and z positions of particles reaching the detector
-  hits.push_back(*step);
+  auto pos = step -> GetPreStepPoint() -> GetPosition();
+  hits->insert(new sensor_hit(pos));
   return true; // TODO what is the meaning of this?
 }
 

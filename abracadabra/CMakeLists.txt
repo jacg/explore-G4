@@ -34,6 +34,7 @@ set(ABRACADABRA_HEADERS
   src/writer/hdf5_functions.hh
   src/writer/hdf5_writer.hh
   src/writer/persistency_manager.hh
+  src/g4-mandatory/sensor_hit.hh
 )
 
 set(ABRACADABRA_SOURCES
@@ -50,6 +51,7 @@ set(ABRACADABRA_SOURCES
   src/writer/hdf5_functions.cc
   src/writer/hdf5_writer.cc
   src/writer/persistency_manager.cc
+  src/g4-mandatory/sensor_hit.cc
 )
 
 set(ABRACADABRA_TESTS
