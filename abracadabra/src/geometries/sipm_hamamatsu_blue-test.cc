@@ -129,8 +129,8 @@ TEST_CASE("hamamatsu app", "[app]") {
   auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   CHECK(sd->hits.size() == n_sipms);
   for (auto hit : sd->hits) {
-    // Stupid checks, just to get something going. Replace with something more
-    // intelligent
+    // TODO: Stupid checks, just to get something going. Replace with something
+    // more intelligent
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
     CHECK(hit.getZ() == Approx(30.2));
