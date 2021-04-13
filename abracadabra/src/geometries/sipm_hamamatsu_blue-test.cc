@@ -127,12 +127,31 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
+
+#define DBG(stuff) std::cout << stuff << std::endl;
+
+  DBG("before dynamic_caste");
   auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
-  CHECK(sd->hits.size() == n_sipms);
-  for (auto& step : sd->hits) {
+  DBG("got sd");
+  auto& hits_collection = *(sd -> hits);
+  //hits_collection.PrintAllHits();
+  DBG("got hits_collection");
+  auto hits = hits_collection . GetVector();
+  DBG("got hits");
+  DBG(hits << " size: " << hits->size());
+  auto one_hit = hits->operator[](0);
+  DBG("got one hit");
+  auto pos = one_hit -> get_position();
+  DBG("got position");
+  //DBG(pos);
+
+  // TODO: check total number of hits
+  for (auto hit : *hits) {
+    DBG("loop: got one hit");
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent
-    auto pos = step . GetPreStepPoint() -> GetPosition();
+    DBG(&hit);
+    auto pos = hit -> get_position();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
     CHECK(pos.getZ() == Approx(30.2));
@@ -142,4 +161,5 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto x_over_7 = pos.getX(); CHECK(x_over_7 == (int)x_over_7);
     auto y_over_7 = pos.getY(); CHECK(y_over_7 == (int)y_over_7);
   }
+  DBG("ZZZZZZZZZZZZZZZZZ");
 }
