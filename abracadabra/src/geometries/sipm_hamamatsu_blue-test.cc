@@ -1,6 +1,7 @@
 #include "nain4.hh"
 
 #include "geometries/sipm_hamamatsu_blue.hh"
+#include "writer/persistency_manager.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -104,6 +105,9 @@ TEST_CASE("hamamatsu app", "[app]") {
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
+
+  // Add persistency manager
+  auto persistency = new persistency_manager{};
 
   // ----- Verify -------------------------------------------------------------
 
