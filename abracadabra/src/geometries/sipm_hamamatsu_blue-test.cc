@@ -95,6 +95,9 @@ TEST_CASE("hamamatsu app", "[app]") {
     void Build         () const override { SetUserAction(new primary_generator); }
   };
 
+  // Add persistency manager
+  auto persistency = new persistency_manager{};
+
   // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
@@ -105,9 +108,6 @@ TEST_CASE("hamamatsu app", "[app]") {
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
-
-  // Add persistency manager
-  auto persistency = new persistency_manager{};
 
   // ----- Verify -------------------------------------------------------------
 
