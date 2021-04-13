@@ -123,8 +123,9 @@ TEST_CASE("hamamatsu app", "[app]") {
   // std::cout << std::endl;
 
   size_t n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
+  std::ptrdiff_t number_of_volumes_in_geometry = n_sipms * volumes_per_sipm + n_worlds;
 
-  CHECK(std::distance(begin(world), end(world)) == n_sipms * volumes_per_sipm + n_worlds);
+  CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
   auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   CHECK(sd->hits.size() == n_sipms);
