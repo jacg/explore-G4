@@ -75,8 +75,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
 
 G4bool hamamatsu_sensitive::ProcessHits(G4Step* step, G4TouchableHistory*) {
   // Store the min and max y and z positions of particles reaching the detector
-  auto pos = step -> GetPreStepPoint() -> GetPosition();
-  hits.push_back(pos);
+  hits.push_back(*step);
   return true; // TODO what is the meaning of this?
 }
 

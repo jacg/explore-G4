@@ -128,16 +128,17 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   CHECK(sd->hits.size() == n_sipms);
-  for (auto hit : sd->hits) {
+  for (auto& step : sd->hits) {
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent
+    auto pos = step . GetPreStepPoint() -> GetPosition();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    CHECK(hit.getZ() == Approx(30.2));
+    CHECK(pos.getZ() == Approx(30.2));
     // The particles were fired at x and y positions that were multiples of 7,
     // and the gun direction had no z-component, so the xs and ys should still
     // be multilpes of 7.
-    auto x_over_7 = hit.getX(); CHECK(x_over_7 == (int)x_over_7);
-    auto y_over_7 = hit.getY(); CHECK(y_over_7 == (int)y_over_7);
+    auto x_over_7 = pos.getX(); CHECK(x_over_7 == (int)x_over_7);
+    auto y_over_7 = pos.getY(); CHECK(y_over_7 == (int)y_over_7);
   }
 }

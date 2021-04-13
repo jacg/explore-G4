@@ -14,7 +14,7 @@ public:
   G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
 
 public:
-  std::vector<G4ThreeVector> hits {};
+  std::vector<G4Step> hits {};
 };
 
 
