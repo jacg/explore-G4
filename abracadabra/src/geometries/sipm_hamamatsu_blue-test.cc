@@ -149,6 +149,15 @@ TEST_CASE("hamamatsu app", "[app]") {
   DBG("got position");
   //DBG(pos);
 
+  std::vector<hit_t> written_hits;
+  hdf5_writer h5writer{"test_file.h5"};
+  h5writer.read_hit_info(written_hits);
+  DBG("hits read from file");
+
+	for (auto row : written_hits){
+		std::cout << row.event_id << ", " << row.x <<  ", " << row.y << ", " << row.z << std::endl;
+	}
+
   // TODO: check total number of hits
   for (auto hit : *hits) {
     DBG("loop: got one hit");

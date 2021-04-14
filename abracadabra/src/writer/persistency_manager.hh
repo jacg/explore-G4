@@ -10,7 +10,7 @@
 class persistency_manager: public G4VPersistencyManager {
 public:
     persistency_manager();
-    virtual ~persistency_manager() override { this->close_file(); };
+    virtual ~persistency_manager() override {};
 
     G4bool Store(const G4Event*)           override;
     G4bool Store(const G4Run*)             override;
@@ -21,7 +21,6 @@ public:
     G4bool Retrieve(G4VPhysicalVolume*&) override { return false; }
 
     void open_file(G4String);
-    void close_file();
 
     void store_hits(G4HCofThisEvent*);
 
