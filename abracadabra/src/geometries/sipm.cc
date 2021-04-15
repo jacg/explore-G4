@@ -3,17 +3,6 @@
 
 #include <G4Box.hh>
 
-#include <G4PVPlacement.hh>
-
-
-// Only needed during refactoring?
-#include <G4LogicalSkinSurface.hh>
-
-
-
-
-
-using nain4::material;
 using nain4::material_from_elements_N;
 using nain4::place;
 using nain4::scale_by;
@@ -21,35 +10,13 @@ using nain4::volume;
 using nain4::vis_attributes;
 
 
-
 G4PVPlacement* sipm::build() {
   auto vol_body = volume<G4Box>(    name_,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name_, act.mat, act.half.x(), act.half.y(), act.half.z());
   vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
-  // --------------------------------------------------------------------------------
-  // TODO most of this needs to be moved to the client, once the builder interface caters for it
-  // ----- Cover active window with optical surface -------------------------------
-  //         --- create optical surface with properties table ---
-  auto active_surface = new G4OpticalSurface{"SIPM_OPTSURF", unified, polished, dielectric_metal};
-  auto active_props   = new G4MaterialPropertiesTable{};
-  active_surface -> SetMaterialPropertiesTable(active_props);
-  //         --- insert properties into the table ---
-  auto photon_energy = scale_by(CLHEP::eV,
-    { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
-    , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
-  active_props -> AddProperty("EFFICIENCY"  , photon_energy,
-     { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
-     , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  });
-  active_props -> AddProperty("REFLECTIVITY", photon_energy, std::vector<double>(photon_energy.size(), 0));
-
-  //         --- wrap active volume in optical surface ---
-  new G4LogicalSkinSurface{"SIPM_OPTSURF", vol_act, active_surface};
-
-  //         --- attach sensitive detector to the active logical volume ---
-  vol_act -> SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
 
   // ----- visibility -------------------------------------------------------------
-
+  // TODO provide builder methods for this
   auto visible = true;
   if (visible) {
     vol_body -> SetVisAttributes(               G4Colour::Yellow()                 );
@@ -66,7 +33,6 @@ G4PVPlacement* sipm::build() {
 }
 
 G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {
-  // Store the min and max y and z positions of particles reaching the detector
   hits.push_back(*step);
   return true; // TODO what is the meaning of this?
 }
@@ -86,6 +52,13 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
     { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
     , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
 
+  auto matprop = material_properties()
+    .add("EFFICIENCY",   photon_energy,
+         { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
+         , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  })
+    .add("REFLECTIVITY", photon_energy, 0)
+    .done();
+
   return sipm("Hama_Blue")
     .material("G4_Si")
     .size(6 * mm, 6 * mm, 0.6 * mm)
@@ -93,12 +66,25 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
         .name("PHOTODIODES")
         .size(6 * mm, 6 * mm, 0.1 * mm)
         .material(fr4)
-        .skin("SIPM_OPTSURF")
-        // TODO factor out property definition
-        .add_property("EFFICIENCY",   photon_energy,
-                      { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
-                      , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  })
-        .add_property("REFLECTIVITY", photon_energy, 0)
+        .skin(matprop, "SIPM_OPTSURF", unified, polished, dielectric_metal)
     .end_active_window()
     .build();
+}
+
+
+
+
+
+material_properties& material_properties::add(G4String const& key, vec const& energies, vec const& values) {
+  table -> AddProperty(key, energies, values); // es-vs size equality assertion done in AddProperty
+  return *this;
+}
+
+material_properties& material_properties::add(G4String const& key, vec const& energies, G4double   value ) {
+  return add(key, energies, vec(energies.size(), value));
+}
+
+material_properties& material_properties::add_const(G4String const& key, G4double value) {
+  table->AddConstProperty(key, value);
+  return *this;
 }
