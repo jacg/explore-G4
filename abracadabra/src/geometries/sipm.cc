@@ -37,8 +37,11 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
   return true; // TODO what is the meaning of this?
 }
 
-#include <G4SystemOfUnits.hh>
 
+
+// ------------------------------------------------------------------------------------------
+// Hamamatsu Blue: one example of a SiPM
+#include <G4SystemOfUnits.hh>
 
 using vec = std::vector<G4double>;
 
@@ -52,7 +55,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
     { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
     , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
 
-  auto matprop = material_properties()
+  auto matprop = nain4::material_properties()
     .add("EFFICIENCY",   photon_energy,
          { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
          , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  })
@@ -69,22 +72,4 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
         .skin(matprop, "SIPM_OPTSURF", unified, polished, dielectric_metal)
     .end_active_window()
     .build();
-}
-
-
-
-
-
-material_properties& material_properties::add(G4String const& key, vec const& energies, vec const& values) {
-  table -> AddProperty(key, energies, values); // es-vs size equality assertion done in AddProperty
-  return *this;
-}
-
-material_properties& material_properties::add(G4String const& key, vec const& energies, G4double   value ) {
-  return add(key, energies, vec(energies.size(), value));
-}
-
-material_properties& material_properties::add_const(G4String const& key, G4double value) {
-  table->AddConstProperty(key, value);
-  return *this;
 }

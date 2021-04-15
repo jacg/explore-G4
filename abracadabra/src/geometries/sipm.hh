@@ -10,27 +10,6 @@
 #include <string>
 
 
-// ================================================================================
-// TODO this needs to be moved to nain4
-
-class material_properties {
-  using vec = std::vector<G4double>;
-public:
-  material_properties& add(G4String const& key, vec const& energies, vec const& values);
-  material_properties& add(G4String const& key, vec const& energies, G4double   value );
-  material_properties& add_const(G4String const& key, G4double value);
-  G4MaterialPropertiesTable* done() { return table; }
-private:
-  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable;
-};
-
-// ================================================================================
-
-
-
-
-
-
 // Abstract interface for sepecification and construction of SiPMs
 class sipm {
   using vec = std::vector<G4double>;
