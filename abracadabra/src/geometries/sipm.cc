@@ -1,8 +1,8 @@
+// clang-format off
 #include "geometries/sipm.hh"
 
 #include <G4Box.hh>
 
-#include <G4OpticalSurface.hh>
 #include <G4PVPlacement.hh>
 
 
@@ -11,10 +11,6 @@
 
 
 
-sipm::Active& sipm::Active::skin(std::string const& n) {
-  auto active_surface = new G4OpticalSurface{n, unified, polished, dielectric_metal};
-  return *this;
-}
 
 
 using nain4::material;
@@ -78,12 +74,17 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
 #include <G4SystemOfUnits.hh>
 
 
+using vec = std::vector<G4double>;
+
 G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
                                                                            {"O", 3}});
 
+  auto photon_energy = scale_by(eV,
+    { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
+    , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
 
   return sipm("Hama_Blue")
     .material("G4_Si")
@@ -93,6 +94,11 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
         .size(6 * mm, 6 * mm, 0.1 * mm)
         .material(fr4)
         .skin("SIPM_OPTSURF")
+        // TODO factor out property definition
+        .add_property("EFFICIENCY",   photon_energy,
+                      { 0.0445, 0.1045 , 0.208  , 0.261  , 0.314  , 0.3435 , 0.420  , 0.505  , 0.528
+                      , 0.502 , 0.460  , 0.4195 , 0.3145 , 0.2625 , 0.211  , 0.1055 , 0.026  })
+        .add_property("REFLECTIVITY", photon_energy, 0)
     .end_active_window()
     .build();
 }
