@@ -20,9 +20,10 @@ sipm::Active& sipm::Active::skin(std::string const& n) {
 using nain4::material;
 using nain4::material_from_elements_N;
 using nain4::place;
-//using nain4::scale_by;
+using nain4::scale_by;
 using nain4::volume;
 using nain4::vis_attributes;
+
 
 
 G4PVPlacement* sipm::build() {
@@ -37,7 +38,7 @@ G4PVPlacement* sipm::build() {
   auto active_props   = new G4MaterialPropertiesTable{};
   active_surface -> SetMaterialPropertiesTable(active_props);
   //         --- insert properties into the table ---
-  auto photon_energy = nain4::scale_by(CLHEP::eV,
+  auto photon_energy = scale_by(CLHEP::eV,
     { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
     , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
   active_props -> AddProperty("EFFICIENCY"  , photon_energy,
@@ -72,4 +73,26 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
   // Store the min and max y and z positions of particles reaching the detector
   hits.push_back(*step);
   return true; // TODO what is the meaning of this?
+}
+
+#include <G4SystemOfUnits.hh>
+
+
+G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
+
+  auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
+                                                                           {"C", 18},
+                                                                           {"O", 3}});
+
+
+  return sipm("Hama_Blue")
+    .material("G4_Si")
+    .size(6 * mm, 6 * mm, 0.6 * mm)
+    .active_window()
+        .name("PHOTODIODES")
+        .size(6 * mm, 6 * mm, 0.1 * mm)
+        .material(fr4)
+        .skin("SIPM_OPTSURF")
+    .end_active_window()
+    .build();
 }

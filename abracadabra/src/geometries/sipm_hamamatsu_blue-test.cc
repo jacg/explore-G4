@@ -1,6 +1,6 @@
 #include "nain4.hh"
 
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/sipm.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -127,7 +127,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
-  auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
+  auto sd = dynamic_cast<sipm_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   CHECK(sd->hits.size() == n_sipms);
   for (auto& step : sd->hits) {
     // TODO: Stupid checks, just to get something going. Replace with something

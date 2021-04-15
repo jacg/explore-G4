@@ -5,7 +5,6 @@
 
 #include <G4Material.hh>
 #include <G4ThreeVector.hh>
-#include <G4VSensitiveDetector.hh>
 #include <G4PVPlacement.hh>
 #include <string>
 
@@ -63,6 +62,8 @@ public:
   std::vector<G4Step> hits;
 };
 
+
+G4PVPlacement* sipm_hamamatsu_blue(G4bool visible=true);
 
 
 #endif
