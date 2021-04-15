@@ -29,6 +29,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/imas.hh
   src/geometries/nema.hh
   src/geometries/sipm_hamamatsu_blue.hh
+  src/geometries/sipm.hh
   src/random/random.hh
   src/utils/enumerate.hh
 )
@@ -43,6 +44,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/imas.cc
   src/geometries/nema.cc
   src/geometries/sipm_hamamatsu_blue.cc
+  src/geometries/sipm.cc
   src/random/random.cc
 )
 

@@ -1,4 +1,4 @@
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/sipm.hh"
 
 #include "nain4.hh"
 
@@ -17,8 +17,28 @@ using nain4::volume;
 using nain4::vis_attributes;
 
 
+G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
+
+  auto fr4 = material_from_elements_N("FR4", 1.85 * g/cm3, kStateSolid, {{"H", 12},
+                                                                         {"C", 18},
+                                                                         {"O",  3}});
+  return sipm("Hama_Blue")
+    .material("G4_Si")
+    .size(6*mm, 6*mm, 0.6*mm)
+    .active_window()
+        .name("PHOTODIODES")
+        .size(6*mm, 6*mm, 0.1*mm)
+        .material(fr4)
+        .skin("SIPM_OPTSURF")
+    .end_active_window()
+    .build();
+}
+
+
+
+#include "geometries/sipm_hamamatsu_blue.hh"
 // ===== Geometry of one SiPM =====================================================
-G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
+G4PVPlacement* sipm_hamamatsu_blue_old(G4bool visible) {
   // ----- Materials --------------------------------------------------------------
   auto silicon = material("G4_Si");
 
