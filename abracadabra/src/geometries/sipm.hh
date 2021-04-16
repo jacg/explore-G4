@@ -28,6 +28,7 @@ public:
   CHAIN thickness(G4double t) { dz = t; NEXT }
   CHAIN margin(G4double mx, G4double my) { margin_x = mx; margin_y = my; NEXT }
   CHAIN material(G4Material* mt) { mat = mt; NEXT }
+  CHAIN vis(G4VisAttributes const& va)           { vis_attributes = va            ; NEXT }
 
   template<class... ArgTypes>
   CHAIN skin(std::string const& surface_name, G4MaterialPropertiesTable* material_properties, ArgTypes&&... args) {
@@ -42,6 +43,7 @@ private:
   G4Material* mat;
   G4MaterialPropertiesTable* active_props;
   G4OpticalSurface* active_surface;
+  G4VisAttributes vis_attributes;
 
 #undef CHAIN
 };

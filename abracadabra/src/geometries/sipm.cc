@@ -20,7 +20,7 @@ G4PVPlacement* sipm::build() {
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
-  //vol_act  -> SetVisAttributes(act.vis_attributes);
+  vol_act  -> SetVisAttributes(act.vis_attributes);
 
   // --------------------------------------------------------------------------------
   auto z_act_in_body = half.z() - act.dz/2;
@@ -61,8 +61,6 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
   using va = nain4::vis_attributes;
   using col = G4Colour;
 
-  auto vis_act  = visible ? va(col::Blue  ()) : va().visible(false);
-
   return sipm("Hamamatsu_Blue")
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
@@ -70,7 +68,8 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
                    .thickness(0.1*mm)
                    //.margin(0, 0) // Unnecessary: 0 by default // TODO make it 1 micro?
                    .material(fr4)
-                   .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal))
+                   .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
+                   .vis(visible ? va(col::Blue  ()) : va().visible(false)))
     .vis(visible ? col::Yellow() : va().visible(false))
     .build();
 
