@@ -91,12 +91,12 @@ private:
 class sipm_sensitive : public G4VSensitiveDetector {
 public:
   sipm_sensitive(G4String name)                      : G4VSensitiveDetector{name} {}
-  sipm_sensitive(G4String name, std::optional<std::string> h5_name) : G4VSensitiveDetector{name}, io{h5_name} { io->open(); }
+  sipm_sensitive(G4String name, std::optional<std::string> h5_name) : G4VSensitiveDetector{name}, io{h5_name} { if (io) io->open(); }
   G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
 
 public:
   std::vector<G4Step> hits;
-  std::optional<hdf5_io> io;
+  std::optional<hdf5_io> io; // TODO improve RAII
 };
 
 

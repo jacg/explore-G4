@@ -22,7 +22,7 @@ typedef struct {
 class hdf5_io {
 public:
   hdf5_io(std::string fname);
-  ~hdf5_io() {}
+  ~hdf5_io() {} // TODO improve RAII
 
   void open();
 
