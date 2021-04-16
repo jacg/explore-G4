@@ -22,7 +22,7 @@ G4PVPlacement* sipm::build() {
   vol_body -> SetVisAttributes(    vis_attributes);
   vol_act  -> SetVisAttributes(act.vis_attributes);
 
-  // --------------------------------------------------------------------------------
+  // ----- geometrical relationship between components ----------------------------
   auto z_act_in_body = act.dz/2 - half.z();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
   return place(vol_body).now();
