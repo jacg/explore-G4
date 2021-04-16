@@ -16,7 +16,7 @@ G4PVPlacement* sipm::build() {
   auto act_half_z = act.dz / 2;
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
-  vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
+  vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?", h5_filename));
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
@@ -30,6 +30,10 @@ G4PVPlacement* sipm::build() {
 
 G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {
   hits.push_back(*step);
+  if (io) {
+    auto pos = step -> GetPreStepPoint() -> GetPosition();
+    io -> write_hit_info(0, pos.getX(), pos.getY(), pos.getZ());
+  }
   return true; // TODO what is the meaning of this?
 }
 
@@ -52,7 +56,9 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
-G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
+using std::optional;   using std::string;
+
+G4PVPlacement* sipm_hamamatsu_blue(G4bool visible, optional<string> h5_filename) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
@@ -74,6 +80,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
     .vis(vis_body)
+    .write(h5_filename)
     .build();
 
 }

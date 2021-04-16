@@ -22,7 +22,7 @@
 
 // visible = true
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(true);
+  auto& whole  = *sipm_hamamatsu_blue(true, {});
   auto& active = *whole.GetLogicalVolume()->GetDaughter(0);
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(whole), end(whole)) == 2);
@@ -39,7 +39,7 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 
 // visible = false
 TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(false);
+  auto& whole  = *sipm_hamamatsu_blue(false, {});
   auto& active = *whole.GetLogicalVolume()->GetDaughter(0);
   // Verify the number of volumes that make up the geometry
   CHECK(std::distance(begin(whole), end(whole)) == 2);
@@ -54,10 +54,12 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 TEST_CASE("hamamatsu app", "[app]") {
 
   // ----- Geometry ------------------------------------------------------------
-  class geometry : public G4VUserDetectorConstruction {
+  struct geometry : public G4VUserDetectorConstruction {
+    geometry(std::string const& f) : filename{f} {}
+
     G4VPhysicalVolume* Construct() {
       auto air = nain4::material("G4_AIR");
-      auto sipm = sipm_hamamatsu_blue(true)->GetLogicalVolume();
+      auto sipm = sipm_hamamatsu_blue(true, filename)->GetLogicalVolume();
       auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
       for (int x=-35; x<35; x+=7) {
         for (int y=-35; y<35; y+=7) {
@@ -65,8 +67,9 @@ TEST_CASE("hamamatsu app", "[app]") {
         }
       }
       return nain4::place(world).now();
-
     }
+
+    std::string filename;
   };
 
   // ----- Generator ------------------------------------------------------------
@@ -97,10 +100,12 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------
+
+  std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new geometry);
+    run_manager -> SetUserInitialization(new geometry{hdf5_test_file_name});
     run_manager -> SetUserInitialization(new QBBC{0});
     run_manager -> SetUserInitialization(new actions);
     run_manager -> Initialize();
@@ -136,7 +141,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // Retrieve hits that were written out
   std::vector<hit_t> written_hits;
-  hdf5_io h5io{"test_file.h5"};
+  hdf5_io h5io{hdf5_test_file_name};
   h5io.read_hit_info(written_hits);
 
   CHECK(written_hits.size() == detected_hits.size());
