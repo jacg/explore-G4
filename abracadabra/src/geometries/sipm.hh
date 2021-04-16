@@ -25,10 +25,10 @@ class sipm_active_window {
 public:
   sipm_active_window() = default;
   sipm_active_window(std::string const& name): name{name} {}
-  CHAIN thickness(G4double t) { dz = t; NEXT }
-  CHAIN margin(G4double mx, G4double my) { margin_x = mx; margin_y = my; NEXT }
-  CHAIN material(G4Material* mt) { mat = mt; NEXT }
-  CHAIN vis(G4VisAttributes const& va)           { vis_attributes = va            ; NEXT }
+  CHAIN thickness(G4double t)                { dz = t                      ; NEXT }
+  CHAIN margin   (G4double mx, G4double my)  { margin_x = mx; margin_y = my; NEXT }
+  CHAIN material (G4Material* mt)            { mat = mt                    ; NEXT }
+  CHAIN vis      (G4VisAttributes const& va) { vis_attributes = va         ; NEXT }
 
   template<class... ArgTypes>
   CHAIN skin(std::string const& surface_name, G4MaterialPropertiesTable* material_properties, ArgTypes&&... args) {
@@ -39,11 +39,11 @@ public:
 
 private:
   std::string name;
-  G4double dz, margin_x = 0, margin_y = 0;
-  G4Material* mat;
+  G4double dz = 0, margin_x = 0, margin_y = 0;
+  G4Material*                mat;
   G4MaterialPropertiesTable* active_props;
-  G4OpticalSurface* active_surface;
-  G4VisAttributes vis_attributes;
+  G4OpticalSurface*          active_surface;
+  G4VisAttributes            vis_attributes;
 
 #undef CHAIN
 };
@@ -66,18 +66,19 @@ public:
   sipm(std::string name) : name{name} {}
   G4PVPlacement* build();
 
-  CHAIN material(G4Material * mt)                { mat = mt                       ; NEXT }
-  CHAIN material(std::string const& matname)     { mat = nain4::material(matname) ; NEXT }
-  CHAIN size(G4double x, G4double y, G4double z) { half = G4ThreeVector{x,y,z} / 2; NEXT }
-  CHAIN vis(G4VisAttributes const& va)           { vis_attributes = va            ; NEXT }
-  CHAIN active_window(sipm_active_window a)      { act  = a; NEXT }
-  CHAIN wls(sipm_wls w)                          { wls_ = w; NEXT }
+  using dist = G4double;
+  CHAIN material(G4Material * mt)            { mat = mt                       ; NEXT }
+  CHAIN material(std::string const& matname) { mat = nain4::material(matname) ; NEXT }
+  CHAIN size    (dist x, dist y, dist z)     { half = G4ThreeVector{x,y,z} / 2; NEXT }
+  CHAIN vis     (G4VisAttributes const& va)  { vis_attributes = va            ; NEXT }
+  CHAIN active  (sipm_active_window a)       { act  = a; NEXT }
+  CHAIN wls     (sipm_wls w)                 { wls_ = w; NEXT }
 private:
-  std::string name;
-  G4Material * mat;
-  G4ThreeVector half;
-  G4VisAttributes vis_attributes;
-  sipm_active_window act;
+  std::string             name;
+  G4Material *            mat;
+  G4ThreeVector           half;
+  G4VisAttributes         vis_attributes;
+  sipm_active_window      act;
   std::optional<sipm_wls> wls_;
 #undef CHAIN
 };

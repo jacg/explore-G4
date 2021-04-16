@@ -58,19 +58,22 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
                                                                            {"C", 18},
                                                                            {"O", 3}});
 
-  using va = nain4::vis_attributes;
-  using col = G4Colour;
+  using va = nain4::vis_attributes;       using col = G4Colour;
+
+  auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
+  auto vis_act  = visible ? va(col::Blue()).force_solid(true) : va().visible(false);
+
+  auto active = sipm_active_window("PHOTODIODES")
+    .thickness(0.1*mm)
+    .material(fr4)
+    .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
+    .vis(vis_act);
 
   return sipm("Hamamatsu_Blue")
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
-    .active_window(sipm_active_window("PHOTODIODES")
-                   .thickness(0.1*mm)
-                   //.margin(0, 0) // Unnecessary: 0 by default // TODO make it 1 micro?
-                   .material(fr4)
-                   .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
-                   .vis(visible ? va(col::Blue  ()) : va().visible(false)))
-    .vis(visible ? col::Yellow() : va().visible(false))
+    .active(active)
+    .vis(vis_body)
     .build();
 
 }
