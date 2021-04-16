@@ -4,8 +4,6 @@
 #include <cstring>
 #include <iostream>
 
-#define CONFLEN 300
-
 hdf5_writer::hdf5_writer(std::string fname)
 : filename{fname}
 , runinfo_index{0}
@@ -21,8 +19,8 @@ HighFive::CompoundType create_hit_type() {
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
 HighFive::CompoundType create_runinfo_type() {
-    return {{"param_key"  , HighFive::AtomicType<char[CONFLEN]>{}},
-            {"param_value", HighFive::AtomicType<char[CONFLEN]>{}}};
+    return {{"param_key"  , HighFive::AtomicType<char[hdf5_writer::CONFLEN]>{}},
+            {"param_value", HighFive::AtomicType<char[hdf5_writer::CONFLEN]>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 

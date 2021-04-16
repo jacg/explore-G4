@@ -10,7 +10,6 @@
 #include <highfive/H5DataSpace.hpp>
 #include <highfive/H5DataType.hpp>
 
-#define CONFLEN 300
 
 typedef struct{
     unsigned int event_id;
@@ -18,11 +17,6 @@ typedef struct{
     double y;
     double z;
 } hit_t;
-
-typedef struct{
-    char param_key  [CONFLEN];
-    char param_value[CONFLEN];
-} run_info_t;
 
 
 class hdf5_writer {
@@ -37,10 +31,19 @@ public:
 
     void read_hit_info(std::vector<hit_t>& hits);
 
+    static const unsigned CONFLEN = 300;
+
 private:
     std::string filename;
     unsigned int runinfo_index;
     unsigned int hit_index;
 };
+
+
+typedef struct {
+  char param_key  [hdf5_writer::CONFLEN];
+  char param_value[hdf5_writer::CONFLEN];
+} run_info_t;
+
 
 #endif
