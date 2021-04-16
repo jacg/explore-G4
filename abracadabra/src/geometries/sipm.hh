@@ -45,8 +45,8 @@ private:
     sipm& end_active_window() { return *body; }
 
     template<class... ArgTypes>
-    Active& skin(G4MaterialPropertiesTable* material_properties, ArgTypes&&... args) {
-      active_surface = new G4OpticalSurface{std::forward<ArgTypes>(args)...};
+    Active& skin(std::string const& name, G4MaterialPropertiesTable* material_properties, ArgTypes&&... args) {
+      active_surface = new G4OpticalSurface{name, std::forward<ArgTypes>(args)...};
       active_props   = material_properties;
       NEXT
     }

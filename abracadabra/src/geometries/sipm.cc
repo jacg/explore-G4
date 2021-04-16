@@ -69,7 +69,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
         .name("PHOTODIODES")
         .size(6*mm, 6*mm, 0.1*mm)
         .material(fr4)
-        .skin(fr4_surface_properties(), "SIPM_OPTSURF", unified, polished, dielectric_metal)
+        .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
     .end_active_window()
     .build();
 }
