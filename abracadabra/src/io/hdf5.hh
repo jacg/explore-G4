@@ -37,7 +37,6 @@ public:
 
     void read_hit_info(std::vector<hit_t>& hits);
 
-
 private:
     std::string filename;
     unsigned int runinfo_index;

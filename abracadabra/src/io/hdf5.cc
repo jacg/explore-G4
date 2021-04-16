@@ -20,12 +20,10 @@ HighFive::CompoundType create_hit_type() {
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
-
 HighFive::CompoundType create_runinfo_type() {
     return {{"param_key"  , HighFive::AtomicType<char[CONFLEN]>{}},
             {"param_value", HighFive::AtomicType<char[CONFLEN]>{}}};
 }
-
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
 void set_string_param(char * to, const char * from, unsigned int max_len) {
@@ -68,7 +66,6 @@ void hdf5_writer::write_run_info(const char* param_key, const char* param_value)
     runinfo_index += n_elements;
 }
 
-
 void hdf5_writer::write_hit_info(unsigned int event_id, double x, double y, double z) {
     // Create hit_t objects with the data
     std::vector<hit_t> data;
@@ -87,7 +84,6 @@ void hdf5_writer::write_hit_info(unsigned int event_id, double x, double y, doub
 
     hit_index += n_elements;
 }
-
 
 void hdf5_writer::read_hit_info(std::vector<hit_t>& hits) {
     // Get the table from the file
