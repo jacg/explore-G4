@@ -1,7 +1,8 @@
 #include "nain4.hh"
 
 #include "geometries/sipm_hamamatsu_blue.hh"
-#include "writer/persistency_manager.hh"
+#include "writer/hdf5_writer.hh"
+#include "utils/enumerate.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -95,9 +96,6 @@ TEST_CASE("hamamatsu app", "[app]") {
     void Build         () const override { SetUserAction(new primary_generator); }
   };
 
-  // Add persistency manager
-  auto persistency = new persistency_manager{};
-
   // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
@@ -132,47 +130,34 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
 
-#define DBG(stuff) std::cout << stuff << std::endl;
-
-  DBG("before dynamic_caste");
+  // Retrieve hits stored in the sensitive detector
   auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
-  DBG("got sd");
-  auto& hits_collection = *(sd -> hits);
-  //hits_collection.PrintAllHits();
-  DBG("got hits_collection");
-  auto hits = hits_collection . GetVector();
-  DBG("got hits");
-  DBG(hits << " size: " << hits->size());
-  auto one_hit = hits->operator[](0);
-  DBG("got one hit");
-  auto pos = one_hit -> get_position();
-  DBG("got position");
-  //DBG(pos);
+  auto& detected_hits = sd -> hits;
 
+  // Retrieve hits that were written out
   std::vector<hit_t> written_hits;
   hdf5_writer h5writer{"test_file.h5"};
   h5writer.read_hit_info(written_hits);
-  DBG("hits read from file");
 
-	for (auto row : written_hits){
-		std::cout << row.event_id << ", " << row.x <<  ", " << row.y << ", " << row.z << std::endl;
-	}
+  CHECK(written_hits.size() == detected_hits.size());
 
-  // TODO: check total number of hits
-  for (auto hit : *hits) {
-    DBG("loop: got one hit");
+  for (auto [i, hit] : enumerate(detected_hits)) {
+    auto row =  written_hits[i];
+    auto pos = hit.GetPreStepPoint() -> GetPosition();
+    // TODO: CHECK(row.event_id == ??);
+    CHECK(row.x == pos.getX());
+    CHECK(row.y == pos.getY());
+    CHECK(row.z == pos.getZ());
+
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent
-    DBG(&hit);
-    auto pos = hit -> get_position();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    CHECK(pos.getZ() == Approx(30.2));
+    //CHECK(pos.getZ() == Approx(30.2)); // TODO why is this a type error all of a sudden?
     // The particles were fired at x and y positions that were multiples of 7,
     // and the gun direction had no z-component, so the xs and ys should still
     // be multilpes of 7.
     auto x_over_7 = pos.getX(); CHECK(x_over_7 == (int)x_over_7);
     auto y_over_7 = pos.getY(); CHECK(y_over_7 == (int)y_over_7);
   }
-  DBG("ZZZZZZZZZZZZZZZZZ");
 }

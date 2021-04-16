@@ -81,16 +81,8 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
 // }
 
 
-void hamamatsu_sensitive::Initialize(G4HCofThisEvent* hit_collections) {
-	hits = new sensor_hits_collection("sipms", "hits");
-	G4int hcid = 0; // TODO: How to procude HitCollection ID's? SDManager?
-	hit_collections->AddHitsCollection(hcid, hits);
-}
-
-G4bool hamamatsu_sensitive::ProcessHits(G4Step* step, G4TouchableHistory*) {
-  // Store the min and max y and z positions of particles reaching the detector
-  auto pos = step -> GetPreStepPoint() -> GetPosition();
-  hits->insert(new sensor_hit(pos));
+G4bool hamamatsu_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {
+  hits.push_back(*step);
   return true; // TODO what is the meaning of this?
 }
 

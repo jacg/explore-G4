@@ -32,7 +32,6 @@ set(ABRACADABRA_HEADERS
   src/random/random.hh
   src/utils/enumerate.hh
   src/writer/hdf5_writer.hh
-  src/writer/persistency_manager.hh
   src/g4-mandatory/sensor_hit.hh
 )
 
@@ -48,7 +47,6 @@ set(ABRACADABRA_SOURCES
   src/geometries/sipm_hamamatsu_blue.cc
   src/random/random.cc
   src/writer/hdf5_writer.cc
-  src/writer/persistency_manager.cc
   src/g4-mandatory/sensor_hit.cc
 )
 
