@@ -11,8 +11,8 @@ using nain4::vis_attributes;
 
 
 G4PVPlacement* sipm::build() {
-  auto vol_body = volume<G4Box>(    name_,     mat,     half.x(),     half.y(),     half.z());
-  auto vol_act  = volume<G4Box>(act.name_, act.mat, act.half.x(), act.half.y(), act.half.z());
+  auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
+  auto vol_act  = volume<G4Box>(act.name, act.mat, act.half.x(), act.half.y(), act.half.z());
   vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
 
   // ----- visibility -------------------------------------------------------------
@@ -65,11 +65,10 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
   return sipm("Hamamatsu_Blue")
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
-    .active_window()
-        .name("PHOTODIODES")
-        .size(6*mm, 6*mm, 0.1*mm)
-        .material(fr4)
-        .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
-    .end_active_window()
+    .active_window(sipm_active_window("PHOTODIODES")
+                   .size(6*mm, 6*mm, 0.1*mm)
+                   .material(fr4)
+                   .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal))
     .build();
+
 }
