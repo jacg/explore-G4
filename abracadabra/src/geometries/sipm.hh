@@ -67,13 +67,14 @@ public:
   CHAIN material(G4Material * mt)                { mat = mt                       ; NEXT }
   CHAIN material(std::string const& matname)     { mat = nain4::material(matname) ; NEXT }
   CHAIN size(G4double x, G4double y, G4double z) { half = G4ThreeVector{x,y,z} / 2; NEXT }
+  CHAIN vis(G4VisAttributes const& va)           { vis_attributes = va            ; NEXT }
   CHAIN active_window(sipm_active_window a)      { act  = a; NEXT }
   CHAIN wls(sipm_wls w)                          { wls_ = w; NEXT }
-
 private:
   std::string name;
   G4Material * mat;
   G4ThreeVector half;
+  G4VisAttributes vis_attributes;
   sipm_active_window act;
   std::optional<sipm_wls> wls_;
 #undef CHAIN

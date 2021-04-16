@@ -19,15 +19,8 @@ G4PVPlacement* sipm::build() {
   vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
 
   // ----- visibility -------------------------------------------------------------
-  // TODO provide builder methods for this
-  auto visible = true;
-  if (visible) {
-    vol_body -> SetVisAttributes(               G4Colour::Yellow()                 );
-    vol_act  -> SetVisAttributes(vis_attributes(G4Colour::Blue()).force_solid(true));
-  } else {
-    vol_body -> SetVisAttributes(G4VisAttributes::Invisible);
-    vol_act  -> SetVisAttributes(G4VisAttributes::Invisible);
-  }
+  vol_body -> SetVisAttributes(    vis_attributes);
+  //vol_act  -> SetVisAttributes(act.vis_attributes);
 
   // --------------------------------------------------------------------------------
   auto z_act_in_body = half.z() - act.dz/2;
@@ -59,11 +52,16 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
-G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
+G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
                                                                            {"O", 3}});
+
+  using va = nain4::vis_attributes;
+  using col = G4Colour;
+
+  auto vis_act  = visible ? va(col::Blue  ()) : va().visible(false);
 
   return sipm("Hamamatsu_Blue")
     .material("G4_Si")
@@ -73,6 +71,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
                    //.margin(0, 0) // Unnecessary: 0 by default // TODO make it 1 micro?
                    .material(fr4)
                    .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal))
+    .vis(visible ? col::Yellow() : va().visible(false))
     .build();
 
 }
