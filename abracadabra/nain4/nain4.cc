@@ -45,6 +45,22 @@ std::vector<G4double> scale_by(G4double factor, std::initializer_list<G4double> 
 }
 
 // --------------------------------------------------------------------------------
+// definition of material_properties
+material_properties& material_properties::add(G4String const& key, vec const& energies, vec const& values) {
+  table -> AddProperty(key, energies, values); // es-vs size equality assertion done in AddProperty
+  return *this;
+}
+
+material_properties& material_properties::add(G4String const& key, vec const& energies, G4double   value ) {
+  return add(key, energies, vec(energies.size(), value));
+}
+
+material_properties& material_properties::add_const(G4String const& key, G4double value) {
+  table->AddConstProperty(key, value);
+  return *this;
+}
+
+// --------------------------------------------------------------------------------
 // stream redirection utilities
 
 // redirect to arbitrary stream or buffer

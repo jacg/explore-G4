@@ -1,6 +1,6 @@
 #include "nain4.hh"
 
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/sipm.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -127,7 +127,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
-  auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
+  auto sd = dynamic_cast<sipm_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   CHECK(sd->hits.size() == n_sipms);
   for (auto& step : sd->hits) {
     // TODO: Stupid checks, just to get something going. Replace with something
@@ -135,7 +135,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto pos = step . GetPreStepPoint() -> GetPosition();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    CHECK(pos.getZ() == Approx(30.2));
+    CHECK(pos.getZ() == Approx(29.7));
     // The particles were fired at x and y positions that were multiples of 7,
     // and the gun direction had no z-component, so the xs and ys should still
     // be multilpes of 7.
