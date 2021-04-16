@@ -62,7 +62,7 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
     .add("REFLECTIVITY", photon_energy, 0)
     .done();
 
-  return sipm("Hama_Blue")
+  return sipm("Hamamatsu_Blue")
     .material("G4_Si")
     .size(6 * mm, 6 * mm, 0.6 * mm)
     .active_window()
