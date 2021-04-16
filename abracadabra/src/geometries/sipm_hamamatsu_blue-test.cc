@@ -136,8 +136,8 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // Retrieve hits that were written out
   std::vector<hit_t> written_hits;
-  hdf5_writer h5writer{"test_file.h5"};
-  h5writer.read_hit_info(written_hits);
+  hdf5_io h5io{"test_file.h5"};
+  h5io.read_hit_info(written_hits);
 
   CHECK(written_hits.size() == detected_hits.size());
 

@@ -11,38 +11,38 @@
 #include <highfive/H5DataType.hpp>
 
 
-typedef struct{
-    unsigned int event_id;
-    double x;
-    double y;
-    double z;
+typedef struct {
+  unsigned int event_id;
+  double x;
+  double y;
+  double z;
 } hit_t;
 
 
-class hdf5_writer {
+class hdf5_io {
 public:
-    hdf5_writer(std::string fname);
-    ~hdf5_writer() {}
+  hdf5_io(std::string fname);
+  ~hdf5_io() {}
 
-    void open();
+  void open();
 
-    void write_run_info(const char* param_key, const char* param_value);
-    void write_hit_info(unsigned int evt_id, double x, double y, double z);
+  void write_run_info(const char* param_key, const char* param_value);
+  void write_hit_info(unsigned int evt_id, double x, double y, double z);
 
-    void read_hit_info(std::vector<hit_t>& hits);
+  void read_hit_info(std::vector<hit_t>& hits);
 
-    static const unsigned CONFLEN = 300;
+  static const unsigned CONFLEN = 300;
 
 private:
-    std::string filename;
-    unsigned int runinfo_index;
-    unsigned int hit_index;
+  std::string filename;
+  unsigned int runinfo_index;
+  unsigned int hit_index;
 };
 
 
 typedef struct {
-  char param_key  [hdf5_writer::CONFLEN];
-  char param_value[hdf5_writer::CONFLEN];
+  char param_key  [hdf5_io::CONFLEN];
+  char param_value[hdf5_io::CONFLEN];
 } run_info_t;
 
 
