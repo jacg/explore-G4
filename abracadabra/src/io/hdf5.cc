@@ -1,4 +1,4 @@
-#include "hdf5_writer.hh"
+#include "hdf5.hh"
 #include <highfive/H5DataSpace.hpp>
 
 #include <cstring>

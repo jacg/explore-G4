@@ -1,7 +1,7 @@
 #include "nain4.hh"
 
 #include "geometries/sipm_hamamatsu_blue.hh"
-#include "writer/hdf5_writer.hh"
+#include "io/hdf5.hh"
 #include "utils/enumerate.hh"
 
 #include <G4Box.hh>

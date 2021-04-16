@@ -31,7 +31,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/sipm_hamamatsu_blue.hh
   src/random/random.hh
   src/utils/enumerate.hh
-  src/writer/hdf5_writer.hh
+  src/io/hdf5.hh
 )
 
 set(ABRACADABRA_SOURCES
@@ -45,7 +45,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/nema.cc
   src/geometries/sipm_hamamatsu_blue.cc
   src/random/random.cc
-  src/writer/hdf5_writer.cc
+  src/io/hdf5.cc
 )
 
 set(ABRACADABRA_TESTS
