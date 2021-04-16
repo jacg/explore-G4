@@ -11,8 +11,11 @@ using nain4::vis_attributes;
 
 
 G4PVPlacement* sipm::build() {
+  auto act_half_x = half.x() - act.margin_x;
+  auto act_half_y = half.y() - act.margin_y;
+  auto act_half_z = act.dz / 2;
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
-  auto vol_act  = volume<G4Box>(act.name, act.mat, act.half.x(), act.half.y(), act.half.z());
+  auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
   vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?"));
 
   // ----- visibility -------------------------------------------------------------
@@ -27,7 +30,7 @@ G4PVPlacement* sipm::build() {
   }
 
   // --------------------------------------------------------------------------------
-  auto z_act_in_body = half.z() - act.half.z();
+  auto z_act_in_body = half.z() - act.dz/2;
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
   return place(vol_body).now();
 }
@@ -66,7 +69,8 @@ G4PVPlacement* sipm_hamamatsu_blue(G4bool /*visible*/) {
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active_window(sipm_active_window("PHOTODIODES")
-                   .size(6*mm, 6*mm, 0.1*mm)
+                   .thickness(0.1*mm)
+                   //.margin(0, 0) // Unnecessary: 0 by default // TODO make it 1 micro?
                    .material(fr4)
                    .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal))
     .build();

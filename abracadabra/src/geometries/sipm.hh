@@ -25,8 +25,8 @@ class sipm_active_window {
 public:
   sipm_active_window() = default;
   sipm_active_window(std::string const& name): name{name} {}
-  CHAIN size(G4double x, G4double y, G4double z) { size({x, y, z}); NEXT }
-  CHAIN size(G4ThreeVector size) { half = size / 2; NEXT}
+  CHAIN thickness(G4double t) { dz = t; NEXT }
+  CHAIN margin(G4double mx, G4double my) { margin_x = mx; margin_y = my; NEXT }
   CHAIN material(G4Material* mt) { mat = mt; NEXT }
 
   template<class... ArgTypes>
@@ -38,7 +38,7 @@ public:
 
 private:
   std::string name;
-  G4ThreeVector half;
+  G4double dz, margin_x = 0, margin_y = 0;
   G4Material* mat;
   G4MaterialPropertiesTable* active_props;
   G4OpticalSurface* active_surface;
