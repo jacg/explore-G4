@@ -1,6 +1,6 @@
 #include "nain4.hh"
 
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/sipm.hh"
 #include "io/hdf5.hh"
 #include "utils/enumerate.hh"
 
@@ -129,10 +129,10 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
-
   // Retrieve hits stored in the sensitive detector
-  auto sd = dynamic_cast<hamamatsu_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
+  auto sd = dynamic_cast<sipm_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
   auto& detected_hits = sd -> hits;
+  CHECK(detected_hits.size() == n_sipms);
 
   // Retrieve hits that were written out
   std::vector<hit_t> written_hits;
@@ -153,7 +153,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     // more intelligent
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    //CHECK(pos.getZ() == Approx(30.2)); // TODO why is this a type error all of a sudden?
+    CHECK(pos.getZ() == Approx(29.7));
     // The particles were fired at x and y positions that were multiples of 7,
     // and the gun direction had no z-component, so the xs and ys should still
     // be multilpes of 7.

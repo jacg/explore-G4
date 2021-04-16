@@ -5,7 +5,7 @@
 #include <G4Box.hh>
 
 #include "geometries/nema.hh"
-#include "geometries/sipm_hamamatsu_blue.hh"
+#include "geometries/sipm.hh"
 
 G4VPhysicalVolume* detector_construction::Construct() {
 
