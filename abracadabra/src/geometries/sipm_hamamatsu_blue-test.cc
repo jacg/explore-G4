@@ -135,7 +135,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto pos = step . GetPreStepPoint() -> GetPosition();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    CHECK(pos.getZ() == Approx(30.2));
+    CHECK(pos.getZ() == Approx(29.7));
     // The particles were fired at x and y positions that were multiples of 7,
     // and the gun direction had no z-component, so the xs and ys should still
     // be multilpes of 7.
