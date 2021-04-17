@@ -14,7 +14,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
-      nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now();
+      nain4::place(sipm).in(world).at((x+3.5)*mm, (y+3.5)*mm, 30*mm).now();
     }
   }
   return nain4::place(world).now();
