@@ -1,10 +1,10 @@
 # TLDR
 
 ```shell
-cd abracadabra/build
+mkcd abracadabra/build
 cmake ..
 make -j8
-make test
+./tests-trial --list-test-names-only | while read testname; do ./tests-trial $testname; done
 ./abracadabra
 ```
 
@@ -12,7 +12,7 @@ make test
 
 ## Dependency management with Nix
 
-The above instructions assume that you have the require dependencies installed
+The above instructions assume that you have the required dependencies installed
 and configured.
 
 This is done automatically when you `cd` into the project's directory, if you
