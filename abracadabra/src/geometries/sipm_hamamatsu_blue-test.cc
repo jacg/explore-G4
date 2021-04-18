@@ -22,13 +22,13 @@
 
 // visible = true
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(true, {});
-  auto& active = *whole.GetLogicalVolume()->GetDaughter(0);
-  // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(whole), end(whole)) == 2);
+  auto& whole  = *sipm_hamamatsu_blue(true);
+  auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
+  // Verify the number of sub-volumes: 1 active region
+  CHECK(std::distance(begin(whole), end(whole)) == 1);
 
-  CHECK(whole .GetLogicalVolume()->GetVisAttributes()->GetColour() == G4Colour::Yellow());
-  CHECK(active.GetLogicalVolume()->GetVisAttributes()->GetColour() == G4Colour::Blue());
+  CHECK(whole .GetVisAttributes()->GetColour() == G4Colour::Yellow());
+  CHECK(active.GetVisAttributes()->GetColour() == G4Colour::Blue());
 
   auto number_of_sensitive_detectors =
     std::count_if(begin(whole), end(whole),
@@ -39,14 +39,14 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 
 // visible = false
 TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(false, {});
-  auto& active = *whole.GetLogicalVolume()->GetDaughter(0);
-  // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(whole), end(whole)) == 2);
+  auto& whole  = *sipm_hamamatsu_blue(false);
+  auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
+  // Verify the number of sub-volumes: 1 active region
+  CHECK(std::distance(begin(whole), end(whole)) == 1);
 
   // TODO How can you verify the G4VisAttributes::Invisible attribute?
-  CHECK(whole .GetLogicalVolume()->GetVisAttributes()->GetColour() == G4Colour::White());
-  CHECK(active.GetLogicalVolume()->GetVisAttributes()->GetColour() == G4Colour::White());
+  CHECK(whole .GetVisAttributes()->GetColour() == G4Colour::White());
+  CHECK(active.GetVisAttributes()->GetColour() == G4Colour::White());
 
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
     G4VPhysicalVolume* Construct() {
       auto air = nain4::material("G4_AIR");
-      auto sipm = sipm_hamamatsu_blue(true, filename)->GetLogicalVolume();
+      auto sipm = sipm_hamamatsu_blue(true, filename);
       auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
       for (int x=-35; x<35; x+=7) {
         for (int y=-35; y<35; y+=7) {

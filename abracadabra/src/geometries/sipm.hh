@@ -65,7 +65,7 @@ class sipm {
 
 public:
   sipm(std::string name) : name{name} {}
-  G4PVPlacement* build();
+  G4LogicalVolume* build();
 
   using dist = G4double;
   CHAIN material(G4Material * mt)            { mat = mt                       ; NEXT }
@@ -101,7 +101,7 @@ public:
 
 
 // ----- One example of usage of the interface
-G4PVPlacement* sipm_hamamatsu_blue(G4bool visible, std::optional<std::string> h5_filename);
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, std::optional<std::string> h5_filename = {});
 
 
 #endif
