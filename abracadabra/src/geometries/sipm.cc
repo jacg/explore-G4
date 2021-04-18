@@ -2,6 +2,7 @@
 #include "geometries/sipm.hh"
 
 #include <G4Box.hh>
+#include <G4LogicalVolume.hh>
 
 using nain4::material_from_elements_N;
 using nain4::place;
@@ -10,7 +11,7 @@ using nain4::volume;
 using nain4::vis_attributes;
 
 
-G4PVPlacement* sipm::build() {
+G4LogicalVolume* sipm::build() {
   auto act_half_x = half.x() - act.margin_x;
   auto act_half_y = half.y() - act.margin_y;
   auto act_half_z = act.dz / 2;
@@ -25,7 +26,7 @@ G4PVPlacement* sipm::build() {
   // ----- geometrical relationship between components ----------------------------
   auto z_act_in_body = act.dz/2 - half.z();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
-  return place(vol_body).now();
+  return vol_body;
 }
 
 G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {
@@ -52,7 +53,7 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
-G4PVPlacement* sipm_hamamatsu_blue(G4bool visible) {
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},

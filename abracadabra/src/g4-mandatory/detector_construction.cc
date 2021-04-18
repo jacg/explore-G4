@@ -10,7 +10,7 @@
 G4VPhysicalVolume* detector_construction::Construct() {
 
   auto air = nain4::material("G4_AIR");
-  auto sipm = sipm_hamamatsu_blue(true)->GetLogicalVolume();
+  auto sipm = sipm_hamamatsu_blue(true);
   auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
@@ -19,7 +19,7 @@ G4VPhysicalVolume* detector_construction::Construct() {
   }
   return nain4::place(world).now();
 
-  return sipm_hamamatsu_blue(true);
+  return nain4::place(sipm_hamamatsu_blue(true)).now();
 
   return build_nema_phantom{}
     .activity(1)
