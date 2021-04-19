@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
-    {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default)};
+    {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // Set mandatory initialization classes
 

@@ -30,6 +30,8 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     pkgs.catch2
     pkgs.cmake-language-server
     pkgs.gdb
+    pkgs.hdf5
+    pkgs.highfive
     # For graphics hardware matching on non-NixOS
     pkgs.libGL
     (linux nixGL.nixGLDefault)

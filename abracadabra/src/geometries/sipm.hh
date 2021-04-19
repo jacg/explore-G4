@@ -1,6 +1,7 @@
 #ifndef geometries_sipm_hh
 #define geometries_sipm_hh
 
+#include "io/hdf5.hh"
 #include "nain4.hh"
 
 #include <G4Material.hh>
@@ -71,6 +72,7 @@ public:
   CHAIN material(std::string const& matname) { mat = nain4::material(matname) ; NEXT }
   CHAIN size    (dist x, dist y, dist z)     { half = G4ThreeVector{x,y,z} / 2; NEXT }
   CHAIN vis     (G4VisAttributes const& va)  { vis_attributes = va            ; NEXT }
+  CHAIN write   (std::optional<std::string> f) { h5_filename = f              ; NEXT }
   CHAIN active  (sipm_active_window a)       { act  = a; NEXT }
   CHAIN wls     (sipm_wls w)                 { wls_ = w; NEXT }
 private:
@@ -80,6 +82,7 @@ private:
   G4VisAttributes         vis_attributes;
   sipm_active_window      act;
   std::optional<sipm_wls> wls_;
+  std::optional<std::string> h5_filename;
 #undef CHAIN
 };
 #undef NEXT
@@ -87,16 +90,18 @@ private:
 // ----- Sensitive Detector ------------------------------------------------------------------------
 class sipm_sensitive : public G4VSensitiveDetector {
 public:
-  sipm_sensitive(G4String name) : G4VSensitiveDetector{name} {}
+  sipm_sensitive(G4String name)                      : G4VSensitiveDetector{name} {}
+  sipm_sensitive(G4String name, std::optional<std::string> h5_name) : G4VSensitiveDetector{name}, io{h5_name} { if (io) io->open(); }
   G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
 
 public:
   std::vector<G4Step> hits;
+  std::optional<hdf5_io> io; // TODO improve RAII
 };
 
 
 // ----- One example of usage of the interface
-G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible=true);
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, std::optional<std::string> h5_filename = {});
 
 
 #endif

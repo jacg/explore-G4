@@ -1,6 +1,8 @@
 #include "nain4.hh"
 
 #include "geometries/sipm.hh"
+#include "io/hdf5.hh"
+#include "utils/enumerate.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -52,10 +54,12 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 TEST_CASE("hamamatsu app", "[app]") {
 
   // ----- Geometry ------------------------------------------------------------
-  class geometry : public G4VUserDetectorConstruction {
+  struct geometry : public G4VUserDetectorConstruction {
+    geometry(std::string const& f) : filename{f} {}
+
     G4VPhysicalVolume* Construct() {
       auto air = nain4::material("G4_AIR");
-      auto sipm = sipm_hamamatsu_blue(true);
+      auto sipm = sipm_hamamatsu_blue(true, filename);
       auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
       for (int x=-35; x<35; x+=7) {
         for (int y=-35; y<35; y+=7) {
@@ -63,8 +67,9 @@ TEST_CASE("hamamatsu app", "[app]") {
         }
       }
       return nain4::place(world).now();
-
     }
+
+    std::string filename;
   };
 
   // ----- Generator ------------------------------------------------------------
@@ -95,10 +100,12 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------
+
+  std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new geometry);
+    run_manager -> SetUserInitialization(new geometry{hdf5_test_file_name});
     run_manager -> SetUserInitialization(new QBBC{0});
     run_manager -> SetUserInitialization(new actions);
     run_manager -> Initialize();
@@ -127,12 +134,28 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
+  // Retrieve hits stored in the sensitive detector
   auto sd = dynamic_cast<sipm_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
-  CHECK(sd->hits.size() == n_sipms);
-  for (auto& step : sd->hits) {
+  auto& detected_hits = sd -> hits;
+  CHECK(detected_hits.size() == n_sipms);
+
+  // Retrieve hits that were written out
+  std::vector<hit_t> written_hits;
+  hdf5_io h5io{hdf5_test_file_name};
+  h5io.read_hit_info(written_hits);
+
+  CHECK(written_hits.size() == detected_hits.size());
+
+  for (auto [i, hit] : enumerate(detected_hits)) {
+    auto row =  written_hits[i];
+    auto pos = hit.GetPreStepPoint() -> GetPosition();
+    // TODO: CHECK(row.event_id == ??);
+    CHECK(row.x == pos.getX());
+    CHECK(row.y == pos.getY());
+    CHECK(row.z == pos.getZ());
+
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent
-    auto pos = step . GetPreStepPoint() -> GetPosition();
 
     // The z-plane in which the nearest part of the sensitive detectors is positioned.
     CHECK(pos.getZ() == Approx(29.7));
