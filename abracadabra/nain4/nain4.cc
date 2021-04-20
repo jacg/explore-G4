@@ -27,11 +27,10 @@ G4PVPlacement* place::now() {
   bool WTF_is_pMany   = false;
   bool check_overlaps = false;
 
-  return new G4PVPlacement{rotation   .value_or(nullptr),
-                           position   .value_or(G4ThreeVector{}),
-                           child      .value(),
+  return new G4PVPlacement{transformation,
+                           child.value(),
                            the_name,
-                           parent     .value_or(nullptr),
+                           parent.value_or(nullptr),
                            WTF_is_pMany,
                            copy_number.value_or(0),
                            check_overlaps};

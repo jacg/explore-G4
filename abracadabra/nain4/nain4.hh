@@ -1,6 +1,7 @@
 #ifndef nain4_hh
 #define nain4_hh
 
+#include <CLHEP/Geometry/Transform3D.h>
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
 #include <G4Material.hh>
@@ -9,11 +10,13 @@
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTable.hh>
 #include <G4PhysicalVolumeStore.hh>
+#include <G4RotationMatrix.hh>
 #include <G4RunManager.hh>
 #include <G4String.hh>
 #include <G4SolidStore.hh>
 #include <G4SDManager.hh>
 #include <G4ThreeVector.hh>
+#include <G4Transform3D.hh>
 #include <G4VPhysicalVolume.hh>
 #include <G4VSensitiveDetector.hh>
 #include <G4VisAttributes.hh>
@@ -104,8 +107,9 @@ public:
   place(G4LogicalVolume* child)  : child(child ? make_optional(child) : nullopt) {}
   place(place const&) = default;
 
-  place& at(double x, double y, double z)                 { return at({x, y, z}); }
-  place& at(G4ThreeVector    pos)          { position    = pos    ; return *this; }
+  place& rotate(G4RotationMatrix* rot)     { transformation = HepGeom::Rotate3D{*rot}     * transformation; return *this; }
+  place& at(double x, double y, double z)  { transformation = HepGeom::Translate3D{x,y,z} * transformation; return *this; }
+  place& at(G4ThreeVector    p)            { return at(p.x(), p.y(), p.z()); }
   place& copy_no(int         n)            { copy_number = n      ; return *this; }
   place& in(G4LogicalVolume* parent_)      { parent      = parent_; return *this; }
   place& name(G4String       label_)       { label       = label_ ; return *this; }
@@ -116,10 +120,9 @@ public:
 private:
   optional<G4LogicalVolume*>  child;
   optional<G4LogicalVolume*>  parent;
-  optional<G4ThreeVector>     position;
-  optional<G4RotationMatrix*> rotation;
   optional<G4String>          label;
   optional<int>               copy_number;
+  G4Transform3D               transformation = HepGeom::Transform3D::Identity;
 };
 
 // --------------------------------------------------------------------------------
