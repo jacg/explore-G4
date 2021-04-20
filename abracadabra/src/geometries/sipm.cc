@@ -32,8 +32,9 @@ G4LogicalVolume* sipm::build() {
 G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {
   hits.push_back(*step);
   if (io) {
-    auto pos = step -> GetPreStepPoint() -> GetPosition();
-    io -> write_hit_info(0, pos.getX(), pos.getY(), pos.getZ());
+    auto pos  = step -> GetPreStepPoint() -> GetPosition();
+	auto time = step -> GetPreStepPoint() -> GetGlobalTime();
+    io -> write_hit_info(0, pos.getX(), pos.getY(), pos.getZ(), time);
   }
   return true; // TODO what is the meaning of this?
 }

@@ -14,6 +14,9 @@
 #include <G4VUserPrimaryGeneratorAction.hh>
 #include <QBBC.hh>
 
+#include <CLHEP/Units/PhysicalConstants.h>
+#include <CLHEP/Units/SystemOfUnits.h>
+
 #include <catch2/catch.hpp>
 
 #include <algorithm>
@@ -147,12 +150,15 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(written_hits.size() == detected_hits.size());
 
   for (auto [i, hit] : enumerate(detected_hits)) {
-    auto row =  written_hits[i];
-    auto pos = hit.GetPreStepPoint() -> GetPosition();
+    auto row  = written_hits[i];
+    auto pos  = hit.GetPreStepPoint()  -> GetPosition();
+	auto time = hit.GetPreStepPoint() -> GetGlobalTime();
     // TODO: CHECK(row.event_id == ??);
-    CHECK(row.x == pos.getX());
-    CHECK(row.y == pos.getY());
-    CHECK(row.z == pos.getZ());
+    CHECK(row.x    == pos.getX());
+    CHECK(row.y    == pos.getY());
+    CHECK(row.z    == pos.getZ());
+    CHECK(row.time == time);
+    CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light * CLHEP::ns/CLHEP::mm) ));
 
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent

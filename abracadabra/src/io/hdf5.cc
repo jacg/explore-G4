@@ -14,7 +14,8 @@ HighFive::CompoundType create_hit_type() {
   return {{"event_id", HighFive::AtomicType<unsigned int>{}},
           {"x", HighFive::AtomicType<double>{}},
           {"y", HighFive::AtomicType<double>{}},
-          {"z", HighFive::AtomicType<double>{}}};
+          {"z", HighFive::AtomicType<double>{}},
+          {"time", HighFive::AtomicType<double>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
@@ -64,10 +65,10 @@ void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   runinfo_index += n_elements;
 }
 
-void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z) {
+void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z, double time) {
   // Create hit_t objects with the data
   std::vector<hit_t> data;
-  data.push_back({event_id, x, y, z});
+  data.push_back({event_id, x, y, z, time});
 
   unsigned int n_elements = data.size();
 
