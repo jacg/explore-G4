@@ -18,6 +18,7 @@ G4PVPlacement* place::now() {
     the_name = this->label.value();
   } else {
     the_name = this->child.value()->GetName();
+    // TODO: G4 already appends the copy number to the name?
     if (this->copy_number) {
       auto suffix = "-" + std::to_string(copy_number.value());
       the_name += suffix;
