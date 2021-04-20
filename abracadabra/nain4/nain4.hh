@@ -107,7 +107,7 @@ public:
   place(G4LogicalVolume* child)  : child(child ? make_optional(child) : nullopt) {}
   place(place const&) = default;
 
-  place& rotate(G4RotationMatrix* rot)     { transformation = HepGeom::Rotate3D{*rot}     * transformation; return *this; }
+  place& rotate(G4RotationMatrix& rot)     { transformation = HepGeom::Rotate3D{rot}      * transformation; return *this; }
   place& at(double x, double y, double z)  { transformation = HepGeom::Translate3D{x,y,z} * transformation; return *this; }
   place& at(G4ThreeVector    p)            { return at(p.x(), p.y(), p.z()); }
   place& copy_no(int         n)            { copy_number = n      ; return *this; }
