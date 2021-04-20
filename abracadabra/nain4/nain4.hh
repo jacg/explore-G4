@@ -114,6 +114,7 @@ public:
   place& in(G4LogicalVolume* parent_)      { parent      = parent_; return *this; }
   place& name(G4String       label_)       { label       = label_ ; return *this; }
 
+  place  clone()                                                  { return *this; }
   G4PVPlacement* operator()()                                     { return now(); }
   G4PVPlacement* now();
 
