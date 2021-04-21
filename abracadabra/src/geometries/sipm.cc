@@ -1,8 +1,10 @@
 // clang-format off
 #include "geometries/sipm.hh"
+#include "g4-mandatory/event_action.hh"
 
 #include <G4Box.hh>
 #include <G4LogicalVolume.hh>
+#include <G4EventManager.hh>
 
 using nain4::material_from_elements_N;
 using nain4::place;
@@ -39,7 +41,12 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
   return true; // TODO what is the meaning of this?
 }
 
-
+void sipm_sensitive::EndOfEvent(G4HCofThisEvent* hc){
+  std::cout << "end of action" << std::endl;
+  auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
+  auto evt_data = dynamic_cast<event_data*>(current_evt -> GetUserInformation());
+  evt_data -> set_hits(hits);
+}
 
 // ------------------------------------------------------------------------------------------
 // Hamamatsu Blue: one example of a SiPM
