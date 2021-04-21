@@ -21,10 +21,13 @@ public:
   void   EndOfRunAction(const G4Run*) override;
 
   void AddEdep (G4double edep);
+  void next_event() {evt_number++; }
+  unsigned int get_evt_number() { return evt_number; }
 
 private:
   G4Accumulable<G4double> edep;
   G4Accumulable<G4double> edep2;
+  unsigned int evt_number;
 };
 
 #endif
