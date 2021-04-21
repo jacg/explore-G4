@@ -14,7 +14,8 @@
 run_action::run_action()
 : G4UserRunAction()
 , edep(0)
-, edep2(0) {
+, edep2(0)
+, evt_number(0) {
   // G4 takes ownership of these by *MAGIC*
   new G4UnitDefinition{"milligray", "milliGy" , "Dose", 1.e-3  * gray};
   new G4UnitDefinition{"microgray", "microGy" , "Dose", 1.e-6  * gray};
