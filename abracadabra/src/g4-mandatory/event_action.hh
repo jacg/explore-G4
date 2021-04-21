@@ -4,7 +4,28 @@
 #include <G4UserEventAction.hh>
 #include <globals.hh>
 
+#include <G4VUserEventInformation.hh>
+#include <G4Step.hh>
+#include <vector>
+
 class run_action;
+
+
+// This class is a container to store everything we need to store later for a given event
+class event_data : public G4VUserEventInformation {
+public:
+  event_data() : G4VUserEventInformation(), hits{} {}
+  ~event_data() override {};
+
+  void Print() const override {};
+
+  void set_hits(std::vector<G4Step>& sensor_hits) { hits = sensor_hits; }
+  std::vector<G4Step>& get_hits() { return hits; }
+
+private:
+  std::vector<G4Step> hits;
+};
+
 
 class event_action : public G4UserEventAction {
 public:
@@ -19,6 +40,8 @@ public:
 private:
   run_action* action;
   G4double    edep;
+  event_data  data;
 };
+
 
 #endif
