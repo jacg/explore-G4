@@ -93,6 +93,7 @@ public:
   sipm_sensitive(G4String name)                      : G4VSensitiveDetector{name} {}
   sipm_sensitive(G4String name, std::optional<std::string> h5_name) : G4VSensitiveDetector{name}, io{h5_name} { if (io) io->open(); }
   G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
+  void   EndOfEvent (G4HCofThisEvent*)                  override;
 
 public:
   std::vector<G4Step> hits;
