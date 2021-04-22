@@ -20,9 +20,9 @@ G4LogicalVolume* sipm::build() {
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
 
-  sipm_sensitive sens_det{"/does/this/matter?", h5_filename};
-  sens_det.Activate(true);
-  vol_act->SetSensitiveDetector(&sens_det);
+  auto sens_det = new sipm_sensitive{"/does/this/matter?", h5_filename};
+  sens_det->Activate(true);
+  vol_act->SetSensitiveDetector(sens_det);
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
