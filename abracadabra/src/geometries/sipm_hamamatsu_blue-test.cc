@@ -3,6 +3,9 @@
 #include "geometries/sipm.hh"
 #include "io/hdf5.hh"
 #include "utils/enumerate.hh"
+#include "g4-mandatory/event_action.hh"
+#include "g4-mandatory/stepping_action.hh"
+#include "g4-mandatory/run_action.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -21,6 +24,7 @@
 
 #include <algorithm>
 #include <string>
+#include <iterator>
 
 
 // visible = true
@@ -99,7 +103,17 @@ TEST_CASE("hamamatsu app", "[app]") {
   // ----- Actions ------------------------------------------------------------
   class actions : public G4VUserActionInitialization {
     void BuildForMaster() const override {}
-    void Build         () const override { SetUserAction(new primary_generator); }
+    void Build         () const override {
+      auto set_and_return = [this](auto action) {
+                              SetUserAction(action);
+                              return action;
+                            };
+      SetUserAction(new primary_generator);
+
+      set_and_return(new stepping_action {
+          set_and_return(new event_action {
+              set_and_return(new run_action)})});
+    }
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------
@@ -137,38 +151,37 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
-  // Retrieve hits stored in the sensitive detector
-  auto sd = dynamic_cast<sipm_sensitive*>(nain4::find_logical("PHOTODIODES") -> GetSensitiveDetector());
-  auto& detected_hits = sd -> hits;
-  CHECK(detected_hits.size() == n_sipms);
-
   // Retrieve hits that were written out
-  std::vector<hit_t> written_hits;
+  std::vector<hit_t> written_hit_structs;
   hdf5_io h5io{hdf5_test_file_name};
-  h5io.read_hit_info(written_hits);
+  h5io.read_hit_info(written_hit_structs);
 
-  CHECK(written_hits.size() == detected_hits.size());
+  CHECK(written_hit_structs.size() == n_sipms);
 
-  for (auto [i, hit] : enumerate(detected_hits)) {
-    auto row  = written_hits[i];
-    auto pos  = hit.GetPreStepPoint()  -> GetPosition();
-    auto time = hit.GetPreStepPoint() -> GetGlobalTime();
+  std::vector<G4ThreeVector> positions{};
+  for (int x=-35; x<35; x+=7) {
+    for (int y=-35; y<35; y+=7) {
+	  positions.push_back({x*mm, y*mm, 29.7*mm});
+    }
+  }
+
+  std::vector<G4ThreeVector> written_hit_vecs{};
+  std::transform(begin(written_hit_structs), end(written_hit_structs),
+		  std::back_inserter(written_hit_vecs),
+		  [](auto& hit) { return G4ThreeVector{hit.x, hit.y, hit.z}; } );
+
+  std::sort(begin(positions)       , end(positions));
+  std::sort(begin(written_hit_vecs), end(written_hit_vecs));
+
+
+  for (auto [i, row] : enumerate(written_hit_vecs)) {
+    auto pos  = positions[i];
+    auto time = pos.getZ() / (CLHEP::c_light / (mm/ns));
     // TODO: CHECK(row.event_id == ??);
-    CHECK(row.x    == pos.getX());
-    CHECK(row.y    == pos.getY());
-    CHECK(row.z    == pos.getZ());
-    CHECK(row.time == time);
-    CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light / (mm/ns))));
-
-    // TODO: Stupid checks, just to get something going. Replace with something
-    // more intelligent
-
-    // The z-plane in which the nearest part of the sensitive detectors is positioned.
-    CHECK(pos.getZ() == Approx(29.7));
-    // The particles were fired at x and y positions that were multiples of 7,
-    // and the gun direction had no z-component, so the xs and ys should still
-    // be multilpes of 7.
-    auto x_over_7 = pos.getX(); CHECK(x_over_7 == (int)x_over_7);
-    auto y_over_7 = pos.getY(); CHECK(y_over_7 == (int)y_over_7);
+    CHECK(row.getX() == pos.getX());
+    CHECK(row.getY() == pos.getY());
+    CHECK(row.getZ() == pos.getZ());
+    // CHECK(row.time == time); // TODO
+    // CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light / (mm/ns))));
   }
 }

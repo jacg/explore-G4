@@ -19,7 +19,7 @@ public:
 
   void Print() const override {};
 
-  void set_hits(std::vector<G4Step>& sensor_hits) { hits = sensor_hits; }
+  void set_hits(std::vector<G4Step>&& sensor_hits) { hits = std::move(sensor_hits); }
   std::vector<G4Step>& get_hits() { return hits; }
 
 private:
@@ -32,11 +32,10 @@ public:
   event_action(run_action* runAction);
   ~event_action() override {}
 
-  void EndOfEventAction(const G4Event* event) override;
+  void EndOfEventAction  (const G4Event* event) override;
 
 private:
   run_action* action;
-  event_data  data;
 };
 
 
