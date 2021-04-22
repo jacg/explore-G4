@@ -11,16 +11,14 @@
 
 event_action::event_action(run_action* runAction)
 : G4UserEventAction()
-, action(runAction)
-, data{} {}
+, action(runAction) {}
 
-void event_action::EndOfEventAction(const G4Event*) {
-  // accumulate statistics in run action
-  std::cout << "event id: " << nain4::event_number() << std::endl;
+void event_action::EndOfEventAction(const G4Event* event) {
+  auto evt_data = dynamic_cast<event_data*>(event -> GetUserInformation());
 
-  for (auto hit: data.get_hits()) {
+  for (auto hit: evt_data->get_hits()) {
     auto pos  = hit.GetPreStepPoint() -> GetPosition();
     auto time = hit.GetPreStepPoint() -> GetGlobalTime();
-    std::cout << "time: " << time << std::endl;
+    //TODO: Decide whether to write here or in sensitive detector
   }
 }

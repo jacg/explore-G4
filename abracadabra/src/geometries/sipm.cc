@@ -49,8 +49,10 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
 void sipm_sensitive::EndOfEvent(G4HCofThisEvent* hc){
   std::cout << "end of event" << std::endl;
   auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-  auto evt_data = dynamic_cast<event_data*>(current_evt -> GetUserInformation());
-  evt_data -> set_hits(hits);
+  auto data = new event_data{};
+  data -> set_hits(std::move(hits));
+  hits = {};
+  current_evt->SetUserInformation(data);
 }
 
 // ------------------------------------------------------------------------------------------
