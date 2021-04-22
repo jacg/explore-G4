@@ -62,7 +62,13 @@ IA event_number  ()       { return G4RunManager::GetRunManager()->GetCurrentRun(
 // Remove all, logical/physical volumes, solids and assemblies.
 inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }
 
-inline void add_sensitive(G4VSensitiveDetector* det) { G4SDManager::GetSDMpointer() -> AddNewDetector(det); }
+template<class SENSITIVE, class... ArgTypes>
+auto make_sensitive(ArgTypes&&... args) {
+  auto detector = new SENSITIVE{std::forward<ArgTypes>(args)...};
+  detector -> Activate(true);
+  G4SDManager::GetSDMpointer() -> AddNewDetector(detector);
+  return detector;
+}
 
 // The G4Material::AddElement is overloaded on double/int in the second
 // parameter. Template argument deduction doesn't seem to be able to resolve

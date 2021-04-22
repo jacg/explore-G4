@@ -6,6 +6,7 @@
 #include <G4LogicalVolume.hh>
 #include <G4EventManager.hh>
 
+using nain4::make_sensitive;
 using nain4::material_from_elements_N;
 using nain4::place;
 using nain4::scale_by;
@@ -20,11 +21,7 @@ G4LogicalVolume* sipm::build() {
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
 
-  auto sens_det = new sipm_sensitive{"/does/this/matter?", h5_filename};
-  sens_det->Activate(true);
-  vol_act->SetSensitiveDetector(sens_det);
-  G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
-  sdmgr->AddNewDetector(sens_det);
+  vol_act->SetSensitiveDetector(make_sensitive<sipm_sensitive>("/does/this/matter?", h5_filename));
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);

@@ -150,9 +150,7 @@ public:
     auto world    = nain4::volume<G4Box>("world"   , air, world_x/2,    world_yz/2,    world_yz/2);
 
     // --- Make the detector volume sensitive ----------------------------------
-    auto sensor = new sensitive("/sensitive");
-    nain4::add_sensitive(sensor);
-    detector->SetSensitiveDetector(sensor);
+    detector->SetSensitiveDetector(nain4::make_sensitive<sensitive>("/sensitive"));
 
     // --- Establish the geometrical relationship between the volumes ----------
     nain4::place(source)  .in(world).at({-sep/2, source_cy, source_cz}).now();
