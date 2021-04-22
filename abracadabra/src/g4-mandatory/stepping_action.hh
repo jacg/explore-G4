@@ -13,11 +13,10 @@ public:
   stepping_action(event_action* eventAction);
   ~stepping_action() override {}
 
-  void UserSteppingAction(const G4Step*) override;
+  //void UserSteppingAction(const G4Step*) override;
 
 private:
-  event_action*    action;
-  G4LogicalVolume* scoring_volume;
+  event_action* action;
 };
 
 #endif

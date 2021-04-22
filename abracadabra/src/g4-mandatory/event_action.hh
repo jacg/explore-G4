@@ -32,14 +32,10 @@ public:
   event_action(run_action* runAction);
   ~event_action() override {}
 
-  void BeginOfEventAction(const G4Event* event) override;
   void EndOfEventAction(const G4Event* event) override;
-
-  void AddEdep(G4double edep_) { edep += edep_; }
 
 private:
   run_action* action;
-  G4double    edep;
   event_data  data;
 };
 
