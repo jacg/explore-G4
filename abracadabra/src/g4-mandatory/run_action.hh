@@ -19,12 +19,6 @@ public:
   // G4Run* GenerateRun() override;
   void BeginOfRunAction(const G4Run*) override;
   void   EndOfRunAction(const G4Run*) override;
-
-  void next_event() { evt_number++; }
-  unsigned int get_evt_number() { return evt_number; }
-
-private:
-  unsigned int evt_number;
 };
 
 #endif

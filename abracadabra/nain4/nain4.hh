@@ -11,6 +11,7 @@
 #include <G4ParticleTable.hh>
 #include <G4PhysicalVolumeStore.hh>
 #include <G4RotationMatrix.hh>
+#include <G4Run.hh>
 #include <G4RunManager.hh>
 #include <G4String.hh>
 #include <G4SolidStore.hh>
@@ -52,6 +53,8 @@ IA find_logical  NAME_VRB { return G4LogicalVolumeStore ::GetInstance()->GetVolu
 IA find_physical NAME_VRB { return G4PhysicalVolumeStore::GetInstance()->GetVolume          (name, verbose); }
 IA find_solid    NAME_VRB { return G4SolidStore         ::GetInstance()->GetSolid           (name, verbose); }
 IA find_particle NAME     { return G4ParticleTable:: GetParticleTable()->FindParticle       (name         ); }
+
+IA event_number  ()       { return G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEvent(); }
 #undef IA
 #undef NAME
 #undef NAME_VRB

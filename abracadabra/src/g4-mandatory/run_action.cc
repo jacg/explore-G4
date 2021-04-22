@@ -11,7 +11,7 @@
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
 
-run_action::run_action() : G4UserRunAction{} , evt_number(0) {}
+run_action::run_action() : G4UserRunAction{} {}
 
 void run_action::BeginOfRunAction(const G4Run*) {
   // inform the runManager to save random number seed
