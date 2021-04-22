@@ -152,7 +152,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   for (auto [i, hit] : enumerate(detected_hits)) {
     auto row  = written_hits[i];
     auto pos  = hit.GetPreStepPoint()  -> GetPosition();
-	auto time = hit.GetPreStepPoint() -> GetGlobalTime();
+    auto time = hit.GetPreStepPoint() -> GetGlobalTime();
     // TODO: CHECK(row.event_id == ??);
     CHECK(row.x    == pos.getX());
     CHECK(row.y    == pos.getY());
