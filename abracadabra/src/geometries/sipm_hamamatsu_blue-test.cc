@@ -158,7 +158,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     CHECK(row.y    == pos.getY());
     CHECK(row.z    == pos.getZ());
     CHECK(row.time == time);
-    CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light * CLHEP::ns/CLHEP::mm) ));
+    CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light / (mm/ns))));
 
     // TODO: Stupid checks, just to get something going. Replace with something
     // more intelligent
