@@ -9,14 +9,10 @@
 event_action::event_action(run_action* runAction)
 : G4UserEventAction()
 , action(runAction)
-, edep(0)
 , data{} {}
-
-void event_action::BeginOfEventAction(const G4Event*) { edep = 0; }
 
 void event_action::EndOfEventAction(const G4Event*) {
   // accumulate statistics in run action
-  action->AddEdep(edep);
   action->next_event();
   std::cout << "event id: " << action->get_evt_number() << std::endl;
 
