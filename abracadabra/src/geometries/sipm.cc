@@ -23,6 +23,8 @@ G4LogicalVolume* sipm::build() {
   auto sens_det = new sipm_sensitive{"/does/this/matter?", h5_filename};
   sens_det->Activate(true);
   vol_act->SetSensitiveDetector(sens_det);
+  G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
+  sdmgr->AddNewDetector(sens_det);
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
@@ -45,7 +47,7 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
 }
 
 void sipm_sensitive::EndOfEvent(G4HCofThisEvent* hc){
-  std::cout << "end of action" << std::endl;
+  std::cout << "end of event" << std::endl;
   auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
   auto evt_data = dynamic_cast<event_data*>(current_evt -> GetUserInformation());
   evt_data -> set_hits(hits);
