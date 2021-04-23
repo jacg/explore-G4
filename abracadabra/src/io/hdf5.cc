@@ -15,7 +15,7 @@ HighFive::CompoundType create_hit_type() {
           {"x", HighFive::AtomicType<double>{}},
           {"y", HighFive::AtomicType<double>{}},
           {"z", HighFive::AtomicType<double>{}},
-          {"time", HighFive::AtomicType<double>{}}};
+          {"t", HighFive::AtomicType<double>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 

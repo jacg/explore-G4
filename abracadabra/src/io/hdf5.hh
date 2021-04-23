@@ -16,7 +16,7 @@ typedef struct {
   double x;
   double y;
   double z;
-  double time;
+  double t;
 } hit_t;
 
 
@@ -28,7 +28,7 @@ public:
   void open();
 
   void write_run_info(const char* param_key, const char* param_value);
-  void write_hit_info(unsigned int evt_id, double x, double y, double z, double time);
+  void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
 
   void read_hit_info(std::vector<hit_t>& hits);
 
