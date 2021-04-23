@@ -130,6 +130,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto p = pt->GetPosition();
     auto t = pt -> GetGlobalTime();
     writer -> write_hit_info(0, p[0], p[1], p[2], t);
+    detected.push_back(p);
     return true;
   };
 
@@ -183,30 +184,28 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   CHECK(written_hit_structs.size() == n_sipms);
 
-  std::vector<G4ThreeVector> positions{};
+  std::vector<G4ThreeVector> expected{};
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
-	  positions.push_back({x*mm, y*mm, 29.7*mm});
+	  expected.push_back({x*mm, y*mm, 29.7*mm});
     }
   }
 
-  std::vector<G4ThreeVector> written_hit_vecs{};
+  std::vector<G4ThreeVector> written{};
   std::transform(begin(written_hit_structs), end(written_hit_structs),
-		  std::back_inserter(written_hit_vecs),
+		  std::back_inserter(written),
 		  [](auto& hit) { return G4ThreeVector{hit.x, hit.y, hit.z}; } );
 
-  std::sort(begin(positions)       , end(positions));
-  std::sort(begin(written_hit_vecs), end(written_hit_vecs));
+  std::sort(begin(expected) , end(expected));
+  std::sort(begin(detected) , end(detected));
+  std::sort(begin(written)  , end(written));
 
+  CHECK(detected == expected);
+  CHECK(written  == expected);
 
-  for (auto [i, row] : enumerate(written_hit_vecs)) {
-    auto pos  = positions[i];
-    auto time = pos.getZ() / (CLHEP::c_light / (mm/ns));
+  for (auto [evt_id, x,y,z,t] : written_hit_structs) {
+    auto expected_t = z / (CLHEP::c_light / (mm/ns));
+    CHECK(t == Approx(expected_t));
     // TODO: CHECK(row.event_id == ??);
-    CHECK(row.getX() == pos.getX());
-    CHECK(row.getY() == pos.getY());
-    CHECK(row.getZ() == pos.getZ());
-    // CHECK(row.time == time); // TODO
-    // CHECK(row.time == Approx(pos.getZ() / (CLHEP::c_light / (mm/ns))));
   }
 }
