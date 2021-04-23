@@ -154,7 +154,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     run_manager -> BeamOn(1);
   }
 
-  //delete writer;
+  delete writer;
 
   // ----- Verify -------------------------------------------------------------
 
@@ -179,8 +179,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
   // Retrieve hits that were written out
-  //auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
-  auto written_hit_structs = writer -> read_hit_info();
+  auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
 
   CHECK(written_hit_structs.size() == n_sipms);
 
