@@ -152,9 +152,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
   // Retrieve hits that were written out
-  std::vector<hit_t> written_hit_structs;
-  hdf5_io h5io{hdf5_test_file_name};
-  h5io.read_hit_info(written_hit_structs);
+  auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
 
   CHECK(written_hit_structs.size() == n_sipms);
 

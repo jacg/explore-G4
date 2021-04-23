@@ -72,8 +72,7 @@ void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
 
 void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z, double time) {
   // Create hit_t objects with the data
-  std::vector<hit_t> data;
-  data.push_back({event_id, x, y, z, time});
+  std::vector<hit_t> data{{event_id, x, y, z, time}};
 
   unsigned int n_elements = data.size();
 
@@ -89,12 +88,14 @@ void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z
   hit_index += n_elements;
 }
 
-void hdf5_io::read_hit_info(std::vector<hit_t>& hits) {
+std::vector<hit_t> hdf5_io::read_hit_info() {
+  std::vector<hit_t> hits;
   // Get the table from the file
-  HF::File    file       = HF::File{filename, HF::File::ReadOnly};
+  HF::File file       = HF::File{filename, HF::File::ReadOnly};
   HF::Group   group      = file.getGroup("MC");
   HF::DataSet hits_table = group.getDataSet("hits");
 
   // Read a subset of the data back
   hits_table.read(hits);
+  return hits;
 }

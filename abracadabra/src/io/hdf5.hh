@@ -30,7 +30,7 @@ public:
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
 
-  void read_hit_info(std::vector<hit_t>& hits);
+  std::vector<hit_t> read_hit_info();
 
   static const unsigned CONFLEN = 300;
 
