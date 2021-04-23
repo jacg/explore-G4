@@ -30,6 +30,13 @@ void set_string_param(char * to, const char * from, unsigned int max_len) {
   strcpy(to, from);
 }
 
+run_info_t make_run_info_t(const char* param_key, const char* param_value) {
+  run_info_t runinfo;
+  set_string_param(runinfo.param_key  , param_key  , hdf5_io::CONFLEN);
+  set_string_param(runinfo.param_value, param_value, hdf5_io::CONFLEN);
+  return runinfo;
+}
+
 void hdf5_io::open() {
   HighFive::File file = HighFive::File{filename, HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate};
   HighFive::Group group = file.createGroup("MC");
@@ -45,11 +52,7 @@ void hdf5_io::open() {
 }
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
-  run_info_t runinfo;
-  set_string_param(runinfo.param_key  , param_key  , CONFLEN);
-  set_string_param(runinfo.param_value, param_value, CONFLEN);
-  std::vector<run_info_t> data;
-  data.push_back(runinfo);
+  std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};
 
   unsigned int n_elements = data.size();
 
