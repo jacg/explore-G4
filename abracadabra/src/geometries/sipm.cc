@@ -6,7 +6,6 @@
 #include <G4LogicalVolume.hh>
 #include <G4EventManager.hh>
 
-using nain4::make_sensitive;
 using nain4::material_from_elements_N;
 using nain4::place;
 using nain4::scale_by;
@@ -21,7 +20,7 @@ G4LogicalVolume* sipm::build() {
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
 
-  vol_act->SetSensitiveDetector(make_sensitive<sipm_sensitive>("/does/this/matter?", h5_filename));
+  vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?", h5_filename));
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
@@ -31,6 +30,15 @@ G4LogicalVolume* sipm::build() {
   auto z_act_in_body = act.dz/2 - half.z();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
   return vol_body;
+}
+
+// ----- simp_sensitive implementations --------------------------------------------------
+sipm_sensitive::sipm_sensitive(G4String name, std::optional<std::string> h5_name)
+  : G4VSensitiveDetector{name}
+  , io{h5_name}
+{
+  if (io) io->open();
+  n4::fully_activate_sensitive_detector(this);
 }
 
 G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecated_parameter*/) {

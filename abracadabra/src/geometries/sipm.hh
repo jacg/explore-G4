@@ -90,8 +90,8 @@ private:
 // ----- Sensitive Detector ------------------------------------------------------------------------
 class sipm_sensitive : public G4VSensitiveDetector {
 public:
-  sipm_sensitive(G4String name)                      : G4VSensitiveDetector{name} {}
-  sipm_sensitive(G4String name, std::optional<std::string> h5_name) : G4VSensitiveDetector{name}, io{h5_name} { if (io) io->open(); }
+  sipm_sensitive(G4String name) : sipm_sensitive{name, {}} {}
+  sipm_sensitive(G4String name, std::optional<std::string> h5_name);
   G4bool ProcessHits(G4Step* step, G4TouchableHistory*) override;
   void   EndOfEvent (G4HCofThisEvent*)                  override;
 

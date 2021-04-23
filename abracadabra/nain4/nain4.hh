@@ -62,9 +62,8 @@ IA event_number  ()       { return G4RunManager::GetRunManager()->GetCurrentRun(
 // Remove all, logical/physical volumes, solids and assemblies.
 inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }
 
-template<class SENSITIVE, class... ArgTypes>
-auto make_sensitive(ArgTypes&&... args) {
-  auto detector = new SENSITIVE{std::forward<ArgTypes>(args)...};
+template<class SENSITIVE>
+auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   detector -> Activate(true);
   G4SDManager::GetSDMpointer() -> AddNewDetector(detector);
   return detector;
