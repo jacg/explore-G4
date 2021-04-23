@@ -4,24 +4,26 @@
 #include <cstring>
 #include <iostream>
 
+namespace HF { using namespace HighFive; }
+
 hdf5_io::hdf5_io(std::string fname)
 : filename{fname}
 , runinfo_index{0}
 , hit_index{0} {}
 
 
-HighFive::CompoundType create_hit_type() {
-  return {{"event_id", HighFive::AtomicType<unsigned int>{}},
-          {"x", HighFive::AtomicType<double>{}},
-          {"y", HighFive::AtomicType<double>{}},
-          {"z", HighFive::AtomicType<double>{}},
-          {"t", HighFive::AtomicType<double>{}}};
+HF::CompoundType create_hit_type() {
+  return {{"event_id", HF::AtomicType<unsigned int>{}},
+          {"x", HF::AtomicType<double>{}},
+          {"y", HF::AtomicType<double>{}},
+          {"z", HF::AtomicType<double>{}},
+          {"t", HF::AtomicType<double>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
-HighFive::CompoundType create_runinfo_type() {
-  return {{"param_key"  , HighFive::AtomicType<char[hdf5_io::CONFLEN]>{}},
-          {"param_value", HighFive::AtomicType<char[hdf5_io::CONFLEN]>{}}};
+HF::CompoundType create_runinfo_type() {
+  return {{"param_key"  , HF::AtomicType<char[hdf5_io::CONFLEN]>{}},
+          {"param_value", HF::AtomicType<char[hdf5_io::CONFLEN]>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
@@ -38,17 +40,17 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
 }
 
 void hdf5_io::open() {
-  HighFive::File file = HighFive::File{filename, HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate};
-  HighFive::Group group = file.createGroup("MC");
+  HF::File file = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+  HF::Group group = file.createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
   // and requires chunking of the data
-  HighFive::DataSpace dataspace = HighFive::DataSpace({0}, {HighFive::DataSpace::UNLIMITED});
-  HighFive::DataSetCreateProps props;
-  props.add(HighFive::Chunking(std::vector<hsize_t>{32768}));
+  HF::DataSpace dataspace = HF::DataSpace({0}, {HF::DataSpace::UNLIMITED});
+  HF::DataSetCreateProps props;
+  props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  HighFive::DataSet hits_table    = group.createDataSet("hits"         , dataspace, create_hit_type()    , props);
-  HighFive::DataSet runinfo_table = group.createDataSet("configuration", dataspace, create_runinfo_type(), props);
+  HF::DataSet hits_table    = group.createDataSet("hits"         , dataspace, create_hit_type()    , props);
+  HF::DataSet runinfo_table = group.createDataSet("configuration", dataspace, create_runinfo_type(), props);
 }
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
@@ -57,9 +59,9 @@ void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   unsigned int n_elements = data.size();
 
   // Get the table from the file
-  HighFive::File    file       = HighFive::File{filename, HighFive::File::ReadWrite};
-  HighFive::Group   group      = file.getGroup("MC");
-  HighFive::DataSet hits_table = group.getDataSet("configuration");
+  HF::File    file       = HF::File{filename, HF::File::ReadWrite};
+  HF::Group   group      = file.getGroup("MC");
+  HF::DataSet hits_table = group.getDataSet("configuration");
 
   // Create extra space in the table and append the new data
   hits_table.resize({runinfo_index + n_elements});
@@ -76,9 +78,9 @@ void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z
   unsigned int n_elements = data.size();
 
   // Get the table from the file
-  HighFive::File    file       = HighFive::File{filename, HighFive::File::ReadWrite};
-  HighFive::Group   group      = file.getGroup("MC");
-  HighFive::DataSet hits_table = group.getDataSet("hits");
+  HF::File    file       = HF::File{filename, HF::File::ReadWrite};
+  HF::Group   group      = file.getGroup("MC");
+  HF::DataSet hits_table = group.getDataSet("hits");
 
   // Create extra space in the table and append the new data
   hits_table.resize({hit_index + n_elements});
@@ -89,9 +91,9 @@ void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z
 
 void hdf5_io::read_hit_info(std::vector<hit_t>& hits) {
   // Get the table from the file
-  HighFive::File    file       = HighFive::File{filename, HighFive::File::ReadOnly};
-  HighFive::Group   group      = file.getGroup("MC");
-  HighFive::DataSet hits_table = group.getDataSet("hits");
+  HF::File    file       = HF::File{filename, HF::File::ReadOnly};
+  HF::Group   group      = file.getGroup("MC");
+  HF::DataSet hits_table = group.getDataSet("hits");
 
   // Read a subset of the data back
   hits_table.read(hits);
