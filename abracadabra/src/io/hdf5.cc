@@ -95,7 +95,6 @@ std::vector<hit_t> hdf5_io::read_hit_info() {
   HF::Group   group      = file.getGroup("MC");
   HF::DataSet hits_table = group.getDataSet("hits");
 
-  // Read a subset of the data back
   hits_table.read(hits);
   return hits;
 }
