@@ -49,8 +49,8 @@ void hdf5_io::open() {
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  HF::DataSet hits_table    = group.createDataSet("hits"         , dataspace, create_hit_type()    , props);
-  HF::DataSet runinfo_table = group.createDataSet("configuration", dataspace, create_runinfo_type(), props);
+  group.createDataSet("hits"         , dataspace, create_hit_type()    , props);
+  group.createDataSet("configuration", dataspace, create_runinfo_type(), props);
 }
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
