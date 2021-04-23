@@ -207,9 +207,9 @@ private:
   std::ofstream   dev_null;
 };
 
-
-
 } // namespace nain4
+
+namespace n4 { using namespace nain4; }
 
 // --------------------------------------------------------------------------------
 
