@@ -1,5 +1,5 @@
-#ifndef HDF5WRITER_H
-#define HDF5WRITER_H
+#ifndef IO_HDF5_IO_H
+#define IO_HDF5_IO_H
 
 #include <iostream>
 #include <string>
