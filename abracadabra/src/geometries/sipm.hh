@@ -64,7 +64,7 @@ class sipm {
   using vec = std::vector<G4double>;
 
 public:
-  sipm(std::string name) : name{name} {}
+  sipm(std::string name, n4::sensitive_detector* sd) : name{name}, sensitive_detector{sd} {}
   G4LogicalVolume* build();
 
   using dist = G4double;
@@ -72,7 +72,6 @@ public:
   CHAIN material(std::string const& matname) { mat = nain4::material(matname) ; NEXT }
   CHAIN size    (dist x, dist y, dist z)     { half = G4ThreeVector{x,y,z} / 2; NEXT }
   CHAIN vis     (G4VisAttributes const& va)  { vis_attributes = va            ; NEXT }
-  CHAIN write   (std::optional<std::string> f) { h5_filename = f              ; NEXT }
   CHAIN active  (sipm_active_window a)       { act  = a; NEXT }
   CHAIN wls     (sipm_wls w)                 { wls_ = w; NEXT }
 private:
@@ -82,7 +81,7 @@ private:
   G4VisAttributes         vis_attributes;
   sipm_active_window      act;
   std::optional<sipm_wls> wls_;
-  std::optional<std::string> h5_filename;
+  n4::sensitive_detector* sensitive_detector;
 #undef CHAIN
 };
 #undef NEXT
@@ -100,9 +99,8 @@ public:
   std::optional<hdf5_io> io; // TODO improve RAII
 };
 
-
 // ----- One example of usage of the interface
-G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, std::optional<std::string> h5_filename = {});
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, n4::sensitive_detector*);
 
 
 #endif

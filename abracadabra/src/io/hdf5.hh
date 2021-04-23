@@ -25,7 +25,6 @@ public:
   hdf5_io(std::string fname);
   ~hdf5_io() {} // TODO improve RAII
 
-  void open();
 
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
@@ -35,6 +34,8 @@ public:
   static const unsigned CONFLEN = 300;
 
 private:
+  void open();
+
   std::string filename;
   unsigned int runinfo_index;
   unsigned int hit_index;

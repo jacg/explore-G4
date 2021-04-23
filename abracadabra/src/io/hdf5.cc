@@ -9,7 +9,9 @@ namespace HF { using namespace HighFive; }
 hdf5_io::hdf5_io(std::string fname)
 : filename{fname}
 , runinfo_index{0}
-, hit_index{0} {}
+, hit_index{0} {
+  open();
+}
 
 
 HF::CompoundType create_hit_type() {

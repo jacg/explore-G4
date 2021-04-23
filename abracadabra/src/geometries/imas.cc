@@ -1,6 +1,8 @@
 #include "geometries/imas.hh"
+#include "g4-mandatory/event_action.hh"
 #include "geometries/sipm.hh"
 
+#include "io/hdf5.hh"
 #include "nain4.hh"
 
 #include <G4Box.hh>
@@ -20,7 +22,34 @@ using nain4::place;
 using nain4::volume;
 using std::make_tuple;
 
-G4PVPlacement* imas_demonstrator() {
+// Send hits received by sensitive detector to hdf5writer
+class write_with {
+  write_with(hdf5_io& writer) : writer{writer} {}
+public:
+  bool process_hits(G4Step* step) {
+    hits.push_back(*step);
+    auto pt = step -> GetPreStepPoint();
+    auto p = pt->GetPosition();
+    auto t = pt -> GetGlobalTime();
+    writer.write_hit_info(0, p[0], p[1], p[2], t);
+    return true;
+  }
+
+  void end_of_event(G4HCofThisEvent*) {
+    auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
+    auto data = new event_data{};
+    data -> set_hits(std::move(hits));
+    hits = {};
+    current_evt->SetUserInformation(data);
+  }
+
+private:
+  std::vector<G4Step> hits{};
+  hdf5_io& writer;
+
+};
+
+G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
@@ -80,7 +109,7 @@ G4PVPlacement* imas_demonstrator() {
   place(vol_vacuum_out ).in(vol_steel_out ).now();
   place(vol_steel_out  ).in(vol_envelope  ).now();
 
-  line_cylinder_with_tiles(vol_sensors, sipm_hamamatsu_blue(true), 1*mm);
+  line_cylinder_with_tiles(vol_sensors, sipm_hamamatsu_blue(true, sd), 1*mm);
 
   return place(vol_envelope).now();
 }

@@ -29,7 +29,8 @@
 
 // visible = true
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(true);
+  n4::sensitive_detector sensitive{"ignoreme", {}, {}};
+  auto& whole  = *sipm_hamamatsu_blue(true, &sensitive);
   auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region
   CHECK(std::distance(begin(whole), end(whole)) == 1);
@@ -46,7 +47,8 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 
 // visible = false
 TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
-  auto& whole  = *sipm_hamamatsu_blue(false);
+  n4::sensitive_detector sensitive{"ignoreme", {}, {}};
+  auto& whole  = *sipm_hamamatsu_blue(false, &sensitive);
   auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region
   CHECK(std::distance(begin(whole), end(whole)) == 1);
@@ -62,11 +64,11 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // ----- Geometry ------------------------------------------------------------
   struct geometry : public G4VUserDetectorConstruction {
-    geometry(std::string const& f) : filename{f} {}
+    geometry(n4::sensitive_detector* sd) : sensitive{sd} {}
 
     G4VPhysicalVolume* Construct() {
       auto air = nain4::material("G4_AIR");
-      auto sipm = sipm_hamamatsu_blue(true, filename);
+      auto sipm = sipm_hamamatsu_blue(true, sensitive);
       auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
       for (int x=-35; x<35; x+=7) {
         for (int y=-35; y<35; y+=7) {
@@ -76,7 +78,7 @@ TEST_CASE("hamamatsu app", "[app]") {
       return nain4::place(world).now();
     }
 
-    std::string filename;
+    n4::sensitive_detector* sensitive;
   };
 
   // ----- Generator ------------------------------------------------------------
@@ -116,18 +118,43 @@ TEST_CASE("hamamatsu app", "[app]") {
     }
   };
 
-  // ----- Initialize and run Geant4 ------------------------------------------
-
+  // ----- Prepare storage and retrieval of hits generated during test run ------
   std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
+  std::vector<G4ThreeVector> detected{};
+  std::vector<G4Step> hits{};
+  auto writer = new hdf5_io{hdf5_test_file_name};
+
+  auto process_hits = [&](auto* step) -> bool {
+    hits.push_back(*step);
+    auto pt = step -> GetPreStepPoint();
+    auto p = pt->GetPosition();
+    auto t = pt -> GetGlobalTime();
+    writer -> write_hit_info(0, p[0], p[1], p[2], t);
+    return true;
+  };
+
+  auto end_of_event = [&](auto) {
+    auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
+    auto data = new event_data{};
+    data -> set_hits(std::move(hits));
+    hits = {};
+    current_evt->SetUserInformation(data);
+  };
+
+  n4::sensitive_detector sensitive{"testing", process_hits, end_of_event};
+
+  // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new geometry{hdf5_test_file_name});
+    run_manager -> SetUserInitialization(new geometry{&sensitive});
     run_manager -> SetUserInitialization(new QBBC{0});
     run_manager -> SetUserInitialization(new actions);
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
+
+  //delete writer;
 
   // ----- Verify -------------------------------------------------------------
 
@@ -152,7 +179,8 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
   // Retrieve hits that were written out
-  auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
+  //auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
+  auto written_hit_structs = writer -> read_hit_info();
 
   CHECK(written_hit_structs.size() == n_sipms);
 

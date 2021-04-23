@@ -33,7 +33,7 @@ auto a_nema_phantom() {
 auto square_array_of_sipms() {
   // 10 x 10 array array of SiPMs
   auto air = nain4::material("G4_AIR");
-  auto sipm = sipm_hamamatsu_blue(true);
+  auto sipm = sipm_hamamatsu_blue(true, nullptr);
   auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
@@ -49,7 +49,7 @@ auto cylinder_lined_with_hamamatsus(double length, double radius) {
   auto material = nain4::material("G4_AIR");
   auto cylinder = volume<G4Tubs>("Cylinder", material, 0.0, radius, length/2, 0.0, CLHEP::twopi);
   auto envelope = volume<G4Box> ("Envelope", material, 1.1*radius, 1.1*radius, 1.1*length/2);
-  line_cylinder_with_tiles(cylinder, sipm_hamamatsu_blue(true), 1*mm);
+  line_cylinder_with_tiles(cylinder, sipm_hamamatsu_blue(true, nullptr), 1*mm);
   place(cylinder).in(envelope).now();
   return place(envelope).now();
 }
@@ -57,8 +57,8 @@ auto cylinder_lined_with_hamamatsus(double length, double radius) {
 G4VPhysicalVolume* detector_construction::Construct() {
   // Pick one to visualize with `./abradacabra`
   return cylinder_lined_with_hamamatsus(30*mm, 70*mm);
-  return imas_demonstrator();
+  return imas_demonstrator(nullptr);
   return square_array_of_sipms();
-  return nain4::place(sipm_hamamatsu_blue(true)).now();
+  return nain4::place(sipm_hamamatsu_blue(true, nullptr)).now();
   return a_nema_phantom();
 }

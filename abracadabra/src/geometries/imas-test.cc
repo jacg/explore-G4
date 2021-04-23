@@ -12,7 +12,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   using std::setw;
 
-  auto& geometry = *imas_demonstrator();
+  auto& geometry = *imas_demonstrator(nullptr);
 
   // std::cout << std::endl;
   // for (auto v: geometry) {

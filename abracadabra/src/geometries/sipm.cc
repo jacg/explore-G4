@@ -20,7 +20,7 @@ G4LogicalVolume* sipm::build() {
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
 
-  vol_act->SetSensitiveDetector(new sipm_sensitive("/does/this/matter?", h5_filename));
+  vol_act->SetSensitiveDetector(sensitive_detector);
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
@@ -37,7 +37,6 @@ sipm_sensitive::sipm_sensitive(G4String name, std::optional<std::string> h5_name
   : G4VSensitiveDetector{name}
   , io{h5_name}
 {
-  if (io) io->open();
   n4::fully_activate_sensitive_detector(this);
 }
 
@@ -51,7 +50,7 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
   return true; // TODO what is the meaning of this?
 }
 
-void sipm_sensitive::EndOfEvent(G4HCofThisEvent* hc){
+void sipm_sensitive::EndOfEvent(G4HCofThisEvent*){
   auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
   auto data = new event_data{};
   data -> set_hits(std::move(hits));
@@ -76,9 +75,7 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
-using std::optional;   using std::string;
-
-G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, optional<string> h5_filename) {
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, n4::sensitive_detector* sd) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
@@ -95,12 +92,11 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, optional<string> h5_filenam
     .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
     .vis(vis_act);
 
-  return sipm("Hamamatsu_Blue")
+  return sipm("Hamamatsu_Blue", sd)
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
     .vis(vis_body)
-    .write(h5_filename)
     .build();
 
 }
