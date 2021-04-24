@@ -176,16 +176,16 @@ TEST_CASE("hamamatsu app", "[app]") {
   // }
   // std::cout << std::endl;
 
+  // Check the number of volumes that make up the geometry
   size_t n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
   std::ptrdiff_t number_of_volumes_in_geometry = n_sipms * volumes_per_sipm + n_worlds;
-
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
   // Retrieve hits that were written out
   auto written_hit_structs = hdf5_io{hdf5_test_file_name}.read_hit_info();
-
   CHECK(written_hit_structs.size() == n_sipms);
 
+  // Generate theoretically expected hit locations
   std::vector<G4ThreeVector> expected{};
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
@@ -193,11 +193,14 @@ TEST_CASE("hamamatsu app", "[app]") {
     }
   }
 
+  // Translate from HDF5 compatible structs to something we like (G4ThreeVector)
   std::vector<G4ThreeVector> written{};
   std::transform(begin(written_hit_structs), end(written_hit_structs),
                  std::back_inserter(written),
                  [](auto& hit) { return G4ThreeVector{hit.x, hit.y, hit.z}; } );
 
+  // Ensure that implementation details which affect order of arrival of
+  // particles, don't affect the test result
   std::sort(begin(expected) , end(expected));
   std::sort(begin(detected) , end(detected));
   std::sort(begin(written)  , end(written));
@@ -205,6 +208,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   CHECK(detected == expected);
   CHECK(written  == expected);
 
+  // So far we have only checked spatial positions: need to do time and event number
   for (auto [evt_id, x,y,z,t] : written_hit_structs) {
     auto expected_t = z / (CLHEP::c_light / (mm/ns));
     CHECK(t == Approx(expected_t));
