@@ -1,3 +1,5 @@
+// clang-format off
+
 #include "nain4.hh"
 
 #include "geometries/sipm.hh"
@@ -148,25 +150,17 @@ TEST_CASE("hamamatsu app", "[app]") {
   // ----- Prepare storage and retrieval of hits generated during test run ------
   std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
   std::vector<G4ThreeVector> detected{};
-  std::vector<G4Step> hits{};
   auto writer = new hdf5_io{hdf5_test_file_name};
+  auto fwd = write_with{*writer};
 
+  // Intercept hits being processed by sensitive detector and store their
+  // positions in `detected`
   auto process_hits = [&](auto* step) -> bool {
-    hits.push_back(*step);
-    auto pt = step -> GetPreStepPoint();
-    auto p = pt -> GetPosition();
-    auto t = pt -> GetGlobalTime();
-    writer -> write_hit_info(0, p[0], p[1], p[2], t);
-    detected.push_back(p);
-    return true;
+    detected.push_back(step -> GetPreStepPoint() -> GetPosition());
+    return fwd.process_hits(step);
   };
 
-  auto end_of_event = [&](auto) {
-    auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-    auto data = new event_data{std::move(hits)};
-    hits = {};
-    current_evt->SetUserInformation(data);
-  };
+  auto end_of_event = [&](auto x) { fwd.end_of_event(x); };
 
   n4::sensitive_detector sensitive{"testing", process_hits, end_of_event};
 
