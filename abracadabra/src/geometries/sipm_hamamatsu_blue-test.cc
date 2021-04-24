@@ -65,10 +65,8 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 TEST_CASE("hamamatsu app", "[app]") {
 
   // ----- Geometry ------------------------------------------------------------
-  struct geometry : public G4VUserDetectorConstruction {
-    geometry(n4::sensitive_detector* sd) : sensitive{sd} {}
-
-    G4VPhysicalVolume* Construct() {
+  auto tiles_10_by_10 = [](n4::sensitive_detector* sensitive) -> n4::geometry::construct_fn {
+    return [sensitive]() {
       auto air = nain4::material("G4_AIR");
       auto sipm = sipm_hamamatsu_blue(true, sensitive);
       auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
@@ -78,9 +76,7 @@ TEST_CASE("hamamatsu app", "[app]") {
         }
       }
       return nain4::place(world).now();
-    }
-
-    n4::sensitive_detector* sensitive;
+    };
   };
 
   // ----- Generator ------------------------------------------------------------
@@ -169,14 +165,13 @@ TEST_CASE("hamamatsu app", "[app]") {
     return fwd.process_hits(step);
   };
 
-
   n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
 
   // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new geometry{&sensitive});
+    run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10(&sensitive)});
     run_manager -> SetUserInitialization(new QBBC{0});
     run_manager -> SetUserInitialization(new actions);
     run_manager -> Initialize();
