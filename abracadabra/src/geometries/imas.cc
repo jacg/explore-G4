@@ -29,7 +29,7 @@ public:
   bool process_hits(G4Step* step) {
     hits.push_back(*step);
     auto pt = step -> GetPreStepPoint();
-    auto p = pt->GetPosition();
+    auto p = pt -> GetPosition();
     auto t = pt -> GetGlobalTime();
     writer.write_hit_info(0, p[0], p[1], p[2], t);
     return true;

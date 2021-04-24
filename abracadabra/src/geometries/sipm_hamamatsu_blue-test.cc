@@ -107,9 +107,9 @@ TEST_CASE("hamamatsu app", "[app]") {
     void BuildForMaster() const override {}
     void Build         () const override {
       auto set_and_return = [this](auto action) {
-                              SetUserAction(action);
-                              return action;
-                            };
+        SetUserAction(action);
+        return action;
+      };
       SetUserAction(new primary_generator);
 
       set_and_return(new stepping_action {
@@ -127,7 +127,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   auto process_hits = [&](auto* step) -> bool {
     hits.push_back(*step);
     auto pt = step -> GetPreStepPoint();
-    auto p = pt->GetPosition();
+    auto p = pt -> GetPosition();
     auto t = pt -> GetGlobalTime();
     writer -> write_hit_info(0, p[0], p[1], p[2], t);
     detected.push_back(p);
@@ -186,14 +186,14 @@ TEST_CASE("hamamatsu app", "[app]") {
   std::vector<G4ThreeVector> expected{};
   for (int x=-35; x<35; x+=7) {
     for (int y=-35; y<35; y+=7) {
-	  expected.push_back({x*mm, y*mm, 29.7*mm});
+      expected.push_back({x*mm, y*mm, 29.7*mm});
     }
   }
 
   std::vector<G4ThreeVector> written{};
   std::transform(begin(written_hit_structs), end(written_hit_structs),
-		  std::back_inserter(written),
-		  [](auto& hit) { return G4ThreeVector{hit.x, hit.y, hit.z}; } );
+                 std::back_inserter(written),
+                 [](auto& hit) { return G4ThreeVector{hit.x, hit.y, hit.z}; } );
 
   std::sort(begin(expected) , end(expected));
   std::sort(begin(detected) , end(detected));
