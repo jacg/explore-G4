@@ -1,3 +1,5 @@
+// clang-format off
+
 #ifndef nain4_hh
 #define nain4_hh
 
@@ -20,6 +22,7 @@
 #include <G4Transform3D.hh>
 #include <G4VPhysicalVolume.hh>
 #include <G4VSensitiveDetector.hh>
+#include <G4VUserDetectorConstruction.hh>
 #include <G4VisAttributes.hh>
 
 #include <string>
@@ -69,7 +72,14 @@ auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   return detector;
 }
 
-
+class detector : public G4VUserDetectorConstruction {
+public:
+  using construct_fn = std::function<G4VPhysicalVolume*()>;
+  detector(construct_fn f) : construct{f} {}
+  G4VPhysicalVolume* Construct() override { return construct(); }
+private:
+  construct_fn construct;
+};
 
 // TODO make a builder for this (if more methods are added?)
 // TODO: needs tests

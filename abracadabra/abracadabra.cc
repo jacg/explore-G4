@@ -1,8 +1,15 @@
+#include "nain4.hh"
+
+#include "geometries/imas.hh"
+#include "geometries/samples.hh"
+#include "geometries/sipm.hh"
+
 #include "g4-mandatory/action_initialization.hh"
 #include "g4-mandatory/detector_construction.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4SystemOfUnits.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
 #include <G4VisExecutive.hh>
@@ -32,7 +39,14 @@ int main(int argc, char** argv) {
   // Set mandatory initialization classes
 
   // run_manager takes ownership of detector_construction
-  run_manager -> SetUserInitialization(new detector_construction{});
+  run_manager -> SetUserInitialization(new n4::detector{[]() -> G4VPhysicalVolume* {
+    // Pick one ...
+    return a_nema_phantom();
+    return cylinder_lined_with_hamamatsus(30*mm, 70*mm);
+    return imas_demonstrator(nullptr);
+    return square_array_of_sipms();
+    return nain4::place(sipm_hamamatsu_blue(true, nullptr)).now();
+  }});
 
   { // Physics list
     auto verbosity = 1;
