@@ -54,6 +54,7 @@ set(ABRACADABRA_TESTS
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
   test/trivial-full-app-test.cc
+  test/nema-phantom-generator-test.cc
   src/random/random-test.cc
   src/utils/enumerate-test.cc
 )
