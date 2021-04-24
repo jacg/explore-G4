@@ -121,10 +121,11 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Needs to find a home --------------------------------------------------
-  // Send hits received by sensitive detector to hdf5writer
+  // Utility for connecting sensitive detector to hdf5 writer
   class write_with {
   public:
     write_with(hdf5_io& writer) : writer{writer} {}
+
     bool process_hits(G4Step* step) {
       hits.push_back(*step);
       auto pt = step -> GetPreStepPoint();
@@ -140,6 +141,10 @@ TEST_CASE("hamamatsu app", "[app]") {
       hits = {};
       current_evt->SetUserInformation(data);
     }
+
+    // TODO: better docs: use for filling slots in n4::sensitive_detector
+    auto PROCESS_HITS() { return [this](auto step){ return this -> process_hits(step); }; }
+    auto END_OF_EVENT() { return [this](auto hc)  {        this -> end_of_event(hc  ); }; }
 
   private:
     std::vector<G4Step> hits{};
@@ -160,9 +165,8 @@ TEST_CASE("hamamatsu app", "[app]") {
     return fwd.process_hits(step);
   };
 
-  auto end_of_event = [&](auto x) { fwd.end_of_event(x); };
 
-  n4::sensitive_detector sensitive{"testing", process_hits, end_of_event};
+  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT()};
 
   // ----- Initialize and run Geant4 ------------------------------------------
   {
