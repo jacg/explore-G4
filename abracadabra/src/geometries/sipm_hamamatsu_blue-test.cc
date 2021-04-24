@@ -118,6 +118,33 @@ TEST_CASE("hamamatsu app", "[app]") {
     }
   };
 
+  // ----- Needs to find a home --------------------------------------------------
+  // Send hits received by sensitive detector to hdf5writer
+  class write_with {
+  public:
+    write_with(hdf5_io& writer) : writer{writer} {}
+    bool process_hits(G4Step* step) {
+      hits.push_back(*step);
+      auto pt = step -> GetPreStepPoint();
+      auto p = pt -> GetPosition();
+      auto t = pt -> GetGlobalTime();
+      writer.write_hit_info(0, p[0], p[1], p[2], t);
+      return true;
+    }
+
+    void end_of_event(G4HCofThisEvent*) {
+      auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
+      auto data = new event_data{std::move(hits)};
+      hits = {};
+      current_evt->SetUserInformation(data);
+    }
+
+  private:
+    std::vector<G4Step> hits{};
+    hdf5_io& writer;
+
+  };
+
   // ----- Prepare storage and retrieval of hits generated during test run ------
   std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
   std::vector<G4ThreeVector> detected{};

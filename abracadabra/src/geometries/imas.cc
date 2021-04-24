@@ -22,31 +22,6 @@ using nain4::place;
 using nain4::volume;
 using std::make_tuple;
 
-// Send hits received by sensitive detector to hdf5writer
-class write_with {
-  write_with(hdf5_io& writer) : writer{writer} {}
-public:
-  bool process_hits(G4Step* step) {
-    hits.push_back(*step);
-    auto pt = step -> GetPreStepPoint();
-    auto p = pt -> GetPosition();
-    auto t = pt -> GetGlobalTime();
-    writer.write_hit_info(0, p[0], p[1], p[2], t);
-    return true;
-  }
-
-  void end_of_event(G4HCofThisEvent*) {
-    auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-    auto data = new event_data{std::move(hits)};
-    hits = {};
-    current_evt->SetUserInformation(data);
-  }
-
-private:
-  std::vector<G4Step> hits{};
-  hdf5_io& writer;
-
-};
 
 G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
 
