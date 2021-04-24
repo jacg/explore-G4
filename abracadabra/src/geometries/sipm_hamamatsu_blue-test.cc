@@ -61,22 +61,72 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 
 }
 
+// ----- Needs to find a home --------------------------------------------------
+// Utility for connecting sensitive detector to hdf5 writer
+class write_with {
+public:
+  write_with(hdf5_io& writer)
+    : PROCESS_HITS{ [this](auto step){ return this -> process_hits(step); } }
+    , END_OF_EVENT{ [this](auto hc)  {        this -> end_of_event(hc  ); } }
+    , writer{writer}
+  {}
+
+  bool process_hits(G4Step* step) {
+    hits.push_back(*step);
+    auto pt = step -> GetPreStepPoint();
+    auto p = pt -> GetPosition();
+    auto t = pt -> GetGlobalTime();
+    writer.write_hit_info(0, p[0], p[1], p[2], t);
+    return true;
+  }
+
+  void end_of_event(G4HCofThisEvent*) {
+    auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
+    auto data = new event_data{std::move(hits)};
+    hits = {};
+    current_evt->SetUserInformation(data);
+  }
+
+  // TODO: better docs: use for filling slots in n4::sensitive_detector
+  n4::sensitive_detector::process_hits_fn const PROCESS_HITS;
+  n4::sensitive_detector::end_of_event_fn const END_OF_EVENT;
+
+private:
+  std::vector<G4Step> hits{};
+  hdf5_io& writer;
+
+};
+
 
 TEST_CASE("hamamatsu app", "[app]") {
 
+  // ----- Prepare storage and retrieval of hits generated during test run ------
+  std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
+  std::vector<G4ThreeVector> detected{};
+  auto writer = new hdf5_io{hdf5_test_file_name};
+  auto fwd = write_with{*writer};
+
+  // Intercept hits being processed by sensitive detector and store their
+  // positions in `detected`
+  auto process_hits = [&](auto* step) -> bool {
+    detected.push_back(step -> GetPreStepPoint() -> GetPosition());
+    return fwd.process_hits(step);
+  };
+
+  // An SD connected to `writer` and `detected`
+  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
+
   // ----- Geometry ------------------------------------------------------------
-  auto tiles_10_by_10 = [](n4::sensitive_detector* sensitive) -> n4::geometry::construct_fn {
-    return [sensitive]() {
-      auto air = nain4::material("G4_AIR");
-      auto sipm = sipm_hamamatsu_blue(true, sensitive);
-      auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
-      for (int x=-35; x<35; x+=7) {
-        for (int y=-35; y<35; y+=7) {
-          nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now();
-        }
+  auto tiles_10_by_10 = [&sensitive]() {
+    auto air = nain4::material("G4_AIR");
+    auto sipm = sipm_hamamatsu_blue(true, &sensitive);
+    auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
+    for (int x=-35; x<35; x+=7) {
+      for (int y=-35; y<35; y+=7) {
+        nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now();
       }
-      return nain4::place(world).now();
-    };
+    }
+    return nain4::place(world).now();
   };
 
   // ----- Generator ------------------------------------------------------------
@@ -116,62 +166,11 @@ TEST_CASE("hamamatsu app", "[app]") {
     }
   };
 
-  // ----- Needs to find a home --------------------------------------------------
-  // Utility for connecting sensitive detector to hdf5 writer
-  class write_with {
-  public:
-    write_with(hdf5_io& writer)
-      : PROCESS_HITS{ [this](auto step){ return this -> process_hits(step); } }
-      , END_OF_EVENT{ [this](auto hc)  {        this -> end_of_event(hc  ); } }
-      , writer{writer}
-    {}
-
-    bool process_hits(G4Step* step) {
-      hits.push_back(*step);
-      auto pt = step -> GetPreStepPoint();
-      auto p = pt -> GetPosition();
-      auto t = pt -> GetGlobalTime();
-      writer.write_hit_info(0, p[0], p[1], p[2], t);
-      return true;
-    }
-
-    void end_of_event(G4HCofThisEvent*) {
-      auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-      auto data = new event_data{std::move(hits)};
-      hits = {};
-      current_evt->SetUserInformation(data);
-    }
-
-    // TODO: better docs: use for filling slots in n4::sensitive_detector
-    n4::sensitive_detector::process_hits_fn const PROCESS_HITS;
-    n4::sensitive_detector::end_of_event_fn const END_OF_EVENT;
-
-  private:
-    std::vector<G4Step> hits{};
-    hdf5_io& writer;
-
-  };
-
-  // ----- Prepare storage and retrieval of hits generated during test run ------
-  std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
-  std::vector<G4ThreeVector> detected{};
-  auto writer = new hdf5_io{hdf5_test_file_name};
-  auto fwd = write_with{*writer};
-
-  // Intercept hits being processed by sensitive detector and store their
-  // positions in `detected`
-  auto process_hits = [&](auto* step) -> bool {
-    detected.push_back(step -> GetPreStepPoint() -> GetPosition());
-    return fwd.process_hits(step);
-  };
-
-  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
-
   // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10(&sensitive)});
+    run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
     run_manager -> SetUserInitialization(new QBBC{0});
     run_manager -> SetUserInitialization(new actions);
     run_manager -> Initialize();
