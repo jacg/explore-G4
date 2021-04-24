@@ -124,7 +124,11 @@ TEST_CASE("hamamatsu app", "[app]") {
   // Utility for connecting sensitive detector to hdf5 writer
   class write_with {
   public:
-    write_with(hdf5_io& writer) : writer{writer} {}
+    write_with(hdf5_io& writer)
+      : PROCESS_HITS{ [this](auto step){ return this -> process_hits(step); } }
+      , END_OF_EVENT{ [this](auto hc)  {        this -> end_of_event(hc  ); } }
+      , writer{writer}
+    {}
 
     bool process_hits(G4Step* step) {
       hits.push_back(*step);
@@ -143,8 +147,8 @@ TEST_CASE("hamamatsu app", "[app]") {
     }
 
     // TODO: better docs: use for filling slots in n4::sensitive_detector
-    auto PROCESS_HITS() { return [this](auto step){ return this -> process_hits(step); }; }
-    auto END_OF_EVENT() { return [this](auto hc)  {        this -> end_of_event(hc  ); }; }
+    n4::sensitive_detector::process_hits_fn const PROCESS_HITS;
+    n4::sensitive_detector::end_of_event_fn const END_OF_EVENT;
 
   private:
     std::vector<G4Step> hits{};
@@ -166,7 +170,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
 
-  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT()};
+  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
 
   // ----- Initialize and run Geant4 ------------------------------------------
   {
