@@ -1,11 +1,9 @@
 #include "nain4.hh"
+#include "g4-mandatory.hh"
 
 #include "geometries/imas.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
-
-#include "g4-mandatory/action_initialization.hh"
-#include "g4-mandatory/detector_construction.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -55,7 +53,7 @@ int main(int argc, char** argv) {
   } // run_manager owns physics_list
 
   // User action initialization
-  run_manager -> SetUserInitialization(new action_initialization{});
+  run_manager -> SetUserInitialization(new n4::actions{new n4::generator});
 
   // Initialize visualization
   auto vis_manager = make_unique<G4VisExecutive>();

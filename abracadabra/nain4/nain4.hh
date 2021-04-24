@@ -3,10 +3,6 @@
 #ifndef nain4_hh
 #define nain4_hh
 
-#include "../src/g4-mandatory/event_action.hh"
-#include "../src/g4-mandatory/stepping_action.hh"
-#include "../src/g4-mandatory/run_action.hh"
-
 #include <CLHEP/Geometry/Transform3D.h>
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
@@ -77,37 +73,6 @@ auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   G4SDManager::GetSDMpointer() -> AddNewDetector(detector);
   return detector;
 }
-
-// --------------------------------------------------------------------------------
-
-struct actions : public G4VUserActionInitialization {
-  actions(G4VUserPrimaryGeneratorAction* generator) : generator{generator} {}
-  void BuildForMaster() const override {}
-  void Build         () const override {
-    auto set_and_return = [this](auto action) {
-      SetUserAction(action);
-      return action;
-    };
-    SetUserAction(generator);
-
-    set_and_return(new stepping_action {
-        set_and_return(new event_action {
-            set_and_return(new run_action)})});
-  }
-private:
-  G4VUserPrimaryGeneratorAction* generator;
-};
-
-
-// --------------------------------------------------------------------------------
-class geometry : public G4VUserDetectorConstruction {
-public:
-  using construct_fn = std::function<G4VPhysicalVolume*()>;
-  geometry(construct_fn f) : construct{f} {}
-  G4VPhysicalVolume* Construct() override { return construct(); }
-private:
-  construct_fn construct;
-};
 
 // --------------------------------------------------------------------------------
 // TODO make a builder for this (if more methods are added?)

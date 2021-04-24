@@ -1,5 +1,4 @@
 #include "geometries/imas.hh"
-#include "g4-mandatory/event_action.hh"
 #include "geometries/sipm.hh"
 
 #include "io/hdf5.hh"

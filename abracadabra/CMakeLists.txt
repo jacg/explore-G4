@@ -20,12 +20,6 @@ add_subdirectory(nain4)
 
 # The files that make up the headers/source/tests of the project
 set(ABRACADABRA_HEADERS
-  src/g4-mandatory/action_initialization.hh
-  src/g4-mandatory/detector_construction.hh
-  src/g4-mandatory/event_action.hh
-  src/g4-mandatory/primary_generator_action.hh
-  src/g4-mandatory/run_action.hh
-  src/g4-mandatory/stepping_action.hh
   src/geometries/imas.hh
   src/geometries/nema.hh
   src/geometries/sipm.hh
@@ -36,12 +30,6 @@ set(ABRACADABRA_HEADERS
 )
 
 set(ABRACADABRA_SOURCES
-  src/g4-mandatory/action_initialization.cc
-  src/g4-mandatory/detector_construction.cc
-  src/g4-mandatory/event_action.cc
-  src/g4-mandatory/primary_generator_action.cc
-  src/g4-mandatory/run_action.cc
-  src/g4-mandatory/stepping_action.cc
   src/geometries/imas.cc
   src/geometries/nema.cc
   src/geometries/sipm.cc

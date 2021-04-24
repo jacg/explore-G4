@@ -1,13 +1,11 @@
 // clang-format off
 
 #include "nain4.hh"
+#include "g4-mandatory.hh"
 
 #include "geometries/sipm.hh"
 #include "io/hdf5.hh"
 #include "utils/enumerate.hh"
-#include "g4-mandatory/event_action.hh"
-#include "g4-mandatory/stepping_action.hh"
-#include "g4-mandatory/run_action.hh"
 
 #include <G4Box.hh>
 #include <G4ParticleGun.hh>
@@ -80,7 +78,7 @@ public:
 
   void end_of_event(G4HCofThisEvent*) {
     auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-    auto data = new event_data{std::move(hits)};
+    auto data = new n4::event_data{std::move(hits)};
     hits = {};
     current_evt->SetUserInformation(data);
   }
@@ -128,9 +126,9 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Generator ------------------------------------------------------------
-  class primary_generator : public G4VUserPrimaryGeneratorAction {
+  class generator : public G4VUserPrimaryGeneratorAction {
   public:
-    primary_generator() {
+    generator() {
       gun.SetParticleDefinition(nain4::find_particle("geantino"));
       gun.SetParticleMomentumDirection({0, 0, 1});
     }
@@ -154,7 +152,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
     run_manager -> SetUserInitialization(new QBBC{0});
-    run_manager -> SetUserInitialization(new n4::actions{new primary_generator});
+    run_manager -> SetUserInitialization(new n4::actions{new generator});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }

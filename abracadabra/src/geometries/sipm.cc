@@ -1,6 +1,6 @@
 // clang-format off
 #include "geometries/sipm.hh"
-#include "g4-mandatory/event_action.hh"
+#include "g4-mandatory.hh"
 
 #include <G4Box.hh>
 #include <G4LogicalVolume.hh>
@@ -52,7 +52,7 @@ G4bool sipm_sensitive::ProcessHits(G4Step* step, G4TouchableHistory* /*deprecate
 
 void sipm_sensitive::EndOfEvent(G4HCofThisEvent*){
   auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-  auto data = new event_data{std::move(hits)};
+  auto data = new n4::event_data{std::move(hits)};
   hits = {};
   current_evt->SetUserInformation(data);
 }

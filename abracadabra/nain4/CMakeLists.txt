@@ -1,4 +1,4 @@
-add_library(Nain4 nain4.cc)
+add_library(Nain4 nain4.cc g4-mandatory.cc)
 
 find_package(Geant4 REQUIRED)
 
