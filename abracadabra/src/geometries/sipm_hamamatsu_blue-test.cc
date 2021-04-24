@@ -13,8 +13,6 @@
 #include <G4ParticleGun.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
-#include <G4VUserActionInitialization.hh>
-#include <G4VUserDetectorConstruction.hh>
 
 #include <G4VUserPrimaryGeneratorAction.hh>
 #include <QBBC.hh>
@@ -150,32 +148,13 @@ TEST_CASE("hamamatsu app", "[app]") {
     G4ParticleGun gun {1};
   };
 
-  // ----- Actions ------------------------------------------------------------
-  struct actions : public G4VUserActionInitialization {
-    actions(G4VUserPrimaryGeneratorAction* generator) : generator{generator} {}
-    void BuildForMaster() const override {}
-    void Build         () const override {
-      auto set_and_return = [this](auto action) {
-        SetUserAction(action);
-        return action;
-      };
-      SetUserAction(generator);
-
-      set_and_return(new stepping_action {
-          set_and_return(new event_action {
-              set_and_return(new run_action)})});
-    }
-  private:
-    G4VUserPrimaryGeneratorAction* generator;
-  };
-
   // ----- Initialize and run Geant4 ------------------------------------------
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
     run_manager -> SetUserInitialization(new QBBC{0});
-    run_manager -> SetUserInitialization(new actions{new primary_generator});
+    run_manager -> SetUserInitialization(new n4::actions{new primary_generator});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }

@@ -3,6 +3,10 @@
 #ifndef nain4_hh
 #define nain4_hh
 
+#include "../src/g4-mandatory/event_action.hh"
+#include "../src/g4-mandatory/stepping_action.hh"
+#include "../src/g4-mandatory/run_action.hh"
+
 #include <CLHEP/Geometry/Transform3D.h>
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
@@ -22,6 +26,7 @@
 #include <G4Transform3D.hh>
 #include <G4VPhysicalVolume.hh>
 #include <G4VSensitiveDetector.hh>
+#include <G4VUserActionInitialization.hh>
 #include <G4VUserDetectorConstruction.hh>
 #include <G4VisAttributes.hh>
 
@@ -65,6 +70,7 @@ IA event_number  ()       { return G4RunManager::GetRunManager()->GetCurrentRun(
 // Remove all, logical/physical volumes, solids and assemblies.
 inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }
 
+// --------------------------------------------------------------------------------
 template<class SENSITIVE>
 auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   detector -> Activate(true);
@@ -72,6 +78,28 @@ auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   return detector;
 }
 
+// --------------------------------------------------------------------------------
+
+struct actions : public G4VUserActionInitialization {
+  actions(G4VUserPrimaryGeneratorAction* generator) : generator{generator} {}
+  void BuildForMaster() const override {}
+  void Build         () const override {
+    auto set_and_return = [this](auto action) {
+      SetUserAction(action);
+      return action;
+    };
+    SetUserAction(generator);
+
+    set_and_return(new stepping_action {
+        set_and_return(new event_action {
+            set_and_return(new run_action)})});
+  }
+private:
+  G4VUserPrimaryGeneratorAction* generator;
+};
+
+
+// --------------------------------------------------------------------------------
 class geometry : public G4VUserDetectorConstruction {
 public:
   using construct_fn = std::function<G4VPhysicalVolume*()>;
@@ -81,6 +109,7 @@ private:
   construct_fn construct;
 };
 
+// --------------------------------------------------------------------------------
 // TODO make a builder for this (if more methods are added?)
 // TODO: needs tests
 class sensitive_detector : public G4VSensitiveDetector {
@@ -96,7 +125,7 @@ private:
   end_of_event_fn end_of_event;
 };
 
-
+// --------------------------------------------------------------------------------
 // The G4Material::AddElement is overloaded on double/int in the second
 // parameter. Template argument deduction doesn't seem to be able to resolve
 // this, when the values are nested inside an std::initializer_list argument.
