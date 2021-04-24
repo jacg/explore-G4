@@ -72,10 +72,10 @@ auto fully_activate_sensitive_detector(SENSITIVE* detector) {
   return detector;
 }
 
-class detector : public G4VUserDetectorConstruction {
+class geometry : public G4VUserDetectorConstruction {
 public:
   using construct_fn = std::function<G4VPhysicalVolume*()>;
-  detector(construct_fn f) : construct{f} {}
+  geometry(construct_fn f) : construct{f} {}
   G4VPhysicalVolume* Construct() override { return construct(); }
 private:
   construct_fn construct;

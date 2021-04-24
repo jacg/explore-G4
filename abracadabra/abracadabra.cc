@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
 
   // Set mandatory initialization classes
 
-  // run_manager takes ownership of detector_construction
-  run_manager -> SetUserInitialization(new n4::detector{[]() -> G4VPhysicalVolume* {
+  // run_manager takes ownership of geometry
+  run_manager -> SetUserInitialization(new n4::geometry{[]() -> G4VPhysicalVolume* {
     // Pick one ...
     return a_nema_phantom();
     return cylinder_lined_with_hamamatsus(30*mm, 70*mm);
