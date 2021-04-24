@@ -37,8 +37,7 @@ public:
 
   void end_of_event(G4HCofThisEvent*) {
     auto current_evt = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
-    auto data = new event_data{};
-    data -> set_hits(std::move(hits));
+    auto data        = new event_data{std::move(hits)};
     hits = {};
     current_evt->SetUserInformation(data);
   }

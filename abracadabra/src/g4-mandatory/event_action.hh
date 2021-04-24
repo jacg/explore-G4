@@ -11,13 +11,13 @@
 class run_action;
 
 
-// This class is a container to store everything we need to store later for a given event
+// Container to store everything we need to store later for a given event
 class event_data : public G4VUserEventInformation {
 public:
-  event_data() : G4VUserEventInformation(), hits{} {}
+  event_data(std::vector<G4Step>&& hits) : G4VUserEventInformation(), hits{std::move(hits)} {}
   ~event_data() override {};
 
-  void Print() const override {};
+  void Print() const override {/* purely virtual in superclass */};
 
   void set_hits(std::vector<G4Step>&& sensor_hits) { hits = std::move(sensor_hits); }
   std::vector<G4Step>& get_hits() { return hits; }
