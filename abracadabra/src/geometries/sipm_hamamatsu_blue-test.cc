@@ -151,19 +151,22 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Actions ------------------------------------------------------------
-  class actions : public G4VUserActionInitialization {
+  struct actions : public G4VUserActionInitialization {
+    actions(G4VUserPrimaryGeneratorAction* generator) : generator{generator} {}
     void BuildForMaster() const override {}
     void Build         () const override {
       auto set_and_return = [this](auto action) {
         SetUserAction(action);
         return action;
       };
-      SetUserAction(new primary_generator);
+      SetUserAction(generator);
 
       set_and_return(new stepping_action {
           set_and_return(new event_action {
               set_and_return(new run_action)})});
     }
+  private:
+    G4VUserPrimaryGeneratorAction* generator;
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------
@@ -172,7 +175,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
     run_manager -> SetUserInitialization(new QBBC{0});
-    run_manager -> SetUserInitialization(new actions);
+    run_manager -> SetUserInitialization(new actions{new primary_generator});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
