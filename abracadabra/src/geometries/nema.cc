@@ -71,7 +71,7 @@ G4ThreeVector nema_phantom::sphere_position(size_t n) const {
 
 G4PVPlacement* nema_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
-  auto air     = material("G4_AIR");
+  auto air = material("G4_AIR");
 
   auto two_pi = 360 * deg;
 
@@ -101,22 +101,16 @@ G4PVPlacement* nema_phantom::geometry() const {
 }
 
 void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position, G4double time) {
-
   auto gamma = nain4::find_particle("gamma");
   auto p = 511*keV * G4RandomDirection();
-
   auto vertex =      new G4PrimaryVertex(position, time);
   vertex->SetPrimary(new G4PrimaryParticle(gamma,  p.x(),  p.y(),  p.z()));
   vertex->SetPrimary(new G4PrimaryParticle(gamma, -p.x(), -p.y(), -p.z()));
-
   event -> AddPrimaryVertex(vertex);
 }
 
 void nema_phantom::generate_primaries(G4Event* event) const {
-
-  auto position = generate_vertex();
-  G4double time = 0;
-
+  auto position = generate_vertex();        G4double time = 0;
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
