@@ -78,18 +78,13 @@ G4PVPlacement* nema_phantom::geometry() const {
   auto env_half_length = 1.1 * half_length;
   auto env_half_width  = 1.1 * outer_r;
 
-  // Bind invariant args (3, 5, 6, 7 and 8) of volume
-  auto orb = [](auto name, auto material, auto radius) {
-    return volume<G4Orb>(name, material, radius);
-  };
-
   auto cylinder     = volume<G4Tubs>("Cylinder", air, 0.0, outer_r, half_length, 0.0, two_pi);
   auto vol_envelope = volume<G4Box> ("Envelope", air, env_half_width, env_half_width, env_half_length);
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
 	  std::string name = "Sphere_" + std::to_string(count);
-	  auto ball  = orb(name, air, sphere.radius);
+	  auto ball  = volume<G4Orb>(name, air, sphere.radius);
     auto position = sphere_position(count);
 	  place(ball).in(cylinder).at(position).now();
   }
