@@ -113,7 +113,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
 
   // ----- Geometry ------------------------------------------------------------
-  auto tiles_10_by_10 = [&sensitive]() {
+  n4::geometry::construct_fn tiles_10_by_10 = [&sensitive]() {
     auto air = nain4::material("G4_AIR");
     auto sipm = sipm_hamamatsu_blue(true, &sensitive);
     auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
@@ -126,24 +126,16 @@ TEST_CASE("hamamatsu app", "[app]") {
   };
 
   // ----- Generator ------------------------------------------------------------
-  class generator : public G4VUserPrimaryGeneratorAction {
-  public:
-    generator() {
-      gun.SetParticleDefinition(nain4::find_particle("geantino"));
-      gun.SetParticleMomentumDirection({0, 0, 1});
-    }
-
-    void GeneratePrimaries(G4Event* event) override {
-      for (int x=-35; x<35; x+=7) {
-        for (int y=-35; y<35; y+=7) {
-          gun.SetParticlePosition({x*mm, y*mm, 0*mm});
-          gun.GeneratePrimaryVertex(event);
-        }
+  n4::generator::function shoot_at_each_sipm = [](auto* event) {
+    G4ParticleGun gun {1};
+    gun.SetParticleDefinition(nain4::find_particle("geantino"));
+    gun.SetParticleMomentumDirection({0, 0, 1});
+    for (int x=-35; x<35; x+=7) {
+      for (int y=-35; y<35; y+=7) {
+        gun.SetParticlePosition({x*mm, y*mm, 0*mm});
+        gun.GeneratePrimaryVertex(event);
       }
     }
-
-  private:
-    G4ParticleGun gun {1};
   };
 
   // ----- Initialize and run Geant4 ------------------------------------------
@@ -152,7 +144,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
     run_manager -> SetUserInitialization(new QBBC{0});
-    run_manager -> SetUserInitialization(new n4::actions{new generator});
+    run_manager -> SetUserInitialization(new n4::actions{new n4::generator{shoot_at_each_sipm}});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
