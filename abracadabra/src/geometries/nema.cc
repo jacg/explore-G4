@@ -83,10 +83,10 @@ G4PVPlacement* nema_phantom::geometry() const {
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
-	  std::string name = "Sphere_" + std::to_string(count);
-	  auto ball  = volume<G4Orb>(name, air, sphere.radius);
+    std::string name = "Sphere_" + std::to_string(count);
+    auto ball  = volume<G4Orb>(name, air, sphere.radius);
     auto position = sphere_position(count);
-	  place(ball).in(cylinder).at(position).now();
+    place(ball).in(cylinder).at(position).now();
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
