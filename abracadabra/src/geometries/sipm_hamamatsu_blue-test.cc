@@ -114,7 +114,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     for (int y=-35; y<35; y+=7) { xys.emplace_back(x*mm, y*mm); }
   }
   // ----- Geometry ------------------------------------------------------------
-  n4::geometry::construct_fn tiles_10_by_10 = [&sensitive, &xys]() {
+  n4::geometry::construct_fn tiles = [&sensitive, &xys]() {
     auto air = nain4::material("G4_AIR");
     auto sipm = sipm_hamamatsu_blue(true, &sensitive);
     auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
@@ -122,7 +122,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     return nain4::place(world).now();
   };
   // ----- Generator -----------------------------------------------------------
-  n4::generator::function shoot_at_each_sipm = [&xys](auto* event) {
+  n4::generator::function shoot_at_each_tile = [&xys](auto* event) {
     G4ParticleGun gun {1};
     gun.SetParticleDefinition(nain4::find_particle("geantino"));
     gun.SetParticleMomentumDirection({0, 0, 1});
@@ -135,9 +135,9 @@ TEST_CASE("hamamatsu app", "[app]") {
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    run_manager -> SetUserInitialization(new n4::geometry{tiles_10_by_10});
+    run_manager -> SetUserInitialization(new n4::geometry{tiles});
     run_manager -> SetUserInitialization(new QBBC{0});
-    run_manager -> SetUserInitialization(new n4::actions{new n4::generator{shoot_at_each_sipm}});
+    run_manager -> SetUserInitialization(new n4::actions{new n4::generator{shoot_at_each_tile}});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
