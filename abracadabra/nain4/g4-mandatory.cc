@@ -59,19 +59,12 @@ void actions::Build() const {
 }
 
 // ----- primary generator -----------------------------------------------------------
-generator::generator() {
-  gun.SetParticleDefinition(nain4::find_particle("geantino"));
-  gun.SetParticleMomentumDirection({0, 0, 1});
-}
-
-// TODO: not really appropriate as the default generator
-void generator::GeneratePrimaries(G4Event* event) {
-  for (int x = -35; x < 35; x += 7) {
-    for (int y = -35; y < 35; y += 7) {
-      gun.SetParticlePosition({x * CLHEP::mm, y * CLHEP::mm, 0 * CLHEP::mm});
-      gun.GeneratePrimaryVertex(event);
-    }
-  }
+void generator::geantino_along_x(G4Event* event) {
+  auto geantino  = nain4::find_particle("geantino");
+  auto p         = 1 * CLHEP::MeV;
+  auto vertex    = new G4PrimaryVertex();
+  vertex->SetPrimary(new G4PrimaryParticle(geantino, p, 0, 0));
+  event->AddPrimaryVertex(vertex);
 }
 
 } // namespace nain4

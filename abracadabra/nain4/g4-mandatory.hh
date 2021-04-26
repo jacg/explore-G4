@@ -81,12 +81,14 @@ private:
 };
 
 // ----- primary generator ----------------------------------------------------------
-class generator : public G4VUserPrimaryGeneratorAction {
-public:
-  generator();
-  void GeneratePrimaries(G4Event* event) override;
+
+struct generator : public G4VUserPrimaryGeneratorAction {
+  using function = std::function<void(G4Event*)>;
+  generator(function fn = geantino_along_x) : doit{fn} {}
+  void GeneratePrimaries(G4Event* event) override { doit(event); };
 private:
-  G4ParticleGun gun {1};
+  function const doit;
+  static void geantino_along_x(G4Event*);
 };
 
 } // namespace nain4
