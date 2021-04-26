@@ -57,7 +57,7 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 
 }
 
-// ----- Needs to find a home --------------------------------------------------
+// ----- TODO Needs to find a home --------------------------------------------------
 // Utility for connecting sensitive detector to hdf5 writer
 class write_with {
 public:
