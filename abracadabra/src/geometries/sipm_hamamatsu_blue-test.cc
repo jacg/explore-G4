@@ -95,23 +95,19 @@ private:
 
 
 TEST_CASE("hamamatsu app", "[app]") {
-
   // ----- Prepare storage and retrieval of hits generated during test run ------
   std::string hdf5_test_file_name = std::tmpnam(nullptr) + std::string("_test.h5");
   std::vector<G4ThreeVector> detected{};
   auto writer = new hdf5_io{hdf5_test_file_name};
   auto fwd = write_with{*writer};
-
   // Intercept hits being processed by sensitive detector and store their
   // positions in `detected`
   auto process_hits = [&](auto* step) -> bool {
     detected.push_back(step -> GetPreStepPoint() -> GetPosition());
     return fwd.process_hits(step);
   };
-
   // An SD connected to `writer` and `detected`
   n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
-
   // ----- Key points in the test geometry and generator -----------------------
   std::vector<std::tuple<double, double>> xys;
   for (int x=-35; x<35; x+=7) {
@@ -125,8 +121,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     for (auto [x,y] : xys) { nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now(); }
     return nain4::place(world).now();
   };
-
-  // ----- Generator ------------------------------------------------------------
+  // ----- Generator -----------------------------------------------------------
   n4::generator::function shoot_at_each_sipm = [&xys](auto* event) {
     G4ParticleGun gun {1};
     gun.SetParticleDefinition(nain4::find_particle("geantino"));
@@ -136,8 +131,7 @@ TEST_CASE("hamamatsu app", "[app]") {
         gun.GeneratePrimaryVertex(event);
     }
   };
-
-  // ----- Initialize and run Geant4 ------------------------------------------
+  // ----- Initialize and run Geant4 -------------------------------------------
   {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
@@ -147,10 +141,10 @@ TEST_CASE("hamamatsu app", "[app]") {
     run_manager -> Initialize();
     run_manager -> BeamOn(1);
   }
-
+  // Close & flush writer: ensure a different one is used for reading back in
   delete writer;
 
-  // ----- Verify -------------------------------------------------------------
+  // ===== Verify ==============================================================
   // Verify the number of volumes that make up the geometry
   auto world = nain4::find_physical("world");
 
