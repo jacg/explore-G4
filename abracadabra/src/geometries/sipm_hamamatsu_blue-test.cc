@@ -151,21 +151,8 @@ TEST_CASE("hamamatsu app", "[app]") {
   delete writer;
 
   // ----- Verify -------------------------------------------------------------
-
   // Verify the number of volumes that make up the geometry
   auto world = nain4::find_physical("world");
-
-  // std::cout << std::endl;
-  // for (const auto v: world) {
-  //   std::cout << std::setw(15) << v->GetName() << ": ";
-  //   auto l = v->GetLogicalVolume();
-  //   std::cout
-  //     << std::setw(12) << l->GetMaterial()->GetName()
-  //     << std::setw(12) << G4BestUnit(l->GetMass(), "Mass")
-  //     << std::setw(12) << G4BestUnit(l->GetSolid()->GetCubicVolume(), "Volume")
-  //     << std::endl;
-  // }
-  // std::cout << std::endl;
 
   // Check the number of volumes that make up the geometry
   size_t n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
