@@ -22,14 +22,6 @@
 using std::make_unique;
 using std::unique_ptr;
 
-// ------------------------------------------------------------------------------------------
-struct generator : public G4VUserPrimaryGeneratorAction {
-  void GeneratePrimaries(G4Event* event) override {
-    generate_back_to_back_511_keV_gammas(event, {}, 0);
-  };
-};
-// ------------------------------------------------------------------------------------------
-
 int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
   auto ui = argc == 1
@@ -62,7 +54,9 @@ int main(int argc, char** argv) {
   } // run_manager owns physics_list
 
   // User action initialization
-  run_manager -> SetUserInitialization(new n4::actions{new n4::generator});
+  run_manager -> SetUserInitialization(new n4::actions{
+      new n4::generator{[](G4Event* event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }}
+    });
 
   // Initialize visualization
   auto vis_manager = make_unique<G4VisExecutive>();
