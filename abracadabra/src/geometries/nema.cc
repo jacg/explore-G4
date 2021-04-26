@@ -126,7 +126,7 @@ G4ThreeVector nema_phantom::generate_vertex() const {
   return local_position + offset; // TODO: rotation!
 }
 
-bool nema_phantom::inside_sphere(size_t n, G4ThreeVector& position) const {
+bool nema_phantom::inside_this_sphere(size_t n, G4ThreeVector& position) const {
     auto r = spheres[n].radius;
     auto r2 = r*r;
     auto centre = sphere_position(n);
@@ -140,7 +140,7 @@ bool nema_phantom::inside_a_sphere(G4ThreeVector& position) const {
 
 std::optional<size_t> nema_phantom::in_which_region(G4ThreeVector& position) const {
   for (size_t n=0; n<spheres.size(); ++n) {
-    if (inside_sphere(n, position)) { return n; }
+    if (inside_this_sphere(n, position)) { return n; }
   }
   if (inside_whole(position)) { return spheres.size(); }
   return {};

@@ -19,7 +19,7 @@ public:
 
   G4ThreeVector sphere_position(size_t n) const;
   bool inside_a_sphere(G4ThreeVector&) const;
-  bool inside_sphere(size_t, G4ThreeVector&) const;
+  bool inside_this_sphere(size_t, G4ThreeVector&) const;
   bool inside_whole(G4ThreeVector&) const { return true; }
   std::optional<size_t> in_which_region(G4ThreeVector&) const;
 
