@@ -58,6 +58,7 @@ void actions::Build() const {
           set_and_return(new run_action)})});
 }
 
+// ----- primary generator -----------------------------------------------------------
 generator::generator() {
   gun.SetParticleDefinition(nain4::find_particle("geantino"));
   gun.SetParticleMomentumDirection({0, 0, 1});

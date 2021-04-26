@@ -80,7 +80,7 @@ private:
   construct_fn construct;
 };
 
-// --------------------------------------------------------------------------------
+// ----- primary generator ----------------------------------------------------------
 class generator : public G4VUserPrimaryGeneratorAction {
 public:
   generator();
