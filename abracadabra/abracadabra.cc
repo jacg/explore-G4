@@ -2,6 +2,7 @@
 #include "g4-mandatory.hh"
 
 #include "geometries/imas.hh"
+#include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 
@@ -20,6 +21,14 @@
 
 using std::make_unique;
 using std::unique_ptr;
+
+// ------------------------------------------------------------------------------------------
+struct generator : public G4VUserPrimaryGeneratorAction {
+  void GeneratePrimaries(G4Event* event) override {
+    generate_back_to_back_511_keV_gammas(event, {}, 0);
+  };
+};
+// ------------------------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
