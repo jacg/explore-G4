@@ -84,9 +84,7 @@ private:
 class generator : public G4VUserPrimaryGeneratorAction {
 public:
   generator();
-
   void GeneratePrimaries(G4Event* event) override;
-
 private:
   G4ParticleGun gun {1};
 };
