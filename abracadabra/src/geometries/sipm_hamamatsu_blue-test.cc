@@ -112,29 +112,28 @@ TEST_CASE("hamamatsu app", "[app]") {
   // An SD connected to `writer` and `detected`
   n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
 
+  // ----- Key points in the test geometry and generator -----------------------
+  std::vector<std::tuple<double, double>> xys;
+  for (int x=-35; x<35; x+=7) {
+    for (int y=-35; y<35; y+=7) { xys.emplace_back(x*mm, y*mm); }
+  }
   // ----- Geometry ------------------------------------------------------------
-  n4::geometry::construct_fn tiles_10_by_10 = [&sensitive]() {
+  n4::geometry::construct_fn tiles_10_by_10 = [&sensitive, &xys]() {
     auto air = nain4::material("G4_AIR");
     auto sipm = sipm_hamamatsu_blue(true, &sensitive);
     auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
-    for (int x=-35; x<35; x+=7) {
-      for (int y=-35; y<35; y+=7) {
-        nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now();
-      }
-    }
+    for (auto [x,y] : xys) { nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now(); }
     return nain4::place(world).now();
   };
 
   // ----- Generator ------------------------------------------------------------
-  n4::generator::function shoot_at_each_sipm = [](auto* event) {
+  n4::generator::function shoot_at_each_sipm = [&xys](auto* event) {
     G4ParticleGun gun {1};
     gun.SetParticleDefinition(nain4::find_particle("geantino"));
     gun.SetParticleMomentumDirection({0, 0, 1});
-    for (int x=-35; x<35; x+=7) {
-      for (int y=-35; y<35; y+=7) {
+    for (auto [x,y] : xys) {
         gun.SetParticlePosition({x*mm, y*mm, 0*mm});
         gun.GeneratePrimaryVertex(event);
-      }
     }
   };
 
@@ -179,11 +178,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // Generate theoretically expected hit locations
   std::vector<G4ThreeVector> expected{};
-  for (int x=-35; x<35; x+=7) {
-    for (int y=-35; y<35; y+=7) {
-      expected.push_back({x*mm, y*mm, 29.7*mm});
-    }
-  }
+  for (auto [x,y] : xys) { expected.push_back({x*mm, y*mm, 29.7*mm}); }
 
   // Translate from HDF5 compatible structs to something we like (G4ThreeVector)
   std::vector<G4ThreeVector> written{};
