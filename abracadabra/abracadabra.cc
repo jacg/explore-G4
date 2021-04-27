@@ -18,6 +18,7 @@
 #include <Randomize.hh>
 
 #include <memory>
+#include <string>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -75,15 +76,20 @@ int main(int argc, char** argv) {
   } else {
     // interactive mode
     {
-      //nain4::silence _{G4cout};
       ui_manager -> ApplyCommand("/control/execute init_vis.mac");
       ui_manager -> ApplyCommand("/run/beamOn 10");
-      int PHI=150;
-      for (int phi=PHI; phi<360+PHI; ++phi) {
+      //nain4::silence _{G4cout};
+      int PHI = 150; int THETA = 160;
+      auto view = [&ui_manager](auto theta, auto phi) {
+        ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
+                                 + std::to_string(theta) + ' ' + std::to_string(phi));
+      };
+      {
         nain4::silence _{G4cout};
-        ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi 160 " + std::to_string(phi));
+        for (int phi  =PHI  ; phi  <360+PHI  ; ++phi  ) { view(THETA, phi); }
+        for (int theta=THETA; theta<360+THETA; ++theta) { view(theta, PHI); }
       }
-      ui         -> SessionStart();
+      ui -> SessionStart();
     }
   }
 
