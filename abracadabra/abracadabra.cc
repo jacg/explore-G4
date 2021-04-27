@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
+  // For use with phantom_in_cylinder
   auto phantom = a_nema_phantom();
 
   // Set mandatory initialization classes
@@ -43,7 +44,7 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[&phantom]() -> G4VPhysicalVolume* {
     // Pick one ...
-    return phantom_in_cylinder();
+    return phantom_in_cylinder(phantom, 70*mm);
     return phantom.geometry();
     return cylinder_lined_with_hamamatsus(70*mm, 70*mm);
     return imas_demonstrator(nullptr);
