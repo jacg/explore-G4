@@ -197,7 +197,7 @@ class material_properties {
 public:
   material_properties& add(G4String const& key, vec const& energies, vec const& values);
   material_properties& add(G4String const& key, vec const& energies, G4double   value );
-  material_properties& add_const(G4String const& key, G4double value);
+  material_properties& add(G4String const& key, G4double value);
   G4MaterialPropertiesTable* done() { return table; }
 private:
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable;

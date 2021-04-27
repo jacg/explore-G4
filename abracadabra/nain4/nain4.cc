@@ -55,7 +55,7 @@ material_properties& material_properties::add(G4String const& key, vec const& en
   return add(key, energies, vec(energies.size(), value));
 }
 
-material_properties& material_properties::add_const(G4String const& key, G4double value) {
+material_properties& material_properties::add(G4String const& key, G4double value) {
   table->AddConstProperty(key, value);
   return *this;
 }
