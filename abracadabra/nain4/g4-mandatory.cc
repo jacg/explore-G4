@@ -25,6 +25,7 @@ event_action::event_action(run_action* runAction)
 , action(runAction) {}
 
 void event_action::EndOfEventAction(const G4Event* event) {
+  return; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   auto evt_data = dynamic_cast<event_data*>(event -> GetUserInformation());
   if (!evt_data) { throw "Failed to get event data"; }
   for (auto hit: evt_data->get_hits()) {
