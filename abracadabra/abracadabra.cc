@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[&phantom]() -> G4VPhysicalVolume* {
     // Pick one ...
+    return phantom_in_cylinder();
     return phantom.geometry();
     return cylinder_lined_with_hamamatsus(70*mm, 70*mm);
     return imas_demonstrator(nullptr);
