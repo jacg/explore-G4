@@ -26,6 +26,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/samples.hh
   src/random/random.hh
   src/utils/enumerate.hh
+  src/utils/interpolate.hh
   src/io/hdf5.hh
 )
 
@@ -43,6 +44,7 @@ set(ABRACADABRA_TESTS
   src/geometries/imas-test.cc
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
+  test/default-nain4-app-test.cc
   test/trivial-full-app-test.cc
   test/nema-phantom-generator-test.cc
   src/random/random-test.cc
