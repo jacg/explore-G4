@@ -112,7 +112,7 @@
 /vis/geometry/set/colour     Inner_steel  0 .7 .7 .7 .1
 /vis/geometry/set/colour     Inner_vacuum 0 .7 .7 .7 .1
 /vis/geometry/set/colour     Housing      0 .7 .7 .7 .1
-/vis/geometry/set/colour     Inner_space  0 .7 .7 .7 .1
+/vis/geometry/set/colour     Cavity       0 .7 .7 .7 .1
 /vis/geometry/set/colour     Cylinder     0 .7 .7 .7 .1
 
 /vis/geometry/set/visibility Envelope     0 true
@@ -124,7 +124,7 @@
 /vis/geometry/set/visibility Inner_steel  0 false
 /vis/geometry/set/visibility Inner_vacuum 0 false
 /vis/geometry/set/visibility Housing      0 false
-/vis/geometry/set/visibility Inner_space  0 false
+/vis/geometry/set/visibility Cavity       0 false
 
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface

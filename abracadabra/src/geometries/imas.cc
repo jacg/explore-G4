@@ -58,29 +58,29 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
     return volume<G4Tubs>(name, material, 0.0, radius, half_length, 0.0, twopi);
   };
 
-  auto vol_inner_space = vol("Inner_space" , air    , inner_radius);
-  auto vol_housing     = vol("Housing"     , housing, r_housing   );
-  auto vol_vacuum_in   = vol("Inner_vacuum", vacuum , r_vacuum_in );
-  auto vol_steel_in    = vol("Inner_steel" , steel  , r_steel_in  );
-  auto vol_LXe         = vol("LXe"         , LXe    , r_LXe       );
-  auto vol_quartz      = vol("Quartz"      , quartz , r_quartz    );
-  auto vol_sensors     = vol("Sensors"     , sensors, r_sensors   );
-  auto vol_vacuum_out  = vol("Outer_vacuum", vacuum , r_vacuum_out);
-  auto vol_steel_out   = vol("Outer_steel" , steel  , r_steel_out );
+  auto vol_cavity     = vol("Cavity"      , air    , inner_radius);
+  auto vol_housing    = vol("Housing"     , housing, r_housing   );
+  auto vol_vacuum_in  = vol("Inner_vacuum", vacuum , r_vacuum_in );
+  auto vol_steel_in   = vol("Inner_steel" , steel  , r_steel_in  );
+  auto vol_LXe        = vol("LXe"         , LXe    , r_LXe       );
+  auto vol_quartz     = vol("Quartz"      , quartz , r_quartz    );
+  auto vol_sensors    = vol("Sensors"     , sensors, r_sensors   );
+  auto vol_vacuum_out = vol("Outer_vacuum", vacuum , r_vacuum_out);
+  auto vol_steel_out  = vol("Outer_steel" , steel  , r_steel_out );
   auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
 
   // TODO world volume ?
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
-  place(vol_inner_space).in(vol_housing   ).now();
-  place(vol_housing    ).in(vol_vacuum_in ).now();
-  place(vol_vacuum_in  ).in(vol_steel_in  ).now();
-  place(vol_steel_in   ).in(vol_LXe       ).now();
-  place(vol_LXe        ).in(vol_quartz    ).now();
-  place(vol_quartz     ).in(vol_sensors   ).now();
-  place(vol_sensors    ).in(vol_vacuum_out).now();
-  place(vol_vacuum_out ).in(vol_steel_out ).now();
-  place(vol_steel_out  ).in(vol_envelope  ).now();
+  place(vol_cavity    ).in(vol_housing   ).now();
+  place(vol_housing   ).in(vol_vacuum_in ).now();
+  place(vol_vacuum_in ).in(vol_steel_in  ).now();
+  place(vol_steel_in  ).in(vol_LXe       ).now();
+  place(vol_LXe       ).in(vol_quartz    ).now();
+  place(vol_quartz    ).in(vol_sensors   ).now();
+  place(vol_sensors   ).in(vol_vacuum_out).now();
+  place(vol_vacuum_out).in(vol_steel_out ).now();
+  place(vol_steel_out ).in(vol_envelope  ).now();
 
   line_cylinder_with_tiles(vol_sensors, sipm_hamamatsu_blue(true, sd), 1*mm);
 
