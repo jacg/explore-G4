@@ -17,7 +17,7 @@ auto a_nema_phantom() {
   // Use build_nema_phantom to create one realization of the cylyndrical NEMA
   // phantom pattern
   return build_nema_phantom{}
-    .activity(1)
+    .activity(0)
     .length(140*mm)
     .inner_radius(114.4*mm)
     .outer_radius(152.0*mm)
