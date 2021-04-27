@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[]() -> G4VPhysicalVolume* {
     // Pick one ...
-    return a_nema_phantom();
-    return cylinder_lined_with_hamamatsus(30*mm, 70*mm);
+    return cylinder_lined_with_hamamatsus(70*mm, 70*mm);
     return imas_demonstrator(nullptr);
+    return a_nema_phantom();
     return square_array_of_sipms();
     return nain4::place(sipm_hamamatsu_blue(true, nullptr)).now();
   }});
@@ -54,9 +54,8 @@ int main(int argc, char** argv) {
   } // run_manager owns physics_list
 
   // User action initialization
-  run_manager -> SetUserInitialization(new n4::actions{
-      new n4::generator{[](G4Event* event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }}
-    });
+  run_manager->SetUserInitialization(new n4::actions{
+      new n4::generator{[](G4Event* event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }}});
 
   // Initialize visualization
   auto vis_manager = make_unique<G4VisExecutive>();
@@ -75,8 +74,17 @@ int main(int argc, char** argv) {
     ui_manager -> ApplyCommand(command + file_name);
   } else {
     // interactive mode
-    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-    ui         -> SessionStart();
+    {
+      //nain4::silence _{G4cout};
+      ui_manager -> ApplyCommand("/control/execute init_vis.mac");
+      ui_manager -> ApplyCommand("/run/beamOn 10");
+      int PHI=150;
+      for (int phi=PHI; phi<360+PHI; ++phi) {
+        nain4::silence _{G4cout};
+        ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi 160 " + std::to_string(phi));
+      }
+      ui         -> SessionStart();
+    }
   }
 
   // Job termination
