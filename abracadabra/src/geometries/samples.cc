@@ -13,7 +13,7 @@
 using nain4::volume;
 using nain4::place;
 
-G4VPhysicalVolume* a_nema_phantom() {
+auto a_nema_phantom() {
   // Use build_nema_phantom to create one realization of the cylyndrical NEMA
   // phantom pattern
   return build_nema_phantom{}
@@ -27,8 +27,7 @@ G4VPhysicalVolume* a_nema_phantom() {
     .sphere(22*mm / 2, 2.8)
     .sphere(28*mm / 2, 0)
     .sphere(37*mm / 2, 0)
-    .build()
-    .geometry();
+    .build();
 }
 
 G4VPhysicalVolume* square_array_of_sipms() {
