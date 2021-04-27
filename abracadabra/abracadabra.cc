@@ -36,14 +36,16 @@ int main(int argc, char** argv) {
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
+  auto phantom = a_nema_phantom();
+
   // Set mandatory initialization classes
 
   // run_manager takes ownership of geometry
-  run_manager -> SetUserInitialization(new n4::geometry{[]() -> G4VPhysicalVolume* {
+  run_manager -> SetUserInitialization(new n4::geometry{[&phantom]() -> G4VPhysicalVolume* {
     // Pick one ...
+    return phantom.geometry();
     return cylinder_lined_with_hamamatsus(70*mm, 70*mm);
     return imas_demonstrator(nullptr);
-    return a_nema_phantom();
     return square_array_of_sipms();
     return nain4::place(sipm_hamamatsu_blue(true, nullptr)).now();
   }});
@@ -56,7 +58,11 @@ int main(int argc, char** argv) {
 
   // User action initialization
   run_manager->SetUserInitialization(new n4::actions{
-      new n4::generator{[](G4Event* event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }}});
+      new n4::generator{[&phantom](G4Event* event) {
+        // Pick one that matches geometry
+        //generate_back_to_back_511_keV_gammas(event, {}, 0);
+        phantom.generate_primaries(event);
+      }}});
 
   // Initialize visualization
   auto vis_manager = make_unique<G4VisExecutive>();
@@ -77,7 +83,7 @@ int main(int argc, char** argv) {
     // interactive mode
     {
       ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-      ui_manager -> ApplyCommand("/run/beamOn 10");
+      ui_manager -> ApplyCommand("/run/beamOn 100");
       //nain4::silence _{G4cout};
       int PHI = 150; int THETA = 160;
       auto view = [&ui_manager](auto theta, auto phi) {
