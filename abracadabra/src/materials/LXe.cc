@@ -50,12 +50,10 @@ G4MaterialPropertiesTable* LXe_optical_material_properties() {
   G4double no_absorption = 1e8  * m; // approx. infinity
   G4double optphot_min_E = 1    * eV;
   G4double optphot_max_E = 8.21 * eV;
-  std::function<double(double)> rindex = LXe_refractive_index;
-  std::function<double(double)> scinty = LXe_Scintillation;
 
   // Sampling from ~151 nm to 200 nm <----> from 6.20625 eV to 8.21 eV // TODO convert here
-  auto [sc_energies, sc_values] = interpolate(scinty, 500, 6.20625*eV   , optphot_max_E);
-  auto [ri_energies, ri_values] = interpolate(rindex, 200, optphot_min_E, optphot_max_E);
+  auto [sc_energies, sc_values] = interpolate(LXe_Scintillation   , 500, 6.20625*eV   , optphot_max_E);
+  auto [ri_energies, ri_values] = interpolate(LXe_refractive_index, 200, optphot_min_E, optphot_max_E);
 
   return n4::material_properties()
     .add("RINDEX", ri_energies, ri_values)
@@ -70,7 +68,6 @@ G4MaterialPropertiesTable* LXe_optical_material_properties() {
     .add("SLOWCOMPONENT", sc_energies, sc_values)
     .add("ABSLENGTH", no_absorption)
     .done();
-
 }
 
 G4double LXe_Scintillation(G4double energy) {
