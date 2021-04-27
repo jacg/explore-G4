@@ -39,17 +39,28 @@ int main(int argc, char** argv) {
   // For use with phantom_in_cylinder
   auto phantom = a_nema_phantom();
 
+  n4::sensitive_detector::process_hits_fn make_noise = [](G4Step* step) {
+    auto track    = step->GetTrack();
+    auto particle = track->GetParticleDefinition();
+    auto name     = particle->GetParticleName();
+    std::cout << "LOOK AT MEEEEEEEEEEEE! " << name << std::endl;
+    return true; // Still don't know what this means!
+  };
+  // pick one:
+  auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, {}};
+  //auto sd = nullptr;
+
   // Set mandatory initialization classes
 
   // run_manager takes ownership of geometry
-  run_manager -> SetUserInitialization(new n4::geometry{[&phantom]() -> G4VPhysicalVolume* {
+  run_manager -> SetUserInitialization(new n4::geometry{[&phantom, sd]() -> G4VPhysicalVolume* {
     // Pick one ...
-    return phantom_in_cylinder(phantom, 70*mm);
+    return phantom_in_cylinder(phantom, 70*mm, sd);
     return phantom.geometry();
-    return cylinder_lined_with_hamamatsus(70*mm, 70*mm);
+    return cylinder_lined_with_hamamatsus(70*mm, 70*mm, sd);
     return imas_demonstrator(nullptr);
-    return square_array_of_sipms();
-    return nain4::place(sipm_hamamatsu_blue(true, nullptr)).now();
+    return square_array_of_sipms(sd);
+    return nain4::place(sipm_hamamatsu_blue(true, sd)).now();
   }});
 
   { // Physics list

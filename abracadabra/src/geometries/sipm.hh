@@ -64,7 +64,7 @@ class sipm {
   using vec = std::vector<G4double>;
 
 public:
-  sipm(std::string name, n4::sensitive_detector* sd) : name{name}, sensitive_detector{sd} {}
+  sipm(std::string name, G4VSensitiveDetector* sd) : name{name}, sensitive_detector{sd} {}
   G4LogicalVolume* build();
 
   using dist = G4double;
@@ -81,7 +81,7 @@ private:
   G4VisAttributes         vis_attributes;
   sipm_active_window      act;
   std::optional<sipm_wls> wls_;
-  n4::sensitive_detector* sensitive_detector;
+  G4VSensitiveDetector*   sensitive_detector;
 #undef CHAIN
 };
 #undef NEXT
@@ -100,7 +100,7 @@ public:
 };
 
 // ----- One example of usage of the interface
-G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, n4::sensitive_detector*);
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector*);
 
 
 #endif

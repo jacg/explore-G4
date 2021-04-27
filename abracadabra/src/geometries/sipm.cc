@@ -74,7 +74,7 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
-G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, n4::sensitive_detector* sd) {
+G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
