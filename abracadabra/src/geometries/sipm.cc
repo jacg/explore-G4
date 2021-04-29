@@ -87,8 +87,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
                                                                            {"C", 18},
                                                                            {"O", 3}});
 
-  auto LXe = n4::material("G4_lXe");
-  LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
+  auto LXe = LXe_with_properties();
 
   using va = nain4::vis_attributes;       using col = G4Colour;
 

@@ -5,6 +5,13 @@
 
 #include <G4SystemOfUnits.hh>
 
+G4Material* LXe_with_properties() {
+  auto LXe = n4::material("G4_lXe");
+  LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
+  return LXe;
+}
+
+
 G4double LXe_refractive_index(G4double energy) {
   // Formula for the refractive index taken from
   // A. Baldini et al., "Liquid Xe scintillation calorimetry

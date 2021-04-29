@@ -51,8 +51,7 @@ G4VPhysicalVolume* square_array_of_sipms(SD* sd) {
 G4VPhysicalVolume* cylinder_lined_with_hamamatsus(double length, double radius, double dr_Xe, SD* sd) {
   // LXe-filled cylindrical shell, lined with hamamamtus
   auto air = nain4::material("G4_AIR");
-  auto lXe = nain4::material("G4_lXe");
-  //lXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
+  auto lXe = LXe_with_properties();
 
   auto cavity_r = radius - dr_Xe;
 

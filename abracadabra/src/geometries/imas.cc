@@ -31,10 +31,9 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto vacuum  = material("G4_Galactic");
   auto sensors = material("G4_WATER");    // TODO
   auto quartz  = material("G4_WATER");    // TODO
-  auto LXe     = material("G4_lXe");
+  auto LXe     = LXe_with_properties();
   auto housing = steel;
 
-  LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
   // ----- Dimensions -------------------------------------------------------------
   auto inner_radius = 325 * mm;
 

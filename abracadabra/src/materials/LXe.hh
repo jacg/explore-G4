@@ -1,3 +1,4 @@
+#include <G4Material.hh>
 #include <G4MaterialPropertiesTable.hh>
 
 G4double LXe_refractive_index(G4double energy);
