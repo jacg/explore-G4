@@ -33,7 +33,7 @@ G4LogicalVolume* sipm::build() {
 
   // ----- geometrical relationship between components ----------------------------
   auto z_act_in_body = act.dz/2 - half.z() + pre_z;
-  auto z_pre_in_body = act.dz/2 - pre_z/2;
+  auto z_pre_in_body =  pre_z/2 - half.z();
   place(vol_pre).in(vol_body).at(0,0,z_pre_in_body).now();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
   return vol_body;
