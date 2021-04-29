@@ -5,7 +5,9 @@
 #include <G4VUserActionInitialization.hh>
 #include <G4VUserDetectorConstruction.hh>
 
-#include <QBBC.hh>
+#include <FTFP_BERT.hh>
+#include <G4EmStandardPhysics_option4.hh>
+#include <G4OpticalPhysics.hh>
 
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
@@ -48,7 +50,9 @@ int main(int argc, char** argv) {
 
   { // Physics list
     auto verbosity = 0;
-    auto physics_list = new QBBC(verbosity); // SetVerboseLevel method also exists
+    auto physics_list = new FTFP_BERT{verbosity};
+    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
+    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
     run_manager  -> SetUserInitialization(physics_list);
   } // run_manager owns physics_list
 

@@ -13,7 +13,9 @@
 #include <G4UnitsTable.hh>
 
 #include <G4VUserPrimaryGeneratorAction.hh>
-#include <QBBC.hh>
+#include <FTFP_BERT.hh>
+#include <G4EmStandardPhysics_option4.hh>
+#include <G4OpticalPhysics.hh>
 
 #include <CLHEP/Units/PhysicalConstants.h>
 #include <CLHEP/Units/SystemOfUnits.h>
@@ -138,7 +140,10 @@ TEST_CASE("hamamatsu app", "[app]") {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles});
-    run_manager -> SetUserInitialization(new QBBC{0});
+    auto physics_list = new FTFP_BERT{0};
+    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
+    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
+    run_manager  -> SetUserInitialization(physics_list);
     run_manager -> SetUserInitialization(new n4::actions{new n4::generator{shoot_at_each_tile}});
     run_manager -> Initialize();
     run_manager -> BeamOn(1);

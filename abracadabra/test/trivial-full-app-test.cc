@@ -18,7 +18,10 @@
 #include <G4VUserActionInitialization.hh>
 #include <G4VUserDetectorConstruction.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
-#include <QBBC.hh>
+#include <FTFP_BERT.hh>
+#include <G4EmStandardPhysics_option4.hh>
+#include <G4OpticalPhysics.hh>
+
 
 #include <Randomize.hh>
 #include <catch2/catch.hpp>
@@ -260,7 +263,10 @@ TEST_CASE("trivial app", "[app]") {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new geometry{y_min, y_max, z_min, z_max});
-    run_manager -> SetUserInitialization(new QBBC{0});
+    auto physics_list = new FTFP_BERT{0};
+    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
+    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
+    run_manager  -> SetUserInitialization(physics_list);
     run_manager -> SetUserInitialization(new actions{n_gun, n_inside_generator});
     run_manager -> Initialize();
     run_manager -> BeamOn(n_beam_on);
