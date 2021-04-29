@@ -30,8 +30,9 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
   n4::sensitive_detector sensitive{"ignoreme", {}, {}};
   auto& whole  = *sipm_hamamatsu_blue(true, &sensitive);
   auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
-  // Verify the number of sub-volumes: 1 active region
-  CHECK(std::distance(begin(whole), end(whole)) == 1);
+  // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
+  // for attaching SD in front of skin surface (G4 10.7 bug?)
+  CHECK(std::distance(begin(whole), end(whole)) == 2);
 
   CHECK(whole .GetVisAttributes()->GetColour() == G4Colour::Yellow());
   CHECK(active.GetVisAttributes()->GetColour() == G4Colour::Blue());
@@ -48,8 +49,9 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
   n4::sensitive_detector sensitive{"ignoreme", {}, {}};
   auto& whole  = *sipm_hamamatsu_blue(false, &sensitive);
   auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
-  // Verify the number of sub-volumes: 1 active region
-  CHECK(std::distance(begin(whole), end(whole)) == 1);
+  // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
+  // for attaching SD in front of skin surface (G4 10.7 bug?)
+  CHECK(std::distance(begin(whole), end(whole)) == 2);
 
   // TODO How can you verify the G4VisAttributes::Invisible attribute?
   CHECK(whole .GetVisAttributes()->GetColour() == G4Colour::White());
@@ -149,7 +151,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   auto world = nain4::find_physical("world");
 
   // Check the number of volumes that make up the geometry
-  size_t n_sipms = 10 * 10, volumes_per_sipm = 2, n_worlds = 1;
+  size_t n_sipms = 10 * 10, volumes_per_sipm = 3, n_worlds = 1;
   std::ptrdiff_t number_of_volumes_in_geometry = n_sipms * volumes_per_sipm + n_worlds;
   CHECK(std::distance(begin(world), end(world)) == number_of_volumes_in_geometry);
 
