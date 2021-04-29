@@ -30,14 +30,16 @@
 // visible = true
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
   n4::sensitive_detector sensitive{"ignoreme", {}, {}};
-  auto& whole  = *sipm_hamamatsu_blue(true, &sensitive);
-  auto& active = *whole.GetDaughter(1)->GetLogicalVolume();
+  auto& whole    = *sipm_hamamatsu_blue(true, &sensitive);
+  auto& active_p = *whole.GetDaughter(0);
+  CHECK(active_p.GetName() == "fake_active");
+  auto& active_l = *active_p.GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
   // for attaching SD in front of skin surface (G4 10.7 bug?)
   CHECK(std::distance(begin(whole), end(whole)) == 2);
 
-  CHECK(whole .GetVisAttributes()->GetColour() == G4Colour::Yellow());
-  CHECK(active.GetVisAttributes()->GetColour() == G4Colour::Blue());
+  CHECK(whole   .GetVisAttributes()->GetColour() == G4Colour::Yellow());
+  CHECK(active_l.GetVisAttributes()->GetColour() == G4Colour::Blue());
 
   auto number_of_sensitive_detectors =
     std::count_if(begin(whole), end(whole),
