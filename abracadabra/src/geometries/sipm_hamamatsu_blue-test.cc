@@ -31,7 +31,7 @@
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
   n4::sensitive_detector sensitive{"ignoreme", {}, {}};
   auto& whole  = *sipm_hamamatsu_blue(true, &sensitive);
-  auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
+  auto& active = *whole.GetDaughter(1)->GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
   // for attaching SD in front of skin surface (G4 10.7 bug?)
   CHECK(std::distance(begin(whole), end(whole)) == 2);
@@ -50,7 +50,7 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
   n4::sensitive_detector sensitive{"ignoreme", {}, {}};
   auto& whole  = *sipm_hamamatsu_blue(false, &sensitive);
-  auto& active = *whole.GetDaughter(0)->GetLogicalVolume();
+  auto& active = *whole.GetDaughter(1)->GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
   // for attaching SD in front of skin surface (G4 10.7 bug?)
   CHECK(std::distance(begin(whole), end(whole)) == 2);
