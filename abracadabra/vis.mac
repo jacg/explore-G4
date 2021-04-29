@@ -124,7 +124,7 @@
 /vis/geometry/set/visibility Inner_steel  0 false
 /vis/geometry/set/visibility Inner_vacuum 0 false
 /vis/geometry/set/visibility Housing      0 false
-/vis/geometry/set/visibility Cavity       0 true
+/vis/geometry/set/visibility Cavity       0 false
 
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface
