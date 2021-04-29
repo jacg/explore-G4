@@ -5,6 +5,7 @@
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
+#include "utils/enumerate.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -24,6 +25,80 @@
 
 using std::make_unique;
 using std::unique_ptr;
+
+
+class write_with {
+public:
+  write_with(hdf5_io& writer)
+    : PROCESS_HITS{ [this](auto step){ return this -> process_hits(step); } }
+    , END_OF_EVENT{ [this](auto hc)  {        this -> end_of_event(hc  ); } }
+    , writer{writer}
+  {}
+
+  bool process_hits(G4Step* step) {
+    auto track    = step -> GetTrack();
+    auto particle = track -> GetParticleDefinition();
+    auto name     = particle -> GetParticleName();
+    if (name == "gamma") {
+      std::cout << "evt: " << n4::event_number() << "\t" << name << ", added" << std::endl;
+      hits.push_back(*step);
+    }
+    return true;
+  }
+
+  void end_of_event(G4HCofThisEvent*) {
+    double event_id = n4::event_number();
+    double total_energy = 0;
+    std::vector<double> rs;
+    std::vector<double> phis;
+    std::vector<double> zs;
+    std::vector<double> ts;
+
+    // Save only events where two gammas has been detected
+    if (hits.size() == 2){
+      std::cout << "Two gammas detected!" << std::endl;
+
+      for (auto [i, step]: enumerate(hits)){
+          auto pos      = step . GetPostStepPoint() -> GetPosition();
+          auto track    = step . GetTrack();
+          auto energy   = track -> GetKineticEnergy();
+          auto particle = track -> GetParticleDefinition();
+          auto name     = particle -> GetParticleName();
+          auto id       = track -> GetTrackID();
+          auto time     = track -> GetGlobalTime();
+
+          auto r   = sqrt( pos.x()*pos.x() + pos.y()*pos.y() );
+          auto phi = atan( pos.y() / pos.x() );
+
+          total_energy += energy;
+          rs  .push_back(r);
+          phis.push_back(time);
+          zs  .push_back(pos.z());
+          ts  .push_back(time);
+
+          std::cout << std::setw (4) << event_id << ' '
+              << std::setw(15) << name << ' '
+              << std::setw (4) << id << ' '
+              << std::setw (4) << round(energy / keV) << " keV " << pos << ' '
+              << std::setw(10) << time << ' '
+              << std::endl;
+      }
+      writer.write_lor_info(event_id, total_energy, rs[0], phis[0], zs[0], ts[0], rs[1], phis[1], zs[1], ts[1]);
+    }
+    hits = {};
+  }
+
+  // TODO: better docs: use for filling slots in n4::sensitive_detector
+  n4::sensitive_detector::process_hits_fn const PROCESS_HITS;
+  n4::sensitive_detector::end_of_event_fn const END_OF_EVENT;
+
+private:
+  std::vector<G4Step> hits{};
+  hdf5_io& writer;
+
+};
+
+
 
 int main(int argc, char** argv) {
   // Detect interactive mode (if no arguments) and define UI session
@@ -105,8 +180,15 @@ int main(int argc, char** argv) {
     got_electron = false;
   };
 
+
+  // Add writer for LORs
+  // TODO: Filename should be taken from config file
+  std::string hdf5_file_name = "test_lor.h5";
+  auto writer = new hdf5_io{hdf5_file_name};
+  auto fwd = write_with{*writer};
+
   // pick one:
-  auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, eoe};
+  auto sd = new n4::sensitive_detector{"Noisy_detector", fwd.PROCESS_HITS, fwd.END_OF_EVENT};
   //auto sd = nullptr;
 
   // Set mandatory initialization classes
