@@ -1,5 +1,6 @@
 #include "geometries/imas.hh"
 #include "geometries/sipm.hh"
+#include "materials/LXe.hh"
 
 #include "io/hdf5.hh"
 #include "nain4.hh"
@@ -33,6 +34,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto LXe     = material("G4_lXe");
   auto housing = steel;
 
+  LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
   // ----- Dimensions -------------------------------------------------------------
   auto inner_radius = 325 * mm;
 
