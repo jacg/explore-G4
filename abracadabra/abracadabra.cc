@@ -85,15 +85,16 @@ int main(int argc, char** argv) {
       if (!got_optphot) { events_with_optphots++; }
       got_electron = true;
     }
-    std::cout << std::setw (4) << events_with_electrons << " /"
-              << std::setw (4) << events_with_optphots << " /"
-              << std::setw (4) << round(100 - (100.0 * count_511s / count_gammas) ) << "% /"
-              << std::setw (4) << count_interesting_event << " /"
-              << std::setw (4) << event_id << ' '
-              << std::setw(15) << name << ' '
-              << std::setw (4) << id << ' '
-              << std::setw (4) << round(energy / keV) << " keV " << pos << ' '
-              << std::setw(10) << tg << ' '
+    using std::setw;
+    std::cout << setw (4) << events_with_electrons << " /"
+              << setw (4) << events_with_optphots << " /"
+              << setw (4) << round(100 - (100.0 * count_511s / count_gammas) ) << "% /"
+              << setw (4) << count_interesting_event << " /"
+              << setw (4) << event_id << ' '
+              << setw(15) << name << ' '
+              << setw (4) << id << ' '
+              << setw (4) << round(energy / keV) << " keV " << pos << ' '
+              << setw(10) << tg << ' '
 
       //<< vol_pre_name << ' ' << vol_postname
               << std::endl;
