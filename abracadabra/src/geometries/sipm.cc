@@ -1,6 +1,7 @@
 // clang-format off
 #include "geometries/sipm.hh"
 #include "g4-mandatory.hh"
+#include "materials/LXe.hh"
 
 #include <G4Box.hh>
 #include <G4LogicalVolume.hh>
@@ -17,17 +18,23 @@ G4LogicalVolume* sipm::build() {
   auto act_half_x = half.x() - act.margin_x;
   auto act_half_y = half.y() - act.margin_y;
   auto act_half_z = act.dz / 2;
+  auto pre_z = act_half_z / 1000;
+  auto prename = "pre_" + act.name;
+  auto premat  = pre_active_material_;
   auto vol_body = volume<G4Box>(    name,     mat,     half.x(),     half.y(),     half.z());
   auto vol_act  = volume<G4Box>(act.name, act.mat, act_half_x  , act_half_y  , act_half_z);
+  auto vol_pre  = volume<G4Box>( prename,  premat, act_half_x  , act_half_y  ,      pre_z);
 
-  vol_act->SetSensitiveDetector(sensitive_detector);
+  vol_pre -> SetSensitiveDetector(sensitive_detector);
 
   // ----- visibility -------------------------------------------------------------
   vol_body -> SetVisAttributes(    vis_attributes);
   vol_act  -> SetVisAttributes(act.vis_attributes);
 
   // ----- geometrical relationship between components ----------------------------
-  auto z_act_in_body = act.dz/2 - half.z();
+  auto z_act_in_body = act.dz/2 - half.z() + pre_z;
+  auto z_pre_in_body = act.dz/2 - pre_z/2;
+  place(vol_pre).in(vol_body).at(0,0,z_pre_in_body).now();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).now();
   return vol_body;
 }
@@ -80,6 +87,9 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
                                                                            {"C", 18},
                                                                            {"O", 3}});
 
+  auto LXe = n4::material("G4_lXe");
+  LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
+
   using va = nain4::vis_attributes;       using col = G4Colour;
 
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
@@ -95,6 +105,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
+    .pre_active_material(LXe)
     .vis(vis_body)
     .build();
 

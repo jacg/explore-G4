@@ -74,6 +74,7 @@ public:
   CHAIN vis     (G4VisAttributes const& va)  { vis_attributes = va            ; NEXT }
   CHAIN active  (sipm_active_window a)       { act  = a; NEXT }
   CHAIN wls     (sipm_wls w)                 { wls_ = w; NEXT }
+  CHAIN pre_active_material(G4Material* pam) { pre_active_material_  = pam; NEXT }
 private:
   std::string             name;
   G4Material *            mat;
@@ -82,6 +83,7 @@ private:
   sipm_active_window      act;
   std::optional<sipm_wls> wls_;
   G4VSensitiveDetector*   sensitive_detector;
+  G4Material*             pre_active_material_;
 #undef CHAIN
 };
 #undef NEXT
