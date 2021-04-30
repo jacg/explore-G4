@@ -150,7 +150,7 @@ void line_cylinder_with_tiles(G4LogicalVolume* cylinder, G4LogicalVolume* tile, 
         .rotate(around_z_axis_phi)
         .copy_no(N_copy)
         .now();
+      ++N_copy;
     }
-    ++N_copy;
   }
 }
