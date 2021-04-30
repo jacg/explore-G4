@@ -28,6 +28,7 @@ set(ABRACADABRA_HEADERS
   src/random/random.hh
   src/utils/enumerate.hh
   src/utils/interpolate.hh
+  src/utils/waveform.hh
   src/io/hdf5.hh
 )
 
@@ -38,6 +39,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/samples.cc
   src/materials/LXe.cc
   src/random/random.cc
+  src/utils/waveform.cc
   src/io/hdf5.cc
 )
 
@@ -50,6 +52,7 @@ set(ABRACADABRA_TESTS
   test/nema-phantom-generator-test.cc
   src/random/random-test.cc
   src/utils/enumerate-test.cc
+  src/utils/waveform-test.cc
 )
 
 find_package(HighFive REQUIRED)
