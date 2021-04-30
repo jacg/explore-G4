@@ -72,7 +72,7 @@ public:
 
           total_energy += energy;
           rs  .push_back(r);
-          phis.push_back(time);
+          phis.push_back(phi);
           zs  .push_back(pos.z());
           ts  .push_back(time);
 
