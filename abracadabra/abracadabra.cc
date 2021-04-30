@@ -68,7 +68,7 @@ public:
           auto time     = track -> GetGlobalTime();
 
           auto r   = sqrt( pos.x()*pos.x() + pos.y()*pos.y() );
-          auto phi = atan( pos.y() / pos.x() );
+          auto phi = atan2( pos.y(), pos.x() );
 
           total_energy += energy;
           rs  .push_back(r);
