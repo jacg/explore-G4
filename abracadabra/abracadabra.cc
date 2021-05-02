@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 
   // For use with phantom_in_cylinder
   auto phantom = build_nema_phantom{}
-    .activity(5)
+    .activity(0)
     .length(140*mm)
     .inner_radius(58*mm)
     .outer_radius(76*mm)
