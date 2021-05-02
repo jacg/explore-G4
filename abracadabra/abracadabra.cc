@@ -62,6 +62,24 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 
 // ================================================================================
 
+#include <set>
+
+struct hmm {
+  void add(double t) { ts.insert(t); }
+  std::multiset<double> ts;
+
+  friend std::ostream& operator<<(std::ostream& out, hmm const& h) {
+    using std::setw;
+    auto const& m = h.ts;
+    auto first =  *cbegin(m) / ps;
+    auto last  = *crbegin(m) / ps;
+    auto width = last - first;
+    out << setw(8) << width << " / " << setw(6) << m.size() << ' '
+        << last << " - " << first;
+    return out;
+  }
+};
+
 int main(int argc, char** argv) {
 
   // Detect interactive mode (if no arguments) and define UI session
@@ -87,16 +105,15 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
-  std::unordered_map<size_t, waveform> fine;
-  std::map<size_t, waveform> coarse;
+  std::map<size_t, hmm> times;
+  std::map<size_t, size_t> count;
 
-  auto add_to_waveforms = [&fine, &coarse](auto sensor_id, auto time) {
-    waveform empty{1 * ns};
-    if (!contains(coarse, sensor_id)) {
-      coarse.emplace(sensor_id, waveform{1 * ns});
+  auto add_to_waveforms = [&times](auto sensor_id, auto time) {
+    if (!contains(times, sensor_id)) {
+      times.emplace(sensor_id, hmm{});
     }
-    auto& [sid, wf] = *coarse.find(sensor_id);
-    wf.add(time);
+    auto& [_, map] = *times.find(sensor_id);
+    map.add(time);
   };
 
   // clang-format off
@@ -117,25 +134,32 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn eoe = [&coarse](auto) {
+  n4::sensitive_detector::end_of_event_fn eoe = [&times](auto) {
+    using std::setw;
     // TODO persist waveforms
     std::cout << n4::event_number() << std::endl;
-    size_t total = 0;
-    for (auto& [sensor_id, v] : coarse) {
-      auto& [sid, wf] = *coarse.find(sensor_id);
-      auto data = wf.get().bins;
-      auto sum = std::accumulate(begin(data), end(data), 0);
-      total += sum;
-      if (sum < 100) continue;
-      std::cout << sensor_id << ':' << sum << ' ';
+    for (auto& [sensor_id, hmm] : times) {
+      auto const& ts = hmm.ts;
+      if (ts.size() < 10) { continue; }
+      auto start = *cbegin(ts);
+      std::vector<double> t{};
+      // TODO reserve space once good size is known from statistics
+      std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
+                   [start](auto t) { return t < start + 1000 * ps; });
+      size_t a = std::count_if(cbegin(ts), cend(ts), [start](auto t) { return t < start +  100 * ps; });
+      size_t b = std::count_if(cbegin(ts), cend(ts), [start](auto t) { return t < start + 1000 * ps; });
+      std::cout << sensor_id << " : "
+                << setw(3) << a << " / "
+                << setw(3) << b << " / "
+                << setw(4) << ts.size() << std::endl;
+
     }
-    std::cout << "  ->  " << total << std::endl;
-    coarse.clear();
+    times.clear();
   };
 
   // pick one:
   auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, eoe};
-  //auto sd = nullptr;
+  //auto sd = nullptr; // If you only want to visualize geometry
 
   // Set mandatory initialization classes
 
