@@ -47,10 +47,40 @@ G4VPhysicalVolume* square_array_of_sipms(SD* sd) {
   return nain4::place(world).now();
 
 }
-
+#include <utils/interpolate.hh>
+// clang-format off
 G4VPhysicalVolume* cylinder_lined_with_hamamatsus(double length, double radius, double dr_Xe, SD* sd) {
   // LXe-filled cylindrical shell, lined with hamamamtus
   auto air = nain4::material("G4_AIR");
+  //air -> SetMaterialPropertiesTable(LXe_optical_material_properties());
+
+  G4double no_absorption = 1e8  * m; // approx. infinity
+  G4double optphot_min_E = 1    * eV;
+  G4double optphot_max_E = 8.21 * eV;
+
+  // Sampling from ~151 nm to 200 nm <----> from 6.20625 eV to 8.21 eV // TODO convert here
+  auto [sc_energies, sc_values] = interpolate(LXe_Scintillation   , 500, 6.20625*eV   , optphot_max_E);
+  auto [ri_energies, ri_values] = interpolate(LXe_refractive_index, 200, optphot_min_E, optphot_max_E);
+
+
+  auto air_properties = n4::material_properties()
+    .add("RINDEX", 1.002)
+    .add("ABSLENGTH", 1e8 * m)
+    .done();
+  auto not_air_properties = n4::material_properties()
+    .add("RINDEX", ri_energies, ri_values)
+    .add("YIELDRATIO", 0.03)
+    .add("SCINTILLATIONYIELD", 58708 / MeV)
+    .add("RAYLEIGH", 36 * cm)
+    .add("FASTTIMECONSTANT", 2 * ns)
+    .add("SLOWTIMECONSTANT", 43.5 * ns)
+    .add("ATTACHMENT", 1000 * ms)
+    //      .add("FASTCOMPONENT", sc_energies, sc_values)
+    //      .add("SLOWCOMPONENT", sc_energies, sc_values)
+    .add("ABSLENGTH", 1e8  * m)
+    .done();
+
+  //air -> SetMaterialPropertiesTable(not_air_properties);
   auto lXe = LXe_with_properties();
 
   auto cavity_r = radius - dr_Xe;

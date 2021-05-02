@@ -66,6 +66,7 @@ IA event_number  ()       { return G4RunManager::GetRunManager()->GetCurrentRun(
 // Remove all, logical/physical volumes, solids and assemblies.
 inline void clear_geometry() { G4RunManager::GetRunManager() -> ReinitializeGeometry(true); }
 
+
 // --------------------------------------------------------------------------------
 template<class SENSITIVE>
 auto fully_activate_sensitive_detector(SENSITIVE* detector) {

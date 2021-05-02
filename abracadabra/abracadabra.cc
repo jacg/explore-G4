@@ -1,6 +1,8 @@
 #include "nain4.hh"
 #include "g4-mandatory.hh"
 
+#include <utils/waveform.hh>
+
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
@@ -17,93 +19,118 @@
 #include <FTFP_BERT.hh>
 #include <G4EmStandardPhysics_option4.hh>
 #include <G4OpticalPhysics.hh>
+
+#include <G4OpticalPhoton.hh>
 #include <Randomize.hh>
 
 #include <memory>
+#include <ostream>
 #include <string>
+#include <map>
+
 
 using std::make_unique;
 using std::unique_ptr;
 
+// TODO this needs a home, and some tests
+// TODO: aaaargh! needs 26 varieties for dealing with
+
+template<class M, class K, class V>
+V find_or(M const& map, K const& key, V const& default_value) {
+  auto found = map.find(key);
+  if (found == end(map)) { return default_value; }
+  else                   { return *(found->second); }
+}
+
+template<class M, class K, class V, class MAKE_V>
+V find_or(M const& map, K const& key, MAKE_V const& make_default_value) {
+  auto found = map.find(key);
+  if (found == end(map)) { return make_default_value(); }
+  else                   { return *(found->second); }
+}
+
+template<class M, class K, class V, class MAKE_V>
+V& find_or_insert_with(M const& map, K const& key, MAKE_V const& make_default_value) {
+  auto found = map.find(key);
+  if (found == end(map)) { return make_default_value(); }
+  else                   { return found->second; }
+}
+
+
+template<class M, class K>
+bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
+
+// ================================================================================
+
 int main(int argc, char** argv) {
+
   // Detect interactive mode (if no arguments) and define UI session
   auto ui = argc == 1
     ? make_unique<G4UIExecutive>(argc, argv)
     : unique_ptr <G4UIExecutive>{nullptr};
-
-  // Optionally: choose a different Random engine...
-  // G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
   // Construct the default run manager
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // For use with phantom_in_cylinder
-  auto phantom = a_nema_phantom();
+  auto phantom = build_nema_phantom{}
+    .activity(5)
+    .length(140*mm)
+    .inner_radius(114.4*mm)
+    .outer_radius(152.0*mm)
+    .sphere(10*mm / 2, 20)
+    .sphere(13*mm / 2, 20)
+    .sphere(17*mm / 2, 20)
+    .sphere(22*mm / 2, 20)
+    .sphere(28*mm / 2, 0)
+    .sphere(37*mm / 2, 0)
+    .build();
 
-  int last_interesting_event = 0;
-  size_t count_interesting_event = 0;
-  size_t count_511s              = 0;
-  size_t count_gammas            = 0;
-  size_t events_with_electrons = 0;  bool got_electron = false;
-  size_t events_with_optphots  = 0;  bool got_optphot  = false;
-  // clang-format off
-  n4::sensitive_detector::process_hits_fn make_noise = [&last_interesting_event, &count_interesting_event,
-                                                        &events_with_electrons, &got_electron,
-                                                        &events_with_optphots , &got_optphot,
-                                                        &count_511s, &count_gammas](G4Step* step) {
-    auto pos      = step -> GetPostStepPoint() -> GetPosition();
-    auto track    = step -> GetTrack();
-    auto energy   = track -> GetKineticEnergy();
-    auto particle = track -> GetParticleDefinition();
-    auto name     = particle -> GetParticleName();
-    auto id       = track -> GetTrackID();
-    auto event_id = n4::event_number();
-    auto tg = track -> GetGlobalTime();
+  std::unordered_map<size_t, waveform> fine;
+  std::map<size_t, waveform> coarse;
 
-    auto vol_pre_name = step -> GetPreStepPoint()  -> GetTouchable() -> GetVolume() -> GetName();
-    auto vol_postname = step -> GetPostStepPoint() -> GetTouchable() -> GetVolume() -> GetName();
-
-    // proc_name = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
-
-    if (event_id > last_interesting_event) { count_interesting_event++; }
-    last_interesting_event = event_id;
-
-    if (name == "gamma") {
-      count_gammas++;
-      if (energy > 510.99 * keV && energy < 511.01 * keV) {
-        count_511s++;
-      }
+  auto add_to_waveforms = [&fine, &coarse](auto sensor_id, auto time) {
+    waveform empty{1 * ns};
+    if (!contains(coarse, sensor_id)) {
+      coarse.emplace(sensor_id, waveform{1 * ns});
     }
-
-    if (name == "e-") {
-      if (!got_electron) { events_with_electrons++; }
-      got_electron = true;
-    }
-
-    if (name == "opticalphoton") {
-      if (!got_optphot) { events_with_optphots++; }
-      got_electron = true;
-    }
-    using std::setw;
-    std::cout << setw (4) << events_with_electrons << " /"
-              << setw (4) << events_with_optphots << " /"
-              << setw (4) << round(100 - (100.0 * count_511s / count_gammas) ) << "% /"
-              << setw (4) << count_interesting_event << " /"
-              << setw (4) << event_id << ' '
-              << setw(15) << name << ' '
-              << setw (4) << id << ' '
-              << setw (4) << round(energy / keV) << " keV " << pos << ' '
-              << setw(10) << tg << ' '
-
-      //<< vol_pre_name << ' ' << vol_postname
-              << std::endl;
-    return true; // Still don't know what this means!
+    auto& [sid, wf] = *coarse.find(sensor_id);
+    wf.add(time);
   };
 
-  n4::sensitive_detector::end_of_event_fn eoe = [&last_interesting_event, &got_electron](auto) {
-    if (n4::event_number() == last_interesting_event) {std::cout << std::endl;}
-    got_electron = false;
+  // clang-format off
+  n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
+    static auto optical_photon = G4OpticalPhoton::Definition();
+
+    auto track    = step -> GetTrack();
+    auto particle = track -> GetParticleDefinition();
+    auto name     = particle -> GetParticleName();
+
+    if (particle == optical_photon) {
+      auto time = track -> GetGlobalTime();
+      auto sensor_id = step -> GetPreStepPoint() -> GetTouchable() -> GetCopyNumber(1);
+      add_to_waveforms(sensor_id, time);
+      return true;
+    }
+
+    return false; // Still not *entirely* sure about the return value meaning
+  };
+
+  n4::sensitive_detector::end_of_event_fn eoe = [&coarse](auto) {
+    // TODO persist waveforms
+    std::cout << n4::event_number() << std::endl;
+    size_t total = 0;
+    for (auto& [sensor_id, v] : coarse) {
+      auto& [sid, wf] = *coarse.find(sensor_id);
+      auto data = wf.get().bins;
+      auto sum = std::accumulate(begin(data), end(data), 0);
+      total += sum;
+      if (sum < 100) continue;
+      std::cout << sensor_id << ':' << sum << ' ';
+    }
+    std::cout << "  ->  " << total << std::endl;
+    coarse.clear();
   };
 
   // pick one:
@@ -115,8 +142,8 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[&phantom, sd]() -> G4VPhysicalVolume* {
     // Pick one (ensure that generator (below) is compatible) ...
+    return cylinder_lined_with_hamamatsus(200*mm, 350*mm, 40*mm, sd);
     return phantom_in_cylinder(phantom, 200*mm, 40*mm, sd);
-    return cylinder_lined_with_hamamatsus(150*mm, 70*mm, 50*mm, sd);
     return phantom.geometry();
     return imas_demonstrator(nullptr);
     return square_array_of_sipms(sd);
@@ -135,14 +162,15 @@ int main(int argc, char** argv) {
   run_manager->SetUserInitialization(new n4::actions{
       new n4::generator{[&phantom](G4Event* event) {
         // Pick one that matches geometry
-        // generate_back_to_back_511_keV_gammas(event, {}, 0);
-        phantom.generate_primaries(event);
+        generate_back_to_back_511_keV_gammas(event, {}, 0);
+        //phantom.generate_primaries(event);
 
-        // auto optphot = nain4::find_particle("geantino");
+        // auto particle = nain4::find_particle("geantino");
         // auto p = G4ThreeVector{0,1,0} * 7 * eV;
         // double time = 0;
-        // auto vertex =      new G4PrimaryVertex({0, 65*mm, 3*mm}, time);
-        // auto primary = new G4PrimaryParticle(optphot,  p.x(),  p.y(),  p.z());
+        // //auto vertex =      new G4PrimaryVertex({0, 65*mm, 3*mm}, time);
+        // auto vertex =      new G4PrimaryVertex({}, time);
+        // auto primary = new G4PrimaryParticle(particle,  p.x(),  p.y(),  p.z());
         // primary -> SetPolarization({1,0,0});
         // vertex->SetPrimary(primary);
         // event -> AddPrimaryVertex(vertex);
@@ -178,11 +206,11 @@ int main(int argc, char** argv) {
         ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
                                  + std::to_string(theta) + ' ' + std::to_string(phi));
       };
-      {
-        nain4::silence _{G4cout};
-        for (int phi  =PHI  ; phi  <360+PHI   ; phi  +=4) { view(THETA, phi); }
-        for (int theta=THETA; theta<360+THETAF; theta+=4) { view(theta, PHI); }
-      }
+      // {
+      //   nain4::silence _{G4cout};
+      //   for (int phi  =PHI  ; phi  <360+PHI   ; phi  +=4) { view(THETA, phi); }
+      //   for (int theta=THETA; theta<360+THETAF; theta+=4) { view(theta, PHI); }
+      // }
       ui -> SessionStart();
     }
   }

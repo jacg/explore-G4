@@ -65,6 +65,8 @@ TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
 
 // ----- TODO Needs to find a home --------------------------------------------------
 // Utility for connecting sensitive detector to hdf5 writer
+
+// TODO Needs splitting and abstracting. One part needs to deal with
 class write_with {
 public:
   write_with(hdf5_io& writer)
