@@ -115,7 +115,18 @@ int main(int argc, char** argv) {
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // For use with phantom_in_cylinder
-  auto phantom = a_nema_phantom();
+  auto phantom = build_nema_phantom{}
+    .activity(5)
+    .length(140*mm)
+    .inner_radius(114.4*mm)
+    .outer_radius(152.0*mm)
+    .sphere(10*mm / 2, 20)
+    .sphere(13*mm / 2, 20)
+    .sphere(17*mm / 2, 20)
+    .sphere(22*mm / 2, 20)
+    .sphere(28*mm / 2, 0)
+    .sphere(37*mm / 2, 0)
+    .build();
 
   int last_interesting_event = 0;
   size_t count_interesting_event = 0;
