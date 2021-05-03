@@ -56,7 +56,7 @@ G4VPhysicalVolume* cylinder_lined_with_hamamatsus(double length, double radius, 
 
   auto cavity_r = radius - dr_Xe;
 
-  auto xenon    = volume<G4Tubs>("LXe"     , lXe, cavity_r,   radius, length/2, 0.0, CLHEP::twopi);
+  auto xenon    = volume<G4Tubs>("LXe"     , air, cavity_r,   radius, length/2, 0.0, CLHEP::twopi);
   auto cavity   = volume<G4Tubs>("Cavity"  , air, 0.0     , cavity_r, length/2, 0.0, CLHEP::twopi);
   auto envelope = volume<G4Box> ("Envelope", air, 1.1*radius, 1.1*radius, 1.1*length/2);
 

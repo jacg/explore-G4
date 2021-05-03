@@ -9,7 +9,8 @@ namespace HF { using namespace HighFive; }
 hdf5_io::hdf5_io(std::string fname)
 : filename{fname}
 , runinfo_index{0}
-, hit_index{0} {}
+, hit_index{0}
+, lor_index{0} {}
 
 
 HF::CompoundType create_hit_type() {
@@ -26,6 +27,33 @@ HF::CompoundType create_runinfo_type() {
           {"param_value", HF::AtomicType<char[hdf5_io::CONFLEN]>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
+
+
+HF::CompoundType create_lor_type() {
+  return {{"event_id"   , HF::AtomicType<double>{}},
+          {"true_energy", HF::AtomicType<double>{}},
+          {"true_r1"    , HF::AtomicType<double>{}},
+          {"true_phi1"  , HF::AtomicType<double>{}},
+          {"true_z1"    , HF::AtomicType<double>{}},
+          {"true_t1"    , HF::AtomicType<double>{}},
+          {"true_r2"    , HF::AtomicType<double>{}},
+          {"true_phi2"  , HF::AtomicType<double>{}},
+          {"true_z2"    , HF::AtomicType<double>{}},
+          {"true_t2"    , HF::AtomicType<double>{}},
+          {"phot_like1" , HF::AtomicType<double>{}},
+          {"phot_like2" , HF::AtomicType<double>{}},
+          {"reco_r1"    , HF::AtomicType<double>{}},
+          {"reco_phi1"  , HF::AtomicType<double>{}},
+          {"reco_z1"    , HF::AtomicType<double>{}},
+          {"reco_t1"    , HF::AtomicType<double>{}},
+          {"reco_r2"    , HF::AtomicType<double>{}},
+          {"reco_phi2"  , HF::AtomicType<double>{}},
+          {"reco_z2"    , HF::AtomicType<double>{}},
+          {"reco_t2"    , HF::AtomicType<double>{}},
+          {"not_sel"    , HF::AtomicType<double>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(lor_t, create_lor_type)
+
 
 void set_string_param(char * to, const char * from, unsigned int max_len) {
   memset(to, 0, max_len);
@@ -53,6 +81,9 @@ void hdf5_io::ensure_open_for_writing() {
 
   group.createDataSet("hits"         , dataspace, create_hit_type()    , props);
   group.createDataSet("configuration", dataspace, create_runinfo_type(), props);
+
+  group = open_for_writing->createGroup("reco_info");
+  group.createDataSet("table", dataspace, create_lor_type()    , props);
 }
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
@@ -94,4 +125,45 @@ std::vector<hit_t> hdf5_io::read_hit_info() {
 
   hits_table.read(hits);
   return hits;
+}
+
+
+void hdf5_io::write_lor_info(double event_id, double energy,
+          double r1, double phi1, double z1, double t1,
+          double r2, double phi2, double z2, double t2){
+  lor_t lor;
+  lor.event_id    = event_id;
+  lor.true_energy = energy;
+  lor.true_r1     = r1;
+  lor.true_phi1   = phi1;
+  lor.true_z1     = z1;
+  lor.true_t1     = t1;
+  lor.true_r2     = r2;
+  lor.true_phi2   = phi2;
+  lor.true_z2     = z2;
+  lor.true_t2     = t2;
+  lor.phot_like1  = 1;
+  lor.phot_like2  = 1;
+  lor.reco_r1     = r1;
+  lor.reco_phi1   = phi1;
+  lor.reco_z1     = z1;
+  lor.reco_t1     = t1;
+  lor.reco_r2     = r2;
+  lor.reco_phi2   = phi2;
+  lor.reco_z2     = z2;
+  lor.reco_t2     = t2;
+  lor.not_sel     = 0;
+
+  std::vector<lor_t> data{lor};
+  unsigned int n_elements = data.size();
+
+  ensure_open_for_writing();
+  HF::Group   group = open_for_writing -> getGroup("reco_info");
+  HF::DataSet table = group.getDataSet("table");
+
+  // Create extra space in the table and append the new data
+  table.resize({lor_index + n_elements});
+  table.select({lor_index}, {n_elements}).write(data);
+
+  lor_index += n_elements;
 }
