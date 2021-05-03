@@ -33,11 +33,11 @@ void event_action::EndOfEventAction(const G4Event* event) {
 // ----- actions --------------------------------------------------------------------
 void actions::Build() const {
   SetUserAction(generator);
-  SetUserAction(new stepping_action);
-  SetUserAction(new    event_action);
-  SetUserAction(new      run_action);
+  if (  run_) { SetUserAction(  run_); }
+  if (event_) { SetUserAction(event_); }
+  if ( step_) { SetUserAction( step_); }
+  if (track_) { SetUserAction(track_); }
 }
-
 // ----- primary generator -----------------------------------------------------------
 void generator::geantino_along_x(G4Event* event) {
   auto geantino  = nain4::find_particle("geantino");

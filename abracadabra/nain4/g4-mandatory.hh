@@ -55,8 +55,18 @@ struct actions : public G4VUserActionInitialization {
   // See B1 README for explanation of the role of BuildForMaster in multi-threaded mode.
   //void BuildForMaster() const override;
   void Build() const override;
+
+  actions* run  (G4UserRunAction     * a) { run_   = a; return this; }
+  actions* event(G4UserEventAction   * a) { event_ = a; return this; }
+  actions* step (G4UserSteppingAction* a) { step_  = a; return this; }
+  actions* track(G4UserTrackingAction* a) { track_ = a; return this; }
+
 private:
   G4VUserPrimaryGeneratorAction* generator;
+  G4UserRunAction              * run_   = nullptr;
+  G4UserEventAction            * event_ = nullptr;
+  G4UserSteppingAction         * step_  = nullptr;
+  G4UserTrackingAction         * track_ = nullptr;
 };
 
 // ----- geometry -------------------------------------------------------------------
