@@ -27,7 +27,6 @@ void event_action::EndOfEventAction(const G4Event* event) {
   for (auto hit: evt_data->get_hits()) {
     auto pos  = hit.GetPreStepPoint() -> GetPosition();
     auto time = hit.GetPreStepPoint() -> GetGlobalTime();
-    //TODO: Decide whether to write here or in sensitive detector
   }
 }
 
