@@ -20,11 +20,6 @@ void run_action::EndOfRunAction(const G4Run* run) {
   if (nofEvents == 0) return;
 }
 
-// ----- event_action ---------------------------------------------------------------
-event_action::event_action(run_action* runAction)
-: G4UserEventAction()
-, action(runAction) {}
-
 void event_action::EndOfEventAction(const G4Event* event) {
   return; // TODO XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   auto evt_data = dynamic_cast<event_data*>(event -> GetUserInformation());
@@ -36,28 +31,12 @@ void event_action::EndOfEventAction(const G4Event* event) {
   }
 }
 
-// ----- stepping_action ------------------------------------------------------------
-stepping_action::stepping_action(event_action* action)
-: G4UserSteppingAction()
-, action(action)
-{}
-
 // ----- actions --------------------------------------------------------------------
 void actions::Build() const {
-  // Utility which sets the action, but also returns it, so that it can be
-  // passed on to the constructor of another action. This allows us to write the
-  // code much more clearly, by avoiding naming the objects, and showing their
-  // dependence explicitly by nesting.
-  // TODO: maybe provide this via a nain4 subclass of G4VUserActionInitialization
-  auto set_and_return = [this](auto action) {
-    SetUserAction(action);
-    return action;
-  };
   SetUserAction(generator);
-
-  set_and_return(new stepping_action {
-      set_and_return(new event_action {
-          set_and_return(new run_action)})});
+  SetUserAction(new stepping_action);
+  SetUserAction(new    event_action);
+  SetUserAction(new      run_action);
 }
 
 // ----- primary generator -----------------------------------------------------------

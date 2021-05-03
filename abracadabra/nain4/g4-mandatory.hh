@@ -43,21 +43,11 @@ private:
 
 // ----- event_action ---------------------------------------------------------------
 struct event_action : public G4UserEventAction {
-  event_action(run_action* runAction);
-  ~event_action() override {}
   void EndOfEventAction  (const G4Event* event) override;
-private:
-  run_action* action;
 };
 
 // ----- stepping_action ------------------------------------------------------------
-struct stepping_action : public G4UserSteppingAction {
-  stepping_action(event_action* eventAction);
-  ~stepping_action() override {}
-  //void UserSteppingAction(const G4Step*) override;
-private:
-  event_action* action;
-};
+struct stepping_action : public G4UserSteppingAction {};
 
 // ----- actions --------------------------------------------------------------------
 struct actions : public G4VUserActionInitialization {
