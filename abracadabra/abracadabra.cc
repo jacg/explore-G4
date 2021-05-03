@@ -1,8 +1,6 @@
 #include "nain4.hh"
 #include "g4-mandatory.hh"
 
-#include <utils/waveform.hh>
-
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
