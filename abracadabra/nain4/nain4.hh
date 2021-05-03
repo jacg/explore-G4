@@ -78,6 +78,7 @@ auto fully_activate_sensitive_detector(SENSITIVE* detector) {
 // --------------------------------------------------------------------------------
 // TODO make a builder for this (if more methods are added?)
 // TODO: needs tests
+// TODO: belongs with the actions in g4-mandatory
 class sensitive_detector : public G4VSensitiveDetector {
 public:
   using process_hits_fn = std::function<bool(G4Step*)>;
