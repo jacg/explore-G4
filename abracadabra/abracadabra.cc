@@ -40,7 +40,6 @@ public:
     auto particle = track -> GetParticleDefinition();
     auto name     = particle -> GetParticleName();
     if (name == "gamma") {
-      //std::cout << "evt: " << n4::event_number() << "\t" << name << ", added" << std::endl;
       hits.push_back(*step);
     }
     return true;
@@ -75,14 +74,6 @@ public:
           phis.push_back(phi);
           zs  .push_back(pos.z());
           ts  .push_back(time);
-
-          // std::cout << std::setw (4) << event_id << ' '
-          //     << std::setw(15) << name << ' '
-          //     << std::setw (4) << id << ' '
-          //     << std::setw (4) << round(energy / keV) << " keV " << pos << ' '
-          //     << std::setw(10) << time << ' '
-          //     << std::endl;
-
       }
       writer.write_lor_info(event_id, total_energy, rs[0], phis[0], zs[0], ts[0], rs[1], phis[1], zs[1], ts[1]);
     }
