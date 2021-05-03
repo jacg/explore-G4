@@ -26,35 +26,10 @@
 #include <memory>
 #include <ostream>
 #include <string>
-#include <map>
 
 
 using std::make_unique;
 using std::unique_ptr;
-
-// TODO this needs a home, and some tests
-// TODO: aaaargh! needs 26 varieties for dealing with
-
-template<class M, class K, class V>
-V find_or(M const& map, K const& key, V const& default_value) {
-  auto found = map.find(key);
-  if (found == end(map)) { return default_value; }
-  else                   { return *(found->second); }
-}
-
-template<class M, class K, class V, class MAKE_V>
-V find_or(M const& map, K const& key, MAKE_V const& make_default_value) {
-  auto found = map.find(key);
-  if (found == end(map)) { return make_default_value(); }
-  else                   { return *(found->second); }
-}
-
-template<class M, class K, class V, class MAKE_V>
-V& find_or_insert_with(M const& map, K const& key, MAKE_V const& make_default_value) {
-  auto found = map.find(key);
-  if (found == end(map)) { return make_default_value(); }
-  else                   { return found->second; }
-}
 
 
 template<class M, class K>
