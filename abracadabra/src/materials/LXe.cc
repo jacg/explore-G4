@@ -87,7 +87,7 @@ G4MaterialPropertiesTable* LXe_optical_material_properties() {
     .add("ATTACHMENT"        ,  1000   * ms )
     .add("FASTCOMPONENT", sc_energies, sc_values)
     .add("SLOWCOMPONENT", sc_energies, sc_values)
-    .add("ABSLENGTH", no_absorption)
+    .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption, no_absorption})
     .done();
 }
 
