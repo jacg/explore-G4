@@ -7,29 +7,6 @@
 
 namespace nain4 {
 
-// ----- run_action -----------------------------------------------------------------
-// TODO this is garbage at the moment
-run_action::run_action() : G4UserRunAction{} {}
-
-void run_action::BeginOfRunAction(const G4Run*) {
-  G4RunManager::GetRunManager() -> SetRandomNumberStore(false);
-}
-
-void run_action::EndOfRunAction(const G4Run* run) {
-  G4int nofEvents = run -> GetNumberOfEvent();
-  if (nofEvents == 0) return;
-}
-
-void event_action::EndOfEventAction(const G4Event* event) {
-  return; // TODO XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  auto evt_data = dynamic_cast<event_data*>(event -> GetUserInformation());
-  if (!evt_data) { throw "Failed to get event data"; }
-  for (auto hit: evt_data->get_hits()) {
-    auto pos  = hit.GetPreStepPoint() -> GetPosition();
-    auto time = hit.GetPreStepPoint() -> GetGlobalTime();
-  }
-}
-
 // ----- actions --------------------------------------------------------------------
 void actions::Build() const {
   SetUserAction(generator);
@@ -37,6 +14,7 @@ void actions::Build() const {
   if (event_) { SetUserAction(event_); }
   if ( step_) { SetUserAction( step_); }
   if (track_) { SetUserAction(track_); }
+  if (stack_) { SetUserAction(stack_); }
 }
 // ----- primary generator -----------------------------------------------------------
 void generator::geantino_along_x(G4Event* event) {
