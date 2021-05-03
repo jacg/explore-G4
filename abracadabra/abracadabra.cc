@@ -79,7 +79,6 @@ int main(int argc, char** argv) {
     .build();
 
   std::map<size_t, hmm> times;
-  std::map<size_t, size_t> count;
 
   auto add_to_waveforms = [&times](auto sensor_id, auto time) {
     if (!contains(times, sensor_id)) {
