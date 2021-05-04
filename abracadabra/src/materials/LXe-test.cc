@@ -19,8 +19,22 @@
 #define  DB(stuff) std::cout << stuff << ' ';
 
 TEST_CASE("liquid xenon properties", "[xenon][properties]") {
-  auto LXe = LXe_with_properties();
+
+  auto GXe = G4_LXe_with_properties();
+  auto LXe =    LXe_with_properties();
+
+  CHECK(LXe -> GetZ()           == GXe -> GetZ());
+  CHECK(LXe -> GetA()           == GXe -> GetA());
+  CHECK(LXe -> GetTemperature() == GXe -> GetTemperature());
+  CHECK(LXe -> GetPressure()    == GXe -> GetPressure());
+  CHECK(LXe -> GetRadlen()      == GXe -> GetRadlen());
+  CHECK(LXe -> GetElectronDensity() == GXe -> GetElectronDensity());
+  CHECK(LXe -> GetNuclearInterLength() == GXe -> GetNuclearInterLength());
+  CHECK(LXe -> GetIonisation() == GXe -> GetIonisation());
+
   auto air = n4::material("G4_AIR");
+
+  CHECK(LXe -> GetDensity() / (g / cm3) == Approx(2.98));
 
   auto xe_sphere = [&LXe, &air] (auto radius) {
     return [&LXe, &air, radius] () {
