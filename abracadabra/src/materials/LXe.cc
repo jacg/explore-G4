@@ -27,7 +27,7 @@ G4Material* G4_LXe_with_properties() {
 }
 
 G4Material* LXe_with_properties() {
-  auto LXe = n4::material_from_elements_N("n4_lXe", 2.953*g/cm3, kStateLiquid, {{"Xe", 1}});
+  auto LXe = n4::material_from_elements_N("n4_lXe", 2.98*g/cm3, kStateLiquid, {{"Xe", 1}});
   LXe -> SetMaterialPropertiesTable(LXe_optical_material_properties());
   //LXe -> SetMaterialPropertiesTable(nexus_LXe::OpticalMaterialProperties());
   return LXe;
