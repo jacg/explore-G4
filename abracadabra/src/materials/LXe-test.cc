@@ -14,6 +14,7 @@
 
 #include <catch2/catch.hpp>
 
+
 #define DBG(stuff) std::cout << stuff << std::endl;
 #define  DB(stuff) std::cout << stuff << ' ';
 
@@ -67,6 +68,9 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
   }
 
   auto gammas_sent = 2.0 * events;
-  CHECK(passed / gammas_sent == Approx(0.54).epsilon(0.01));
+  auto ratio = passed / gammas_sent;
+  auto xenon_attenuation_length = 3.7 * cm;
+  auto expected = exp(- xenon_radius / xenon_attenuation_length);
+  CHECK(ratio == Approx(expected).epsilon(0.01));
 
 }
