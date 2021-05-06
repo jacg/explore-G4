@@ -19,6 +19,7 @@
 #define  DB(stuff) std::cout << stuff << ' ';
 
 TEST_CASE("liquid xenon properties", "[xenon][properties]") {
+  // --- Geometry -----
   auto air = n4::material("G4_AIR");
   auto LXe = LXe_with_properties();
   CHECK(LXe -> GetDensity() / (g / cm3) == Approx(2.98));
@@ -33,12 +34,27 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
     };
   };
 
-  size_t passed = 0;
+  // --- Generator -----
+  auto two_gammas_at_origin = [](auto event){generate_back_to_back_511_keV_gammas(event, {}, 0);};
+
+  // --- Counters -----
   size_t events = 0;
-  // TODO loop over various values of radius.
-  auto xenon_radius = 40 * mm;
+  size_t passed = 0;
+  auto count_unscathed = [&passed](auto step) {
+    auto name = step->GetPreStepPoint()->GetTouchable()->GetVolume()->GetName();
+    if (name == "Out") { passed++; }
+  };
+  auto count_events = [&events](auto) { events++; };
+
+  // --- Eliminate secondaries and post-Compton gammas -----
+  auto kill_secondaries = [](auto track) {
+    auto parent_id = track->GetParentID();
+    return parent_id > 0 ? G4ClassificationOfNewTrack::fKill : G4ClassificationOfNewTrack::fUrgent;
+  };
 
   // ----- Initialize and run Geant4 -------------------------------------------
+  // TODO loop over various values of radius.
+  auto xenon_radius = 40 * mm;
   {
     n4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
@@ -47,23 +63,10 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
     physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
     physics_list -> RegisterPhysics(new G4OpticalPhysics{});
     run_manager -> SetUserInitialization(physics_list);
-    run_manager -> SetUserInitialization((new n4::actions {
-          new n4::generator{[](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0);}}
-        })
-      -> set ((new n4::stacking_action)
-              -> classify([](auto track) {
-                auto parent_id = track -> GetParentID();
-                return parent_id > 0                  ?
-                  G4ClassificationOfNewTrack::fKill   :
-                  G4ClassificationOfNewTrack::fUrgent ;
-              })
-              )
-      -> set((new n4::event_action) -> end([&events](auto){events++;}))
-      -> set(new n4::stepping_action{[&passed](auto step) {
-               auto name = step -> GetPreStepPoint() -> GetTouchable() -> GetVolume() -> GetName();
-               if (name == "Out") { passed++; }
-            }})
-      );
+    run_manager -> SetUserInitialization((new n4::actions{new n4::generator{two_gammas_at_origin}})
+      -> set((new n4::stacking_action) -> classify(kill_secondaries))
+      -> set((new    n4::event_action) -> end(count_events))
+      -> set (new n4::stepping_action{count_unscathed}));
     run_manager -> Initialize();
     run_manager -> BeamOn(10000);
   }
