@@ -74,7 +74,7 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
   auto gammas_sent = 2.0 * events;
   auto ratio = passed / gammas_sent;
   auto xenon_attenuation_length = 3.7 * cm;
-  auto attlenuation_length = - xenon_radius / log(ratio);
-  CHECK(attlenuation_length == Approx(xenon_attenuation_length).epsilon(0.01));
+  auto attenuation_length = - xenon_radius / log(ratio);
+  CHECK(attenuation_length == Approx(xenon_attenuation_length).epsilon(0.01));
 
 }
