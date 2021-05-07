@@ -1,3 +1,4 @@
+// clang-format off
 #include <nain4.hh>
 #include <g4-mandatory.hh>
 #include <materials/LXe.hh>
@@ -83,13 +84,29 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
   size_t passed = 0;
   auto count_unscathed = [&passed](auto step) {
     auto name = step->GetPreStepPoint()->GetTouchable()->GetVolume()->GetName();
-    if (name == "LAB") { passed++; }
+    if (name == "LAB") {
+      G4Track* track = step->GetTrack();
+      auto maybe_creator = track -> GetCreatorProcess();
+      auto creator = maybe_creator ? maybe_creator -> GetProcessName() : "no-creator";
+      auto particle = track -> GetDefinition();
+      auto particle_name = particle -> GetParticleName();
+      auto energy = track -> GetTotalEnergy();
+      if (energy == 511*keV) {
+        passed++;
+        //DBG("---------------------------> COUNTING " << creator << ' ' << particle_name << ' ' << energy / keV);
+      }
+    }
   };
   auto count_events = [&events](auto) { events++; };
 
   // --- Eliminate secondaries and post-Compton gammas -----
   auto kill_secondaries = [](auto track) {
+    auto maybe_creator = track -> GetCreatorProcess();
+    auto creator = maybe_creator ? maybe_creator -> GetProcessName() : "no-creator";
+    auto name = track -> GetDefinition() -> GetParticleName();
+    //DB(creator << ' ' << name);
     auto parent_id = track->GetParentID();
+    //if    (parent_id > 0 ) {DBG("kill")} else {DBG("keep")}
     return parent_id > 0 ? G4ClassificationOfNewTrack::fKill : G4ClassificationOfNewTrack::fUrgent;
   };
 
@@ -106,7 +123,7 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
     run_manager -> SetUserInitialization(physics_list);
     run_manager -> SetUserInitialization((new n4::actions{new n4::generator{single_gamma}})
       -> set((new n4::stacking_action) -> classify(kill_secondaries))
-      -> set((new    n4::event_action) -> end(count_events))
+      -> set((new    n4::event_action) -> end(count_events) /*-> begin([](auto){DBG("")})*/)
       -> set (new n4::stepping_action{count_unscathed}));
 
     auto check_attlength = [&events, &passed, run_manager, &xs, &ys](auto build, auto distance_in_xenon) {
@@ -114,7 +131,7 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
       n4::clear_geometry();
       run_manager -> SetUserInitialization(new n4::geometry{build});
       run_manager -> Initialize();
-      run_manager -> BeamOn(1000000);
+      run_manager -> BeamOn(100000);
       auto gammas_sent = 1.0 * events;
       auto ratio = passed / gammas_sent;
       auto xenon_attenuation_length = 3.7 * cm;
@@ -133,10 +150,15 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
 
     for (size_t r = 1; r<=100; r+=1) {
       auto xenon_radius = r*mm;
-      //check_attlength(n4_slab  (xenon_radius   ), xenon_radius);
-      check_attlength(xe_sphere(xenon_radius, 1), xenon_radius);
+      check_attlength(n4_slab  (xenon_radius   ), xenon_radius);
+      //check_attlength(xe_sphere(xenon_radius, 1), xenon_radius);
     }
-  }
+
+    // auto xenon_radius = 40 * mm;
+    // check_attlength(xe_sphere(xenon_radius, false), xenon_radius);
+
+}
+
   for(auto x: xs) { DB(x << ","); } DBG(' ');
   for(auto y: ys) { DB(y << ","); } DBG(' ');
 
