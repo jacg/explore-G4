@@ -30,6 +30,8 @@ public:
 
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
+  void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
+  void write_total_charge(unsigned int evt_id, unsigned int sensor_id, double charge);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
@@ -42,6 +44,8 @@ private:
   std::string filename;
   unsigned int runinfo_index;
   unsigned int hit_index;
+  unsigned int waveform_index;
+  unsigned int total_charge_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
@@ -50,6 +54,19 @@ typedef struct {
   char param_key  [hdf5_io::CONFLEN];
   char param_value[hdf5_io::CONFLEN];
 } run_info_t;
+
+
+typedef struct {
+  unsigned int event_id;
+  unsigned int sensor_id;
+  double time;
+} waveform_t;
+
+typedef struct {
+  unsigned int event_id;
+  unsigned int sensor_id;
+  double charge;
+} total_charge_t;
 
 
 #endif
