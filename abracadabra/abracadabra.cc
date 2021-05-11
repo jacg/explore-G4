@@ -1,3 +1,4 @@
+// clang-format off
 #include "nain4.hh"
 #include "g4-mandatory.hh"
 
@@ -21,19 +22,17 @@
 #include <ostream>
 #include <string>
 
-
 using std::make_unique;
 using std::unique_ptr;
 
-
+// ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
 bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
-
-// ================================================================================
 
 #include <set>
 using times_set = std::multiset<double>;
 
+// ------------------------------------------------------------------------------------------
 int main(int argc, char** argv) {
 
   // Detect interactive mode (if no arguments) and define UI session
@@ -45,20 +44,7 @@ int main(int argc, char** argv) {
   auto run_manager = unique_ptr<G4RunManager>
     {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
-  // For use with phantom_in_cylinder
-  auto phantom = build_nema_phantom{}
-    .activity(5)
-    .length(140*mm)
-    .inner_radius(114.4*mm)
-    .outer_radius(152.0*mm)
-    .sphere(10*mm / 2, 20)
-    .sphere(13*mm / 2, 20)
-    .sphere(17*mm / 2, 20)
-    .sphere(22*mm / 2, 20)
-    .sphere(28*mm / 2, 0)
-    .sphere(37*mm / 2, 0)
-    .build();
-
+  // ----- collecting arrival times of optical photons in sensors ----------------------------
   std::map<size_t, times_set> times;
 
   auto add_to_waveforms = [&times](auto sensor_id, auto time) {
@@ -69,11 +55,12 @@ int main(int argc, char** argv) {
     set.insert(time);
   };
 
+  // ----- Where to write output from sensitive detectors ------------------------------------
   // TODO: Filename should be taken from config file
   std::string hdf5_file_name = "test_waveform.h5";
   auto writer = new hdf5_io{hdf5_file_name};
 
-  // clang-format off
+  // ----- Sensitive detector ----------------------------------------------------------------
   n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
     static auto optical_photon = G4OpticalPhoton::Definition();
 
@@ -110,7 +97,21 @@ int main(int argc, char** argv) {
   auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, eoe};
   //auto sd = nullptr; // If you only want to visualize geometry
 
-  // Set mandatory initialization classes
+  // ===== Mandatory G4 initializations ==================================================
+
+  // ----- A variety of geometries to choose from, for experimentation -------------------
+  auto phantom = build_nema_phantom{}
+    .activity(5)
+    .length(140*mm)
+    .inner_radius(114.4*mm)
+    .outer_radius(152.0*mm)
+    .sphere(10*mm / 2, 20)
+    .sphere(13*mm / 2, 20)
+    .sphere(17*mm / 2, 20)
+    .sphere(22*mm / 2, 20)
+    .sphere(28*mm / 2, 0)
+    .sphere(37*mm / 2, 0)
+    .build();
 
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[&phantom, sd]() -> G4VPhysicalVolume* {
@@ -123,12 +124,10 @@ int main(int argc, char** argv) {
     return nain4::place(sipm_hamamatsu_blue(true, sd)).now();
   }});
 
-  { // Physics list
-    auto verbosity = 1;
-    n4::use_our_optical_physics(run_manager.get(), verbosity);
-  }
+  // ----- Physics list --------------------------------------------------------------------
+  { auto verbosity = 1;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
 
-  // User action initialization
+  // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager->SetUserInitialization(new n4::actions{
       new n4::generator{[&phantom](G4Event* event) {
         // Pick one that matches geometry
@@ -146,6 +145,7 @@ int main(int argc, char** argv) {
         // event -> AddPrimaryVertex(vertex);
 
       }}});
+  // ===== end of mandatory initialization ==================================================
 
   // Initialize visualization
   auto vis_manager = make_unique<G4VisExecutive>();
@@ -166,11 +166,9 @@ int main(int argc, char** argv) {
     // interactive mode
     {
       ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-      ui_manager -> ApplyCommand("/PhysicsList/RegisterPhysics G4EmStandardPhysics_option4");
-      ui_manager -> ApplyCommand("/PhysicsList/RegisterPhysics G4OpticalPhysics");
-      ui_manager -> ApplyCommand("/vis/scene/endOfEventAction accumulate 100");
       //ui_manager -> ApplyCommand("/run/beamOn 1");
 
+      // ----- spin the viewport ------------------------------------------------------------
       struct waypoint { float phi; float theta; size_t steps; };
       auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
         nain4::silence _{G4cout};
@@ -193,6 +191,7 @@ int main(int argc, char** argv) {
                              {-20, 160, 50},
                              {160, 145, 30},
                              {180, 180, 10}});
+      // ----- hand over control to interactive user ----------------------------------------
       ui -> SessionStart();
     }
   }
