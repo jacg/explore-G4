@@ -74,71 +74,27 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("total_charge" , dataspace, create_total_charge_type(), props);
 }
 
+
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};
-  unsigned int n_elements = data.size();
-
-  ensure_open_for_writing();
-  HF::Group   group      = open_for_writing -> getGroup("MC");
-  HF::DataSet hits_table = group.getDataSet("configuration");
-
-  // Create extra space in the table and append the new data
-  hits_table.resize({runinfo_index + n_elements});
-  hits_table.select({runinfo_index}, {n_elements}).write(data);
-
-  runinfo_index += n_elements;
+  write("configuration", runinfo_index, data);
 }
 
 void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z, double time) {
   std::vector<hit_t> data{{event_id, x, y, z, time}};
-  unsigned int n_elements = data.size();
-
-  ensure_open_for_writing();
-  HF::Group   group      = open_for_writing -> getGroup("MC");
-  HF::DataSet hits_table = group.getDataSet("hits");
-
-  // Create extra space in the table and append the new data
-  hits_table.resize({hit_index + n_elements});
-  hits_table.select({hit_index}, {n_elements}).write(data);
-
-  hit_index += n_elements;
+  write("hits", hit_index, data);
 }
 
 void hdf5_io::write_waveform(unsigned int event_id, unsigned int sensor_id, std::vector<double> times) {
   std::vector<waveform_t> data;
-
-  for (auto time: times) {
-    data.push_back({event_id, sensor_id, time});
-  }
-
-  unsigned int n_elements = data.size();
-
-  ensure_open_for_writing();
-  HF::Group   group = open_for_writing -> getGroup("MC");
-  HF::DataSet table = group.getDataSet("waveform");
-
-  // Create extra space in the table and append the new data
-  table.resize({waveform_index + n_elements});
-  table.select({waveform_index}, {n_elements}).write(data);
-
-  waveform_index += n_elements;
+  for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
+  write("waveform", waveform_index, data);
 }
 
 void hdf5_io::write_total_charge(unsigned int event_id, unsigned int sensor_id, double charge) {
   std::vector<total_charge_t> data{{event_id, sensor_id, charge}};
-  unsigned int n_elements = data.size();
-
-  ensure_open_for_writing();
-  HF::Group   group = open_for_writing -> getGroup("MC");
-  HF::DataSet table = group.getDataSet("total_charge");
-
-  // Create extra space in the table and append the new data
-  table.resize({total_charge_index + n_elements});
-  table.select({total_charge_index}, {n_elements}).write(data);
-
-  total_charge_index += n_elements;
+  write("total_charge", total_charge_index, data);
 }
-
 
 std::vector<hit_t> hdf5_io::read_hit_info() {
   std::vector<hit_t> hits;

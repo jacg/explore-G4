@@ -28,6 +28,9 @@ public:
   hdf5_io(std::string fname);
   ~hdf5_io() { if (open_for_writing) { open_for_writing -> flush(); }}
 
+  template<class T>
+  void write(std::string const& dataset, unsigned int& index, T const& data);
+
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
   void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
@@ -49,6 +52,20 @@ private:
   std::optional<HighFive::File> open_for_writing;
 };
 
+template<class T>
+void hdf5_io::write(std::string const& dataset, unsigned int& index, T const& data) {
+  unsigned int n_elements = data.size();
+
+  ensure_open_for_writing();
+  HighFive::Group   group      = open_for_writing -> getGroup("MC");
+  HighFive::DataSet hits_table = group.getDataSet(dataset);
+
+  // Create extra space in the table and append the new data
+  hits_table.resize({index + n_elements});
+  hits_table.select({index}, {n_elements}).write(data);
+
+  index += n_elements;
+}
 
 typedef struct {
   char param_key  [hdf5_io::CONFLEN];
