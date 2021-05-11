@@ -36,22 +36,7 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 // ================================================================================
 
 #include <set>
-
-struct hmm {
-  void add(double t) { ts.insert(t); }
-  std::multiset<double> ts;
-
-  friend std::ostream& operator<<(std::ostream& out, hmm const& h) {
-    using std::setw;
-    auto const& m = h.ts;
-    auto first =  *cbegin(m) / ps;
-    auto last  = *crbegin(m) / ps;
-    auto width = last - first;
-    out << setw(8) << width << " / " << setw(6) << m.size() << ' '
-        << last << " - " << first;
-    return out;
-  }
-};
+using times_set = std::multiset<double>;
 
 int main(int argc, char** argv) {
 
@@ -78,14 +63,14 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
-  std::map<size_t, hmm> times;
+  std::map<size_t, times_set> times;
 
   auto add_to_waveforms = [&times](auto sensor_id, auto time) {
     if (!contains(times, sensor_id)) {
-      times.emplace(sensor_id, hmm{});
+      times.emplace(sensor_id, times_set{});
     }
-    auto& [_, map] = *times.find(sensor_id);
-    map.add(time);
+    auto& [_, set] = *times.find(sensor_id);
+    set.insert(time);
   };
 
   // TODO: Filename should be taken from config file
@@ -113,8 +98,7 @@ int main(int argc, char** argv) {
   n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer](auto) {
     double event_id = n4::event_number();
     std::cout << event_id << std::endl;
-    for (auto& [sensor_id, hmm] : times) {
-      auto const& ts = hmm.ts;
+    for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
       std::vector<double> t{};
       // TODO reserve space once good size is known from statistics
