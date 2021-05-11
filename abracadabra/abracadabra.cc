@@ -36,22 +36,7 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 // ================================================================================
 
 #include <set>
-
-struct hmm {
-  void add(double t) { ts.insert(t); }
-  std::multiset<double> ts;
-
-  friend std::ostream& operator<<(std::ostream& out, hmm const& h) {
-    using std::setw;
-    auto const& m = h.ts;
-    auto first =  *cbegin(m) / ps;
-    auto last  = *crbegin(m) / ps;
-    auto width = last - first;
-    out << setw(8) << width << " / " << setw(6) << m.size() << ' '
-        << last << " - " << first;
-    return out;
-  }
-};
+using times_set = std::multiset<double>;
 
 int main(int argc, char** argv) {
 
@@ -78,15 +63,19 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
-  std::map<size_t, hmm> times;
+  std::map<size_t, times_set> times;
 
   auto add_to_waveforms = [&times](auto sensor_id, auto time) {
     if (!contains(times, sensor_id)) {
-      times.emplace(sensor_id, hmm{});
+      times.emplace(sensor_id, times_set{});
     }
-    auto& [_, map] = *times.find(sensor_id);
-    map.add(time);
+    auto& [_, set] = *times.find(sensor_id);
+    set.insert(time);
   };
+
+  // TODO: Filename should be taken from config file
+  std::string hdf5_file_name = "test_waveform.h5";
+  auto writer = new hdf5_io{hdf5_file_name};
 
   // clang-format off
   n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
@@ -106,25 +95,17 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn eoe = [&times](auto) {
-    using std::setw;
-    // TODO persist waveforms
-    std::cout << n4::event_number() << std::endl;
-    for (auto& [sensor_id, hmm] : times) {
-      auto const& ts = hmm.ts;
-      if (ts.size() < 10) { continue; }
+  n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer](auto) {
+    double event_id = n4::event_number();
+    std::cout << event_id << std::endl;
+    for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
       std::vector<double> t{};
       // TODO reserve space once good size is known from statistics
       std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
-                   [start](auto t) { return t < start + 1000 * ps; });
-      size_t a = std::count_if(cbegin(ts), cend(ts), [start](auto t) { return t < start +  100 * ps; });
-      size_t b = std::count_if(cbegin(ts), cend(ts), [start](auto t) { return t < start + 1000 * ps; });
-      std::cout << sensor_id << " : "
-                << setw(3) << a << " / "
-                << setw(3) << b << " / "
-                << setw(4) << ts.size() << std::endl;
-
+                   [start](auto t) { return t < start + 100 * ps; });
+      writer -> write_waveform(event_id, sensor_id, t);
+      writer -> write_total_charge(event_id, sensor_id, ts.size());
     }
     times.clear();
   };
