@@ -230,6 +230,10 @@ private:
   std::ofstream   dev_null;
 };
 
+// --------------------------------------------------------------------------------
+// Use our flavour of optical physics: jump through 3 hoops in one go
+void use_our_optical_physics(G4RunManager* run_manager, G4int verbosity=0);
+
 } // namespace nain4
 
 namespace n4 { using namespace nain4; }

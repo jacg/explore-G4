@@ -1,5 +1,8 @@
 #include "nain4.hh"
 
+#include <G4EmStandardPhysics_option4.hh>
+#include <G4OpticalPhysics.hh>
+#include <FTFP_BERT.hh>
 #include <G4PVPlacement.hh>
 #include <G4String.hh>
 
@@ -100,6 +103,14 @@ silence::silence(std::ios& stream)
 }
 silence::~silence() { stream.rdbuf(original_buffer); }
 
+
+// Set optical physics lists
+void use_our_optical_physics(G4RunManager* run_manager, G4int verbosity) {
+    auto physics_list = new FTFP_BERT{verbosity};
+    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
+    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
+    run_manager  -> SetUserInitialization(physics_list);
+} // run_manager owns physics_list
 
 } // namespace nain4
 

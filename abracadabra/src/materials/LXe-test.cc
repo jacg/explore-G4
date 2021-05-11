@@ -5,10 +5,6 @@
 
 #include <G4SystemOfUnits.hh>
 
-#include <FTFP_BERT.hh>
-#include <G4EmStandardPhysics_option4.hh>
-#include <G4OpticalPhysics.hh>
-
 #include <G4Orb.hh>
 #include <G4Box.hh>
 
@@ -54,10 +50,7 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
   {
     n4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
-    auto physics_list = new FTFP_BERT{0};
-    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
-    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
-    run_manager -> SetUserInitialization(physics_list);
+    n4::use_our_optical_physics(run_manager);
     run_manager -> SetUserInitialization((new n4::actions{new n4::generator{two_gammas_at_origin}})
          -> set((new n4::stacking_action) -> classify(kill_secondaries))
          -> set (new n4::stepping_action{count_unscathed}));

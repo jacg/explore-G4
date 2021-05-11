@@ -14,10 +14,6 @@
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
 
-#include <FTFP_BERT.hh>
-#include <G4EmStandardPhysics_option4.hh>
-#include <G4OpticalPhysics.hh>
-
 #include <G4OpticalPhoton.hh>
 #include <Randomize.hh>
 
@@ -129,11 +125,8 @@ int main(int argc, char** argv) {
 
   { // Physics list
     auto verbosity = 1;
-    auto physics_list = new FTFP_BERT{verbosity};
-    physics_list -> ReplacePhysics(new G4EmStandardPhysics_option4());
-    physics_list -> RegisterPhysics(new G4OpticalPhysics{});
-    run_manager  -> SetUserInitialization(physics_list);
-  } // run_manager owns physics_list
+    n4::use_our_optical_physics(run_manager.get(), verbosity);
+  }
 
   // User action initialization
   run_manager->SetUserInitialization(new n4::actions{
