@@ -34,7 +34,7 @@ public:
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
   void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
-  void write_total_charge(unsigned int evt_id, unsigned int sensor_id, double charge);
+  void write_total_charge(unsigned int evt_id, unsigned int sensor_id, size_t charge);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
@@ -82,7 +82,7 @@ typedef struct {
 typedef struct {
   unsigned int event_id;
   unsigned int sensor_id;
-  double charge;
+  size_t charge;
 } total_charge_t;
 
 

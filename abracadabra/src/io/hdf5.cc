@@ -33,7 +33,7 @@ HIGHFIVE_REGISTER_TYPE(waveform_t, create_waveform_type)
 HF::CompoundType create_total_charge_type() {
   return {{"event_id", HF::AtomicType<unsigned int>{}},
           {"sensor_id", HF::AtomicType<unsigned int>{}},
-          {"charge", HF::AtomicType<double>{}}};
+          {"charge", HF::AtomicType<size_t>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(total_charge_t, create_total_charge_type)
 
@@ -91,7 +91,7 @@ void hdf5_io::write_waveform(unsigned int event_id, unsigned int sensor_id, std:
   write("waveform", waveform_index, data);
 }
 
-void hdf5_io::write_total_charge(unsigned int event_id, unsigned int sensor_id, double charge) {
+void hdf5_io::write_total_charge(unsigned int event_id, unsigned int sensor_id, size_t charge) {
   std::vector<total_charge_t> data{{event_id, sensor_id, charge}};
   write("total_charge", total_charge_index, data);
 }
