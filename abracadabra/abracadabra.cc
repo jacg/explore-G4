@@ -170,17 +170,29 @@ int main(int argc, char** argv) {
       ui_manager -> ApplyCommand("/PhysicsList/RegisterPhysics G4OpticalPhysics");
       ui_manager -> ApplyCommand("/vis/scene/endOfEventAction accumulate 100");
       //ui_manager -> ApplyCommand("/run/beamOn 1");
-      //nain4::silence _{G4cout};
-      int PHI = 150; int THETA = 160; int THETAF = 175;
-      auto view = [&ui_manager](auto theta, auto phi) {
-        ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
-                                 + std::to_string(theta) + ' ' + std::to_string(phi));
+
+      struct waypoint { float phi; float theta; size_t steps; };
+      auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
+        nain4::silence _{G4cout};
+        float phi_start = 0, theta_start = 0;
+        for (auto [phi_stop, theta_stop, steps] : data) {
+          auto   phi_d = (  phi_stop -   phi_start) / steps;
+          auto theta_d = (theta_stop - theta_start) / steps;
+          for (size_t step=1; step<=steps; step++) {
+            auto   phi =   phi_start +   phi_d * step;
+            auto theta = theta_start + theta_d * step;
+            ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
+                                     + std::to_string(theta) + ' ' + std::to_string(phi));
+          }
+            phi_start =   phi_stop;
+          theta_start = theta_stop;
+        }
       };
-      // {
-      //   nain4::silence _{G4cout};
-      //   for (int phi  =PHI  ; phi  <360+PHI   ; phi  +=4) { view(THETA, phi); }
-      //   for (int theta=THETA; theta<360+THETAF; theta+=4) { view(theta, PHI); }
-      // }
+
+      spin_view(ui_manager, {{-30, -20,  1},
+                             {-20, 160, 50},
+                             {160, 145, 30},
+                             {180, 180, 10}});
       ui -> SessionStart();
     }
   }
