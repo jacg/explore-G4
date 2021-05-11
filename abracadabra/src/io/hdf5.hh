@@ -11,13 +11,13 @@
 #include <highfive/H5DataType.hpp>
 
 
-typedef struct {
+struct hit_t {
   unsigned int event_id;
   double x;
   double y;
   double z;
   double t;
-} hit_t;
+};
 
 
 // TODO There's something fishy about the implementation behind this interface:
@@ -67,23 +67,23 @@ void hdf5_io::write(std::string const& dataset, unsigned int& index, T const& da
   index += n_elements;
 }
 
-typedef struct {
+struct run_info_t {
   char param_key  [hdf5_io::CONFLEN];
   char param_value[hdf5_io::CONFLEN];
-} run_info_t;
+};
 
 
-typedef struct {
+struct waveform_t {
   unsigned int event_id;
   unsigned int sensor_id;
   double time;
-} waveform_t;
+};
 
-typedef struct {
+struct total_charge_t {
   unsigned int event_id;
   unsigned int sensor_id;
   size_t charge;
-} total_charge_t;
+};
 
 
 #endif
