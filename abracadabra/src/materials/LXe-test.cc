@@ -51,10 +51,11 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
     n4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
     n4::use_our_optical_physics(run_manager);
-    run_manager -> SetUserInitialization((new n4::actions{new n4::generator{two_gammas_at_origin}})
+    run_manager -> SetUserInitialization((new n4::actions{two_gammas_at_origin})
          -> set((new n4::stacking_action) -> classify(kill_secondaries))
          -> set (new n4::stepping_action{count_unscathed}));
 
+    // --- Infer attenuation length by gathering statistics for given radius -------------
     auto check_attlength = [&unscathed, run_manager](auto build, auto radius, auto events) {
       unscathed = 0;
       n4::clear_geometry();
@@ -67,7 +68,7 @@ TEST_CASE("liquid xenon properties", "[xenon][properties]") {
       auto attenuation_length = - radius / log(ratio);
       CHECK(attenuation_length == Approx(expected_attenuation_length).epsilon(0.05));
     };
-
+    // --- Check attenuation length across range of radii --------------------------------
     size_t events = 10000;
     for (auto r: {1,2,3,4,5,6,7,8}) { check_attlength(xe_sphere, r*cm, events); }
   }

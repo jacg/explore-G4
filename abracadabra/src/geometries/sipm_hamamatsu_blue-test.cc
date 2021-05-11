@@ -141,7 +141,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     nain4::silence _{G4cout};
     auto run_manager = G4RunManager::GetRunManager();
     run_manager -> SetUserInitialization(new n4::geometry{tiles});
-    run_manager -> SetUserInitialization(new n4::actions{new n4::generator{shoot_at_each_tile}});
+    run_manager -> SetUserInitialization(new n4::actions{shoot_at_each_tile});
     n4::use_our_optical_physics(run_manager);
     run_manager -> Initialize();
     run_manager -> BeamOn(1);

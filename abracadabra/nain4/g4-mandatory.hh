@@ -100,9 +100,20 @@ private:
   action_t action;
 };
 
+// ----- primary generator ----------------------------------------------------------
+struct generator : public G4VUserPrimaryGeneratorAction {
+  using function = std::function<void(G4Event*)>;
+  generator(function fn = geantino_along_x) : doit{fn} {}
+  void GeneratePrimaries(G4Event* event) override { doit(event); };
+private:
+  function const doit;
+  static void geantino_along_x(G4Event*);
+};
+
 // ----- actions --------------------------------------------------------------------
 struct actions : public G4VUserActionInitialization {
-  actions(G4VUserPrimaryGeneratorAction* generator) : generator{generator} {}
+  actions(G4VUserPrimaryGeneratorAction* generator) : generator_{generator} {}
+  actions(generator::function fn) : generator_{new generator(fn)} {}
   // See B1 README for explanation of the role of BuildForMaster in multi-threaded mode.
   //void BuildForMaster() const override;
   void Build() const override;
@@ -114,7 +125,7 @@ struct actions : public G4VUserActionInitialization {
   actions* set(G4UserStackingAction* a) { stack_ = a; return this; }
 
 private:
-  G4VUserPrimaryGeneratorAction* generator;
+  G4VUserPrimaryGeneratorAction* generator_;
   G4UserRunAction              * run_   = nullptr;
   G4UserEventAction            * event_ = nullptr;
   G4UserSteppingAction         * step_  = nullptr;
@@ -131,16 +142,6 @@ struct geometry : public G4VUserDetectorConstruction {
   G4VPhysicalVolume* Construct() override { return construct(); }
 private:
   construct_fn construct;
-};
-
-// ----- primary generator ----------------------------------------------------------
-struct generator : public G4VUserPrimaryGeneratorAction {
-  using function = std::function<void(G4Event*)>;
-  generator(function fn = geantino_along_x) : doit{fn} {}
-  void GeneratePrimaries(G4Event* event) override { doit(event); };
-private:
-  function const doit;
-  static void geantino_along_x(G4Event*);
 };
 
 // --------------------------------------------------------------------------------

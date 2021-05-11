@@ -128,23 +128,22 @@ int main(int argc, char** argv) {
   { auto verbosity = 1;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
 
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager->SetUserInitialization(new n4::actions{
-      new n4::generator{[&phantom](G4Event* event) {
-        // Pick one that matches geometry
-        generate_back_to_back_511_keV_gammas(event, {}, 0);
-        //phantom.generate_primaries(event);
+  run_manager->SetUserInitialization(new n4::actions{[&phantom](G4Event* event) {
+    // Pick one that matches geometry
+    generate_back_to_back_511_keV_gammas(event, {}, 0);
+    //phantom.generate_primaries(event);
 
-        // auto particle = nain4::find_particle("geantino");
-        // auto p = G4ThreeVector{0,1,0} * 7 * eV;
-        // double time = 0;
-        // //auto vertex =      new G4PrimaryVertex({0, 65*mm, 3*mm}, time);
-        // auto vertex =      new G4PrimaryVertex({}, time);
-        // auto primary = new G4PrimaryParticle(particle,  p.x(),  p.y(),  p.z());
-        // primary -> SetPolarization({1,0,0});
-        // vertex->SetPrimary(primary);
-        // event -> AddPrimaryVertex(vertex);
+    // auto particle = nain4::find_particle("geantino");
+    // auto p = G4ThreeVector{0,1,0} * 7 * eV;
+    // double time = 0;
+    // //auto vertex =      new G4PrimaryVertex({0, 65*mm, 3*mm}, time);
+    // auto vertex =      new G4PrimaryVertex({}, time);
+    // auto primary = new G4PrimaryParticle(particle,  p.x(),  p.y(),  p.z());
+    // primary -> SetPolarization({1,0,0});
+    // vertex->SetPrimary(primary);
+    // event -> AddPrimaryVertex(vertex);
 
-      }}});
+  }});
   // ===== end of mandatory initialization ==================================================
 
   // Initialize visualization

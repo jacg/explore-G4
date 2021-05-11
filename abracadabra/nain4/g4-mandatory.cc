@@ -9,7 +9,7 @@ namespace nain4 {
 
 // ----- actions --------------------------------------------------------------------
 void actions::Build() const {
-  SetUserAction(generator);
+  SetUserAction(generator_);
   if (  run_) { SetUserAction(  run_); }
   if (event_) { SetUserAction(event_); }
   if ( step_) { SetUserAction( step_); }
