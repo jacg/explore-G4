@@ -35,6 +35,7 @@ public:
   void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
   void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
   void write_total_charge(unsigned int evt_id, unsigned int sensor_id, size_t charge);
+  void write_sensor_xyz(unsigned int sensor_id, double x, double y, double z);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
@@ -72,7 +73,6 @@ struct run_info_t {
   char param_value[hdf5_io::CONFLEN];
 };
 
-
 struct waveform_t {
   unsigned int event_id;
   unsigned int sensor_id;
@@ -85,5 +85,11 @@ struct total_charge_t {
   size_t charge;
 };
 
+struct sensor_xyz_t {
+  unsigned int sensor_id;
+  double x;
+  double y;
+  double z;
+};
 
 #endif
