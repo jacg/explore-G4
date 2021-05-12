@@ -60,6 +60,18 @@ int main(int argc, char** argv) {
   std::string hdf5_file_name = "test_waveform.h5";
   auto writer = hdf5_io{hdf5_file_name};
 
+  // ----- Extract sensor positions from geometry and write to hdf5 --------------------------
+  auto write_sensor_database = [&writer](auto geometry) {
+    for(auto* vol: geometry) {
+       auto name = vol -> GetName();
+      if (name.rfind("Hamamatsu_Blue", 0) == 0) { // starts with
+        auto p = vol -> GetTranslation();
+        auto id = vol -> GetCopyNo();
+        writer.write_sensor_xyz(id, p.x(), p.y(), p.z());
+      }
+    }
+    return geometry;
+  };
   // ----- Sensitive detector ----------------------------------------------------------------
   n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
     static auto optical_photon = G4OpticalPhoton::Definition();
@@ -114,9 +126,9 @@ int main(int argc, char** argv) {
     .build();
 
   // run_manager takes ownership of geometry
-  run_manager -> SetUserInitialization(new n4::geometry{[&phantom, sd]() -> G4VPhysicalVolume* {
+  run_manager -> SetUserInitialization(new n4::geometry{[&phantom, &write_sensor_database, sd]() -> G4VPhysicalVolume* {
     // Pick one (ensure that generator (below) is compatible) ...
-    return cylinder_lined_with_hamamatsus(200*mm, 350*mm, 40*mm, sd);
+    return write_sensor_database(cylinder_lined_with_hamamatsus(200*mm, 350*mm, 40*mm, sd));
     return phantom_in_cylinder(phantom, 200*mm, 40*mm, sd);
     return phantom.geometry();
     return imas_demonstrator(nullptr);
