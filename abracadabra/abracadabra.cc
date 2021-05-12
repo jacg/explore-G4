@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   // ----- Where to write output from sensitive detectors ------------------------------------
   // TODO: Filename should be taken from config file
   std::string hdf5_file_name = "test_waveform.h5";
-  auto writer = new hdf5_io{hdf5_file_name};
+  auto writer = hdf5_io{hdf5_file_name};
 
   // ----- Sensitive detector ----------------------------------------------------------------
   n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
@@ -87,8 +87,8 @@ int main(int argc, char** argv) {
       // TODO reserve space once good size is known from statistics
       std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
                    [start](auto t) { return t < start + 100 * ps; });
-      writer -> write_waveform(event_id, sensor_id, t);
-      writer -> write_total_charge(event_id, sensor_id, ts.size());
+      writer . write_waveform(event_id, sensor_id, t);
+      writer . write_total_charge(event_id, sensor_id, ts.size());
     }
     times.clear();
   };
