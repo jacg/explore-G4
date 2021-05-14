@@ -31,8 +31,10 @@ struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     auto fcmd = messenger -> DeclareProperty("outfile", outfile, "file to which hdf5 tables well be written");
     // TODO units, ranges etc. for fcmd
+    messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
   }
   G4String outfile = "default_out.h5";
+  size_t offset;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -104,8 +106,8 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer](auto) {
-    size_t event_id = n4::event_number();
+  n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer, &messenger](auto) {
+    size_t event_id = n4::event_number() + messenger.offset;
     std::cout << event_id << std::endl;
     for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);

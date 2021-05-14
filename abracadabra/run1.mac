@@ -8,6 +8,7 @@
 #
 
 /abracadabra/outfile "override-default-here.h5"
+/abracadabra/event-number-offset 1000
 
 # Initialize kernel
 /run/initialize
