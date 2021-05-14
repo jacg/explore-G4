@@ -128,12 +128,15 @@ int main(int argc, char** argv) {
   // run_manager takes ownership of geometry
   run_manager -> SetUserInitialization(new n4::geometry{[&phantom, &write_sensor_database, sd]() -> G4VPhysicalVolume* {
     // Pick one (ensure that generator (below) is compatible) ...
-    return write_sensor_database(cylinder_lined_with_hamamatsus(200*mm, 350*mm, 40*mm, sd));
-    return phantom_in_cylinder(phantom, 200*mm, 40*mm, sd);
-    return phantom.geometry();
-    return imas_demonstrator(nullptr);
-    return square_array_of_sipms(sd);
-    return nain4::place(sipm_hamamatsu_blue(true, sd)).now();
+    auto geometry = [&]() -> G4VPhysicalVolume* {
+      return cylinder_lined_with_hamamatsus(200*mm, 350*mm, 40*mm, sd);
+      return phantom_in_cylinder(phantom,   600*mm,         40*mm, sd);
+      return phantom.geometry();
+      return imas_demonstrator(nullptr);
+      return square_array_of_sipms(sd);
+      return nain4::place(sipm_hamamatsu_blue(true, sd)).now();
+    }();
+    return write_sensor_database(geometry);
   }});
 
   // ----- Physics list --------------------------------------------------------------------
