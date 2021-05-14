@@ -14,6 +14,7 @@
 #include <G4UImanager.hh>
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
+#include <G4GenericMessenger.hh>
 
 #include <G4OpticalPhoton.hh>
 #include <Randomize.hh>
@@ -25,6 +26,17 @@
 using std::make_unique;
 using std::unique_ptr;
 
+
+struct abracadabra_messenger {
+  abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
+    auto fcmd = messenger -> DeclareProperty("outfile", outfile, "file to which hdf5 tables well be written");
+    // TODO units, ranges etc. for fcmd
+  }
+  G4String outfile = "default_out.h5";
+private:
+  unique_ptr<G4GenericMessenger> messenger;
+};
+
 // ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
 bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
@@ -34,6 +46,8 @@ using times_set = std::multiset<double>;
 
 // ------------------------------------------------------------------------------------------
 int main(int argc, char** argv) {
+
+  abracadabra_messenger messenger;
 
   // Detect interactive mode (if no arguments) and define UI session
   auto ui = argc == 1
@@ -56,18 +70,18 @@ int main(int argc, char** argv) {
   };
 
   // ----- Where to write output from sensitive detectors ------------------------------------
-  // TODO: Filename should be taken from config file
-  std::string hdf5_file_name = "test_waveform.h5";
-  auto writer = hdf5_io{hdf5_file_name};
+  unique_ptr<hdf5_io> writer;
+  auto  open_writer = [&writer, &messenger]() { writer.reset(new hdf5_io{messenger.outfile});};
 
   // ----- Extract sensor positions from geometry and write to hdf5 --------------------------
-  auto write_sensor_database = [&writer](auto geometry) {
+  auto write_sensor_database = [&writer, &open_writer](auto geometry) {
+    open_writer();
     for(auto* vol: geometry) {
        auto name = vol -> GetName();
       if (name.rfind("Hamamatsu_Blue", 0) == 0) { // starts with
         auto p = vol -> GetTranslation();
         auto id = vol -> GetCopyNo();
-        writer.write_sensor_xyz(id, p.x(), p.y(), p.z());
+        writer -> write_sensor_xyz(id, p.x(), p.y(), p.z());
       }
     }
     return geometry;
@@ -99,8 +113,8 @@ int main(int argc, char** argv) {
       // TODO reserve space once good size is known from statistics
       std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
                    [start](auto t) { return t < start + 100 * ps; });
-      writer . write_waveform(event_id, sensor_id, t);
-      writer . write_total_charge(event_id, sensor_id, ts.size());
+      writer -> write_waveform(event_id, sensor_id, t);
+      writer -> write_total_charge(event_id, sensor_id, ts.size());
     }
     times.clear();
   };
