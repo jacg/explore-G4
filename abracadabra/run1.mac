@@ -2,10 +2,6 @@
 #
 # Can be run in batch, without graphic
 # or interactively: Idle> /control/execute run1.mac
-#
-# Change the default number of workers (in multi-threading mode)
-#/run/numberOfThreads 4
-#
 
 /abracadabra/outfile "override-default-here.h5"
 /abracadabra/event-number-offset 1000
