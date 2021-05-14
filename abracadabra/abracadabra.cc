@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
   };
 
   n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer](auto) {
-    double event_id = n4::event_number();
+    size_t event_id = n4::event_number();
     std::cout << event_id << std::endl;
     for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
