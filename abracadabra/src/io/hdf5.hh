@@ -36,6 +36,7 @@ public:
   void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
   void write_total_charge(unsigned int evt_id, unsigned int sensor_id, size_t charge);
   void write_sensor_xyz(unsigned int sensor_id, double x, double y, double z);
+  void write_q_t0(unsigned event_id, unsigned sensor_id, unsigned q, double t0);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
@@ -50,6 +51,7 @@ private:
   unsigned int hit_index;
   unsigned int waveform_index;
   unsigned int total_charge_index;
+  unsigned int q_t0_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
@@ -87,9 +89,16 @@ struct total_charge_t {
 
 struct sensor_xyz_t {
   unsigned int sensor_id;
-  double x;
-  double y;
-  double z;
+  double       x;
+  double       y;
+  double       z;
+};
+
+struct q_t0_t {
+  unsigned int event_id;
+  unsigned int sensor_id;
+  unsigned int q;
+  double t0;
 };
 
 #endif

@@ -11,7 +11,8 @@ hdf5_io::hdf5_io(std::string fname)
 , runinfo_index{0}
 , hit_index{0}
 , waveform_index{0}
-, total_charge_index{0} {}
+, total_charge_index{0}
+, q_t0_index{0} {}
 
 
 HF::CompoundType create_hit_type() {
@@ -52,6 +53,14 @@ HF::CompoundType create_sensor_xyz_type() {
 }
 HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
 
+HF::CompoundType create_q_t0_type() {
+  return {{"event_id" , HF::AtomicType<unsigned>{}},
+          {"sensor_id", HF::AtomicType<unsigned>{}},
+          {"q"        , HF::AtomicType<unsigned>{}},
+          {"t0"       , HF::AtomicType<double>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
+
 void set_string_param(char * to, const char * from, unsigned int max_len) {
   memset(to, 0, max_len);
   strcpy(to, from);
@@ -81,6 +90,7 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("waveform"     , dataspace, create_waveform_type(), props);
   group.createDataSet("total_charge" , dataspace, create_total_charge_type(), props);
   group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type(), props);
+  group.createDataSet("q_t0"         , dataspace, create_q_t0_type()     , props);
 }
 
 
@@ -110,6 +120,11 @@ void hdf5_io::write_sensor_xyz(unsigned int sensor_id, double x, double y, doubl
   // than as a whole vector in one go?
   std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
   write("sensor_xyz", hit_index, data);
+}
+
+void hdf5_io::write_q_t0(unsigned event_id, unsigned sensor_id, unsigned q, double t0) {
+  std::vector<q_t0_t> data{{event_id, sensor_id, q, t0}};
+  write("q_t0", q_t0_index, data);
 }
 
 std::vector<hit_t> hdf5_io::read_hit_info() {
