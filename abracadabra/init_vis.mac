@@ -6,7 +6,8 @@
 /control/saveHistory
 /run/verbose 2
 
-/abracadabra/geometry square
+/abracadabra/geometry  phantom
+/abracadabra/generator quarter_ring
 
 # Initialize kernel
 /run/initialize

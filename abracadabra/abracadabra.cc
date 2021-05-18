@@ -1,6 +1,7 @@
 // clang-format off
 #include "nain4.hh"
 #include "g4-mandatory.hh"
+#include "random/random.hh"
 
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
@@ -29,14 +30,16 @@ using std::unique_ptr;
 
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
-    auto fcmd = messenger -> DeclareProperty("outfile", outfile, "file to which hdf5 tables well be written");
-    // TODO units, ranges etc. for fcmd
+    // TODO units, ranges etc.
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
-    messenger -> DeclareProperty("geometry", geometry, "Geometry to be instantiated");
+    messenger -> DeclareProperty("outfile"  , outfile, "file to which hdf5 tables well be written");
+    messenger -> DeclareProperty("geometry" , geometry,  "Geometry to be instantiated");
+    messenger -> DeclareProperty("generator", generator, "Primary generator");
   }
-  G4String outfile = "default_out.h5";
   size_t offset;
-  G4String geometry = "phantom";
+  G4String outfile   = "default_out.h5";
+  G4String geometry  = "phantom";
+  G4String generator = "phantom";
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -155,31 +158,39 @@ int main(int argc, char** argv) {
       throw "Unrecoginzed geometry " + g;
   };
 
-  // run_manager takes ownership of geometry
+  // ----- A choice of generators ---------------------------------------------------------
+  std::map<G4String, n4::generator::function> generators = {
+    {"back_to_back", [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
+    {"phantom"     , [&](auto event) { phantom.generate_primaries(event); }},
+    {"quarter_ring", [ ](auto event) {
+      // Lots of asymmetry to help verify orientation
+      auto r = 250 * mm;
+      auto phi = uniform(0, CLHEP::pi / 2);
+      auto x = r * cos(phi);
+      auto y = r * sin(phi);
+      auto z = 100  * mm;
+      generate_back_to_back_511_keV_gammas(event, {x,y,z}, 0);
+    }}
+  };
+
+  // Generator is passed to run manager before the specific choice of generator
+  // is read from the configuration file, so we add an indirection which allows
+  // us to use the actual generator which is chosen later.
+  // TODO can we avoid these contortions by initialising run manager after
+  // reading the UI macros?
+  n4::generator::function chosen_generator;
+  n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
+
+  // ===== Mandatory G4 initializations ==================================================
+  // ----- Geometry (run_manager takes ownership) ----------------------------------------
   run_manager -> SetUserInitialization(new n4::geometry{[&write_sensor_database, geometry]() -> G4VPhysicalVolume* {
     return write_sensor_database(geometry());
   }});
-
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
-
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager->SetUserInitialization(new n4::actions{[&phantom](G4Event* event) {
-    // Pick one that matches geometry
-    generate_back_to_back_511_keV_gammas(event, {}, 0);
-    //phantom.generate_primaries(event);
 
-    // auto particle = nain4::find_particle("geantino");
-    // auto p = G4ThreeVector{0,1,0} * 7 * eV;
-    // double time = 0;
-    // //auto vertex =      new G4PrimaryVertex({0, 65*mm, 3*mm}, time);
-    // auto vertex =      new G4PrimaryVertex({}, time);
-    // auto primary = new G4PrimaryParticle(particle,  p.x(),  p.y(),  p.z());
-    // primary -> SetPolarization({1,0,0});
-    // vertex->SetPrimary(primary);
-    // event -> AddPrimaryVertex(vertex);
-
-  }});
+  run_manager -> SetUserInitialization(new n4::actions{generator}); // TODO: if generator missing in map
   // ===== end of mandatory initialization ==================================================
 
   // Get the pointer to the User Interface manager
@@ -189,6 +200,7 @@ int main(int argc, char** argv) {
   if (!ui) { // batch mode
     G4String file_name = argv[1];
     ui_manager -> ApplyCommand("/control/execute " + file_name);
+    chosen_generator = generators[messenger.generator];
   } else { // interactive mode
 
     // Initialize visualization
@@ -198,7 +210,7 @@ int main(int argc, char** argv) {
     vis_manager -> Initialize();
 
     ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-
+    chosen_generator = generators[messenger.generator];
     // ----- spin the viewport ------------------------------------------------------------
     struct waypoint { float phi; float theta; size_t steps; };
     auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
