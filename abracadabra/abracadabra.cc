@@ -178,12 +178,6 @@ int main(int argc, char** argv) {
   }});
   // ===== end of mandatory initialization ==================================================
 
-  // Initialize visualization // TODO surely this needs to be moved into the interactive UI branch
-  auto vis_manager = make_unique<G4VisExecutive>();
-  // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
-  vis_manager -> Initialize();
-
   // Get the pointer to the User Interface manager
   auto ui_manager = G4UImanager::GetUIpointer();
 
@@ -192,6 +186,13 @@ int main(int argc, char** argv) {
     G4String file_name = argv[1];
     ui_manager -> ApplyCommand("/control/execute " + file_name);
   } else { // interactive mode
+
+    // Initialize visualization
+    auto vis_manager = make_unique<G4VisExecutive>();
+    // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
+    // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
+    vis_manager -> Initialize();
+
     ui_manager -> ApplyCommand("/control/execute init_vis.mac");
 
     // ----- spin the viewport ------------------------------------------------------------
