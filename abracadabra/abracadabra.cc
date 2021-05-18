@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
   }});
   // ===== end of mandatory initialization ==================================================
 
-  // Initialize visualization
+  // Initialize visualization // TODO surely this needs to be moved into the interactive UI branch
   auto vis_manager = make_unique<G4VisExecutive>();
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
@@ -188,43 +188,40 @@ int main(int argc, char** argv) {
   auto ui_manager = G4UImanager::GetUIpointer();
 
   // Process macro or start UI session
-  if (!ui) {
-    // batch mode
-    G4String command = "/control/execute ";
+  if (!ui) { // batch mode
     G4String file_name = argv[1];
-    ui_manager -> ApplyCommand(command + file_name);
-  } else {
-    // interactive mode
-    {
-      ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-      //ui_manager -> ApplyCommand("/run/beamOn 1");
+    ui_manager -> ApplyCommand("/control/execute " + file_name);
+  } else { // interactive mode
+    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
 
-      // ----- spin the viewport ------------------------------------------------------------
-      struct waypoint { float phi; float theta; size_t steps; };
-      auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
-        nain4::silence _{G4cout};
-        float phi_start = 0, theta_start = 0;
-        for (auto [phi_stop, theta_stop, steps] : data) {
-          auto   phi_d = (  phi_stop -   phi_start) / steps;
-          auto theta_d = (theta_stop - theta_start) / steps;
-          for (size_t step=1; step<=steps; step++) {
-            auto   phi =   phi_start +   phi_d * step;
-            auto theta = theta_start + theta_d * step;
-            ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
-                                     + std::to_string(theta) + ' ' + std::to_string(phi));
-          }
-            phi_start =   phi_stop;
-          theta_start = theta_stop;
+    // ----- spin the viewport ------------------------------------------------------------
+    struct waypoint { float phi; float theta; size_t steps; };
+    auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
+      nain4::silence _{G4cout};
+      float phi_start = 0, theta_start = 0;
+      for (auto [phi_stop, theta_stop, steps] : data) {
+        auto   phi_d = (  phi_stop -   phi_start) / steps;
+        auto theta_d = (theta_stop - theta_start) / steps;
+        for (size_t step=1; step<=steps; step++) {
+          auto   phi =   phi_start +   phi_d * step;
+          auto theta = theta_start + theta_d * step;
+          ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
+                                   + std::to_string(theta) + ' ' + std::to_string(phi));
         }
-      };
+        phi_start =   phi_stop;
+        theta_start = theta_stop;
+      }
+    };
 
-      spin_view(ui_manager, {{-30, -20,  1},
-                             {-20, 160, 50},
-                             {160, 145, 30},
-                             {180, 180, 10}});
-      // ----- hand over control to interactive user ----------------------------------------
-      ui -> SessionStart();
-    }
+    spin_view(ui_manager, {{-30, -20,  1},
+                           {-20, 160, 50},
+                           {160, 145, 30},
+                           {180, 180, 10}});
+
+    //spin_view(ui_manager, {{180, 180, 10}});
+
+    // ----- hand over control to interactive user ----------------------------------------
+    ui -> SessionStart();
   }
 
   // Job termination
