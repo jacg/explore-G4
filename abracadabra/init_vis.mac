@@ -6,8 +6,8 @@
 /control/saveHistory
 /run/verbose 2
 
-/abracadabra/geometry  phantom_in_cylinder
-/abracadabra/generator phantom
+/abracadabra/geometry  phantom
+#/generator/choose origin
 /abracadabra/spin_view True
 /abracadabra/spin_speed 20
 

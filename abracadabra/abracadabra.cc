@@ -11,6 +11,7 @@
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
 #include <G4VisExecutive.hh>
@@ -27,6 +28,12 @@
 using std::make_unique;
 using std::unique_ptr;
 
+// ----- map/set helpers --------------------------------------------------------------------
+template<class M, class K>
+bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
+
+#include <set>
+using times_set = std::multiset<double>;
 
 // ----- Choices which can be made in configuration files -----------------------------------
 struct abracadabra_messenger {
@@ -35,26 +42,48 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
-    messenger -> DeclareProperty("generator" , generator , "Primary generator");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
   }
   size_t offset;
   G4String outfile    = "default_out.h5";
   G4String geometry   = "phantom";
-  G4String generator  = "phantom";
   bool     spin       = true;
   G4int    spin_speed = 10;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
 
-// ----- map/set helpers --------------------------------------------------------------------
-template<class M, class K>
-bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
+struct generator_messenger : G4UImessenger {
+  generator_messenger(n4::generator::function& generate, std::map<G4String, n4::generator::function>& choices)
+    : dir{new G4UIdirectory     ("/generator/")}
+    , cmd{new G4UIcmdWithAString("/generator/choose", this)}
+    , generate{generate}
+    , choices{choices}
+  {
+    auto default_ = "phantom";
+    dir -> SetGuidance("TODO blah blah blah");
+    cmd -> SetGuidance("choice of primary generator");
+    cmd -> SetParameterName("choose", /*omittable*/ false);
+    cmd -> SetDefaultValue(default_);
+    cmd -> SetCandidates(""); // TODO get these from the generator map
+    cmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+    generate = choices[default_];
+  }
 
-#include <set>
-using times_set = std::multiset<double>;
+  void SetNewValue(G4UIcommand* command, G4String choice) {
+    if (command == cmd.get()) {
+      // TODO use proper exceptions
+      if (!contains(choices, choice)) { throw "Unrecoginzed generator " + choice; }
+      generate = choices[choice];
+    }
+  }
+
+  unique_ptr<G4UIdirectory> dir;
+  unique_ptr<G4UIcmdWithAString> cmd;
+  n4::generator::function& generate;
+  std::map<G4String, n4::generator::function>& choices;
+};
 
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
@@ -159,7 +188,7 @@ int main(int argc, char** argv) {
   // ----- A choice of generators ---------------------------------------------------------
   // Can choose generator in macros with `/abracadabra/generator <choice>`
   std::map<G4String, n4::generator::function> generators = {
-    {"back_to_back", [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
+    {"origin"      , [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
     {"phantom"     , [&](auto event) { phantom.generate_primaries(event); }},
     {"quarter_ring", [ ](auto event) {
       // Lots of asymmetry to help verify orientation
@@ -177,8 +206,10 @@ int main(int argc, char** argv) {
   // us to use the actual generator which is chosen later.
   // TODO can we avoid these contortions by initialising run manager after
   // reading the UI macros?
-  n4::generator::function chosen_generator;
+  n4::generator::function chosen_generator = [](auto) { throw "No generator has been chosen"; };
   n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
+  generator_messenger generator_messenger{chosen_generator, generators};
+
 
   // ===== Mandatory G4 initializations ===================================================
 
@@ -212,10 +243,6 @@ int main(int argc, char** argv) {
     G4String file_name = argv[1];
     ui_manager -> ApplyCommand("/control/execute " + file_name);
   }
-
-  // TODO use proper exceptions
-  if (!contains(generators, messenger.generator)) { throw "Unrecoginzed generator " + messenger.generator; }
-  chosen_generator = generators[messenger.generator];
 
   if (ui && messenger.spin) {
 
