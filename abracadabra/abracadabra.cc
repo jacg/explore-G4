@@ -44,12 +44,18 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
+    messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
+    messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
+    messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
   }
   size_t offset;
   G4String outfile    = "default_out.h5";
   G4String geometry   = "phantom";
   bool     spin       = true;
   G4int    spin_speed = 10;
+  G4double xenon_thickness =  40 * mm;
+  G4double cylinder_length = 600 * mm;
+  G4double cylinder_radius = 200 * mm;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -175,10 +181,13 @@ int main(int argc, char** argv) {
 
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
+    auto dr_LXe = messenger.xenon_thickness * mm;
+    auto length = messenger.cylinder_length * mm;
+    auto radius = messenger.cylinder_radius * mm;
     return
       g == "phantom"             ? phantom.geometry() :
-      g == "cylinder"            ? cylinder_lined_with_hamamatsus(700*mm, 350*mm, 40*mm, sd) :
-      g == "phantom_in_cylinder" ? phantom_in_cylinder(phantom,   600*mm,         40*mm, sd) :
+      g == "cylinder"            ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
+      g == "phantom_in_cylinder" ? phantom_in_cylinder(phantom,   length, radius, dr_LXe, sd) :
       g == "imas"                ? imas_demonstrator(sd) :
       g == "square"              ? square_array_of_sipms(sd) :
       g == "hamamatsu"           ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :

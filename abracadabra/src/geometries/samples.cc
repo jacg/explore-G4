@@ -68,14 +68,10 @@ G4VPhysicalVolume* cylinder_lined_with_hamamatsus(double length, double radius, 
 
 // TODO write (or find) something that walks geometries with pointer dynamic
 // casting and pointer deref safety
-G4VPhysicalVolume* phantom_in_cylinder(nema_phantom const& phantom, G4double length, double dr_Xe, SD* sd) {
+G4VPhysicalVolume* phantom_in_cylinder(nema_phantom const& phantom, G4double length, double radius, double dr_Xe, SD* sd) {
   auto phantom_envelope = phantom.geometry() -> GetLogicalVolume();
   auto phantom_cylinder = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume();
-  auto phantom_solid = dynamic_cast<G4Tubs*>(phantom_cylinder -> GetSolid());
-  if (!phantom_solid) { throw "toys out of the pram"; }
-  auto phantom_radius = phantom_solid -> GetOuterRadius();
-  //auto phantom_length = phantom_solid -> GetZHalfLength();
-  auto sensor_envelope = cylinder_lined_with_hamamatsus(length, phantom_radius*1.5, dr_Xe, sd);
+  auto sensor_envelope = cylinder_lined_with_hamamatsus(length, radius, dr_Xe, sd);
   n4::place(phantom_cylinder).in(sensor_envelope->GetLogicalVolume()).now();
   return sensor_envelope;
 }
