@@ -32,9 +32,11 @@ struct abracadabra_messenger {
     auto fcmd = messenger -> DeclareProperty("outfile", outfile, "file to which hdf5 tables well be written");
     // TODO units, ranges etc. for fcmd
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
+    messenger -> DeclareProperty("geometry", geometry, "Geometry to be instantiated");
   }
   G4String outfile = "default_out.h5";
   size_t offset;
+  G4String geometry = "phantom";
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -142,13 +144,15 @@ int main(int argc, char** argv) {
     .build();
 
   // Pick one (ensure that generator (below) is compatible) ...
-  auto geometry = [&]() -> G4VPhysicalVolume* {
-    return phantom.geometry();
-    return cylinder_lined_with_hamamatsus(700*mm, 350*mm, 40*mm, sd);
-    return phantom_in_cylinder(phantom,   600*mm,         40*mm, sd);
-    return imas_demonstrator(sd);
-    return square_array_of_sipms(sd);
-    return nain4::place(sipm_hamamatsu_blue(true, sd)).now();
+  auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
+    return
+      g == "phantom"   ? phantom.geometry() :
+      g == "cylinder"  ? cylinder_lined_with_hamamatsus(700*mm, 350*mm, 40*mm, sd) :
+      g == "pic"       ? phantom_in_cylinder(phantom,   600*mm,         40*mm, sd) :
+      g == "imas"      ? imas_demonstrator(sd) :
+      g == "square"    ? square_array_of_sipms(sd) :
+      g == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
+      throw "Unrecoginzed geometry " + g;
   };
 
   // run_manager takes ownership of geometry

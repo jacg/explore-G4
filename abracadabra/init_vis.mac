@@ -5,7 +5,9 @@
 /control/verbose 2
 /control/saveHistory
 /run/verbose 2
-#
+
+/abracadabra/geometry square
+
 # Initialize kernel
 /run/initialize
 #

@@ -3,8 +3,9 @@
 # Can be run in batch, without graphic
 # or interactively: Idle> /control/execute run1.mac
 
-/abracadabra/outfile "override-default-here.h5"
-/abracadabra/event-number-offset 1000
+/abracadabra/outfile "default-out.h5"
+/abracadabra/event-number-offset 40000
+/abracadabra/geometry cylinder
 
 # Initialize kernel
 /run/initialize
