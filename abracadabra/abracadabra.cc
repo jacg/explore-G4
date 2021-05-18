@@ -56,15 +56,6 @@ int main(int argc, char** argv) {
 
   abracadabra_messenger messenger;
 
-  // Detect interactive mode (if no arguments) and define UI session
-  auto ui = argc == 1
-    ? make_unique<G4UIExecutive>(argc, argv)
-    : unique_ptr <G4UIExecutive>{nullptr};
-
-  // Construct the default run manager
-  auto run_manager = unique_ptr<G4RunManager>
-    {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
-
   // ----- collecting arrival times of optical photons in sensors ----------------------------
   std::map<size_t, times_set> times;
 
@@ -130,8 +121,6 @@ int main(int argc, char** argv) {
   auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, eoe};
   //auto sd = nullptr; // If you only want to visualize geometry
 
-  // ===== Mandatory G4 initializations ==================================================
-
   // ----- A variety of geometries to choose from, for experimentation -------------------
   auto phantom = build_nema_phantom{}
     .activity(5)
@@ -180,6 +169,18 @@ int main(int argc, char** argv) {
   // reading the UI macros?
   n4::generator::function chosen_generator;
   n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
+
+
+
+
+  // Detect interactive mode (if no arguments) and define UI session
+  auto ui = argc == 1
+    ? make_unique<G4UIExecutive>(argc, argv)
+    : unique_ptr <G4UIExecutive>{nullptr};
+
+  // Construct the default run manager
+  auto run_manager = unique_ptr<G4RunManager>
+    {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // ===== Mandatory G4 initializations ==================================================
   // ----- Geometry (run_manager takes ownership) ----------------------------------------
