@@ -33,16 +33,18 @@ struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
-    messenger -> DeclareProperty("outfile"  , outfile, "file to which hdf5 tables well be written");
-    messenger -> DeclareProperty("geometry" , geometry,  "Geometry to be instantiated");
-    messenger -> DeclareProperty("generator", generator, "Primary generator");
-    messenger -> DeclareProperty("spin_view", spin     , "Spin geometry view");
+    messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
+    messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
+    messenger -> DeclareProperty("generator" , generator , "Primary generator");
+    messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
+    messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
   }
   size_t offset;
-  G4String outfile   = "default_out.h5";
-  G4String geometry  = "phantom";
-  G4String generator = "phantom";
-  bool     spin      = true;
+  G4String outfile    = "default_out.h5";
+  G4String geometry   = "phantom";
+  G4String generator  = "phantom";
+  bool     spin       = true;
+  G4int    spin_speed = 10;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -219,13 +221,14 @@ int main(int argc, char** argv) {
 
     // ----- spin the viewport ------------------------------------------------------------
     struct waypoint { float phi; float theta; size_t steps; };
-    auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
+    auto spin_view = [&](auto ui_manager, std::vector<waypoint> data) {
       nain4::silence _{G4cout};
       float phi_start = 0, theta_start = 0;
       for (auto [phi_stop, theta_stop, steps] : data) {
+        steps /= messenger.spin_speed;
         auto   phi_d = (  phi_stop -   phi_start) / steps;
         auto theta_d = (theta_stop - theta_start) / steps;
-        for (size_t step=1; step<=steps; step++) {
+        for (size_t step=0; step<=steps; step++) {
           auto   phi =   phi_start +   phi_d * step;
           auto theta = theta_start + theta_d * step;
           ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
@@ -236,9 +239,9 @@ int main(int argc, char** argv) {
       }
     };
 
-    spin_view(ui_manager, {{-300,-170,   1},
-                           {-360,  40, 500},
-                           {   0,   0, 300}});
+    spin_view(ui_manager, {{-400, 205,   1},
+                           {-360,  25, 300},
+                           {   0,   0, 500}});
 
   }
 

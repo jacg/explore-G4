@@ -8,7 +8,8 @@
 
 /abracadabra/geometry  phantom_in_cylinder
 /abracadabra/generator phantom
-/abracadabra/spin_view False
+/abracadabra/spin_view True
+/abracadabra/spin_speed 20
 
 # Initialize kernel
 /run/initialize
