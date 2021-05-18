@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
   }});
 
   // ----- Physics list --------------------------------------------------------------------
-  { auto verbosity = 1;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
+  { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
 
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager->SetUserInitialization(new n4::actions{[&phantom](G4Event* event) {
