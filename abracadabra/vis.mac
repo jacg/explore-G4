@@ -129,7 +129,8 @@
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenMarker true
-/vis/viewer/set/viewpointThetaPhi 120 150
+/vis/viewer/set/viewpointThetaPhi 0 0
+
 # Hack around bug which makes tracks disappear
 /vis/ogl/set/displayListLimit 100000000
 

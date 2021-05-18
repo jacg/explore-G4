@@ -6,8 +6,9 @@
 /control/saveHistory
 /run/verbose 2
 
-/abracadabra/geometry  phantom
-/abracadabra/generator quarter_ring
+/abracadabra/geometry  phantom_in_cylinder
+/abracadabra/generator phantom
+/abracadabra/spin_view False
 
 # Initialize kernel
 /run/initialize

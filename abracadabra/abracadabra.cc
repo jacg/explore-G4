@@ -28,6 +28,7 @@ using std::make_unique;
 using std::unique_ptr;
 
 
+// ----- Choices which can be made in configuration files -----------------------------------
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
@@ -35,11 +36,13 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("outfile"  , outfile, "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry" , geometry,  "Geometry to be instantiated");
     messenger -> DeclareProperty("generator", generator, "Primary generator");
+    messenger -> DeclareProperty("spin_view", spin     , "Spin geometry view");
   }
   size_t offset;
   G4String outfile   = "default_out.h5";
   G4String geometry  = "phantom";
   G4String generator = "phantom";
+  bool     spin      = true;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -51,7 +54,7 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 #include <set>
 using times_set = std::multiset<double>;
 
-// ------------------------------------------------------------------------------------------
+// ============================== MAIN =======================================================
 int main(int argc, char** argv) {
 
   abracadabra_messenger messenger;
@@ -84,8 +87,9 @@ int main(int argc, char** argv) {
     }
     return geometry;
   };
+
   // ----- Sensitive detector ----------------------------------------------------------------
-  n4::sensitive_detector::process_hits_fn make_noise = [&add_to_waveforms](G4Step* step) {
+  n4::sensitive_detector::process_hits_fn store_hits = [&add_to_waveforms](G4Step* step) {
     static auto optical_photon = G4OpticalPhoton::Definition();
 
     auto track    = step -> GetTrack();
@@ -102,28 +106,31 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn eoe = [&times, &writer, &messenger](auto) {
+  n4::sensitive_detector::end_of_event_fn write_hits = [&times, &writer, &messenger](auto) {
     size_t event_id = n4::event_number() + messenger.offset;
     std::cout << event_id << std::endl;
     for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
-      std::vector<double> t{};
+      // std::vector<double> t{};
       // TODO reserve space once good size is known from statistics
-      std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
-                   [start](auto t) { return t < start + 100 * ps; });
-      writer -> write_waveform(event_id, sensor_id, t);
-      writer -> write_total_charge(event_id, sensor_id, ts.size());
+      // std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
+      //              [start](auto t) { return t < start + 100 * ps; });
+      // writer -> write_waveform(event_id, sensor_id, t);
+      // writer -> write_total_charge(event_id, sensor_id, ts.size());
+      if (sensor_id) {writer -> write_q_t0(event_id, sensor_id, ts.size(), start);}
     }
     times.clear();
   };
 
   // pick one:
-  auto sd = new n4::sensitive_detector{"Noisy_detector", make_noise, eoe};
+  auto sd = new n4::sensitive_detector{"Writing_detector", store_hits, write_hits};
   //auto sd = nullptr; // If you only want to visualize geometry
 
   // ----- A variety of geometries to choose from, for experimentation -------------------
+
+  // some of the available geometries use this phantom
   auto phantom = build_nema_phantom{}
-    .activity(5)
+    .activity(0)
     .length(140*mm)
     .inner_radius(114.4*mm)
     .outer_radius(152.0*mm)
@@ -135,19 +142,20 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
-  // Pick one (ensure that generator (below) is compatible) ...
+  // Can choose geometry in macros with `/abracadabra/geometry <choice>`
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
     return
-      g == "phantom"   ? phantom.geometry() :
-      g == "cylinder"  ? cylinder_lined_with_hamamatsus(700*mm, 350*mm, 40*mm, sd) :
-      g == "pic"       ? phantom_in_cylinder(phantom,   600*mm,         40*mm, sd) :
-      g == "imas"      ? imas_demonstrator(sd) :
-      g == "square"    ? square_array_of_sipms(sd) :
-      g == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
+      g == "phantom"             ? phantom.geometry() :
+      g == "cylinder"            ? cylinder_lined_with_hamamatsus(700*mm, 350*mm, 40*mm, sd) :
+      g == "phantom_in_cylinder" ? phantom_in_cylinder(phantom,   600*mm,         40*mm, sd) :
+      g == "imas"                ? imas_demonstrator(sd) :
+      g == "square"              ? square_array_of_sipms(sd) :
+      g == "hamamatsu"           ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed geometry " + g;
   };
 
   // ----- A choice of generators ---------------------------------------------------------
+  // Can choose generator in macros with `/abracadabra/generator <choice>`
   std::map<G4String, n4::generator::function> generators = {
     {"back_to_back", [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
     {"phantom"     , [&](auto event) { phantom.generate_primaries(event); }},
@@ -170,48 +178,45 @@ int main(int argc, char** argv) {
   n4::generator::function chosen_generator;
   n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
 
-
-
-
-  // Detect interactive mode (if no arguments) and define UI session
-  auto ui = argc == 1
-    ? make_unique<G4UIExecutive>(argc, argv)
-    : unique_ptr <G4UIExecutive>{nullptr};
+  // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
-  auto run_manager = unique_ptr<G4RunManager>
-    {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
+  auto run_manager = unique_ptr<G4RunManager> {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
-  // ===== Mandatory G4 initializations ==================================================
-  // ----- Geometry (run_manager takes ownership) ----------------------------------------
+  // ----- Geometry (run_manager takes ownership) -----------------------------------------
   run_manager -> SetUserInitialization(new n4::geometry{[&write_sensor_database, geometry]() -> G4VPhysicalVolume* {
     return write_sensor_database(geometry());
   }});
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
+  run_manager -> SetUserInitialization(new n4::actions{generator});
 
-  run_manager -> SetUserInitialization(new n4::actions{generator}); // TODO: if generator missing in map
-  // ===== end of mandatory initialization ==================================================
+  // ===== UI ===============================================================================
+  auto ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
+  unique_ptr<G4UIExecutive>           ui{nullptr};
+  unique_ptr<G4VisExecutive> vis_manager{nullptr};
+  if (argc == 1) { // ----- interactive mode -----------------------------------------
 
-  // Get the pointer to the User Interface manager
-  auto ui_manager = G4UImanager::GetUIpointer();
-
-  // Process macro or start UI session
-  if (!ui) { // batch mode
-    G4String file_name = argv[1];
-    ui_manager -> ApplyCommand("/control/execute " + file_name);
-    chosen_generator = generators[messenger.generator];
-  } else { // interactive mode
-
-    // Initialize visualization
-    auto vis_manager = make_unique<G4VisExecutive>();
+    ui =          make_unique<G4UIExecutive>(argc, argv);
+    vis_manager = make_unique<G4VisExecutive>();
     // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
     // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
     vis_manager -> Initialize();
-
     ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-    chosen_generator = generators[messenger.generator];
+
+  } else { // ----- batch mode --------------------------------------------------------
+
+    G4String file_name = argv[1];
+    ui_manager -> ApplyCommand("/control/execute " + file_name);
+  }
+
+  // TODO use proper exceptions
+  if (!contains(generators, messenger.generator)) { throw "Unrecoginzed generator " + messenger.generator; }
+  chosen_generator = generators[messenger.generator];
+
+  if (ui && messenger.spin) {
+
     // ----- spin the viewport ------------------------------------------------------------
     struct waypoint { float phi; float theta; size_t steps; };
     auto spin_view = [](auto ui_manager, std::vector<waypoint> data) {
@@ -236,14 +241,11 @@ int main(int argc, char** argv) {
                            {160, 145, 30},
                            {180, 180, 10}});
 
-    //spin_view(ui_manager, {{180, 180, 10}});
-
-    // ----- hand over control to interactive user ----------------------------------------
-    ui -> SessionStart();
   }
 
-  // Job termination
-  // Free the store: user actions, physics_list and detector_description are
-  // owned and deleted by the run manager, so they should not be deleted
-  // in the main() program !
+  // ----- hand over control to interactive user ------------------------------------------
+  if (ui) { ui -> SessionStart(); }
+
+  // user actions, physics_list and detector_description are owned and deleted
+  // by the run manager, so they should not be deleted by us.
 }
