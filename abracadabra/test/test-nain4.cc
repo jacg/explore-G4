@@ -15,6 +15,7 @@
 
 // Other G4
 #include <G4Material.hh>
+#include <G4Gamma.hh>
 
 #include <catch2/catch.hpp>
 
@@ -313,8 +314,10 @@ TEST_CASE("nain find", "[nain][find]") {
   SECTION("find_particle") {
     auto name = "gamma";
     auto pita = G4ParticleTable::GetParticleTable()->FindParticle(name);
+    auto solid = G4Gamma::Definition();
     auto convenient = nain4::find_particle(name);
     CHECK(convenient == pita);
+    CHECK(convenient == solid);
   }
 }
 
