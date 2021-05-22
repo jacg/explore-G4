@@ -19,6 +19,7 @@
 #include <G4GenericMessenger.hh>
 
 #include <G4OpticalPhoton.hh>
+#include <G4Gamma.hh>
 #include <Randomize.hh>
 
 #include <memory>
@@ -220,6 +221,69 @@ int main(int argc, char** argv) {
   generator_messenger generator_messenger{chosen_generator, generators};
 
 
+  // ----- Identifying vertices in LXe ----------------------------------------------------
+  auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
+
+#define DBG(stuff) std::cout << stuff << std::endl;
+
+  n4::stepping_action::action_t xxxstep = [&](auto step) {
+    auto pst_pt = step -> GetPostStepPoint();
+    auto process = pst_pt -> GetProcessDefinedStep();
+    auto name = transp(process -> GetProcessName());
+    auto track = step -> GetTrack();
+    auto particle = track -> GetParticleDefinition();
+    if (particle == G4Gamma::Definition()) {
+      auto pre_pt = step -> GetPreStepPoint();
+      auto pre_proc = pre_pt -> GetProcessDefinedStep();
+      auto pre_name = transp(pre_proc ? pre_proc -> GetProcessName() : "  -  ");
+      if (!pre_proc) { DBG(' ') }
+      auto id = track -> GetTrackID();
+      auto parent = track -> GetParentID();
+      auto p = pst_pt -> GetPosition();
+      auto x = p.getX(); auto y = p.getY(); auto z = p.getZ();
+      auto dist = step -> GetDeltaPosition().mag();
+      auto dep_E = step -> GetTotalEnergyDeposit() / keV;
+      auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
+      auto dynamic_particle = track -> GetDynamicParticle();
+      auto dyn_TE = dynamic_particle -> GetTotalEnergy() / keV;
+      auto dyn_KE = dynamic_particle -> GetKineticEnergy() / keV;
+      auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
+      auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
+      auto pst_TE = pst_pt -> GetTotalEnergy() / keV;
+      assert(pst_TE == pst_KE);
+      assert(dyn_TE == dyn_KE);
+      assert(dyn_TE == pst_TE);
+      auto ratio = (pst_KE - pre_KE) / dep_E;
+      using std::setw;
+
+#define RATIO(aaa, bbb, ccc) \
+      << '('                 \
+      << setw(7) << aaa      \
+      << " - "               \
+      << setw(7) << bbb      \
+      << ") / "              \
+      << setw(7) << ccc      \
+      << " = "               \
+      << setw(7) << (aaa - bbb) / ccc << " "
+
+
+      DBG(setw( 5) << parent << ' '
+          << setw( 5) << id
+          //<< setw( 6) << pre_name
+          << setw( 6) << name
+          << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << ") "
+          << setw(14) << dist << "   "
+          // << setw( 7) << dep_E << " / "
+          // << setw( 7) << dyn_TE << "  "
+          // << setw( 7) << dyn_KE << "  "
+          // << setw( 7) << ratio << "  "
+          RATIO(pre_KE, pst_KE, dep_E)
+          << setw(20) << volume_name << ' '
+          //<< particle -> GetParticleName()
+          );
+    }
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -232,7 +296,10 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager -> SetUserInitialization(new n4::actions{generator});
+  run_manager -> SetUserInitialization((new n4::actions{generator})
+    // -> set ((new n4::event_action) -> end(write_vertices))
+    -> set ( new n4::stepping_action{xxxstep})
+                                       );
 
   // ===== UI ===============================================================================
   auto ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
