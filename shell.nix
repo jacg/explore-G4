@@ -17,15 +17,15 @@ let
   }}/nixGL.nix" {};
 in
 
-pkgs.llvmPackages_11.stdenv.mkDerivation {
+pkgs.llvmPackages_12.stdenv.mkDerivation {
   inherit (derivation) name;
   nativeBuildInputs = derivation.nativeBuildInputs ++ [
-    pkgs.clang_11
+    pkgs.clang_12
   ];
 
   buildInputs = derivation.buildInputs ++ [
 #    pkgs.clang-tools
-    pkgs.clang_11
+    pkgs.clang_12
     pkgs.cmake
     pkgs.catch2
     pkgs.cmake-language-server

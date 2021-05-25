@@ -3,8 +3,8 @@
 # overriding reason, pick the latest stable NixOS release, at the time of
 # writing this is nixos-20.09.
 let
-  name = "nixos-unstable-2021-01-28";
-  commit-id = "4c9a74aa459dc525fcfdfb3019b234f68de66c8a";
+  name = "nixos-unstable-2021-05-25";
+  commit-id = "ea7d4aa9b8225abd6147339f0d56675d6f1f0fd1";
   url = "https://github.com/nixos/nixpkgs/archive/${commit-id}.tar.gz";
 
   geant4-debug-overlay = final: previous: {
