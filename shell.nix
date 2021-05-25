@@ -37,6 +37,12 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     (linux nixGL.nixGLDefault)
     # Syntax colouring in gdb
     pkgs.python3Packages.pygments
+    # profiling
+    (linux pkgs.linuxPackages.perf)
+    (linux pkgs.oprofile)
+    (linux pkgs.kcachegrind)
+    (linux pkgs.graphviz) # used by kcachegrind
+    (linux pkgs.flamegraph)
   ];
 
 }
