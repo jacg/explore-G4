@@ -10,6 +10,17 @@
 #include <vector>
 
 
+
+// TODO central cylinder is missing, and its attenuating properties are an
+// inherent part of the test.
+
+// TODO if the NEMA NU 2 section 7 analyses are to be performed, the body size
+// needs to be increased, in order to accommodate the 12 different background
+// ROIs. Maybe the shape should then be adjusted to match the official one, but
+// maybe it's a pointless PITA.
+
+// TODO needs to be renamed to something like nema_image_quality_phantom
+
 class nema_phantom {
 
 public:
