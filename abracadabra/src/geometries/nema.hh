@@ -11,6 +11,22 @@
 
 
 
+// ===== Section 3: Spatial Resolution =======================================================
+
+// This is the most boring phantom of the lot: the geometry consists of 6
+// pointlike sources, and there are no materials around them that are supposed
+// to attenuate or scatter, so the generator is the only thing that matters.
+
+class nema_spatial_resolution {
+public:
+  nema_spatial_resolution(G4double fov_length);
+  void generate_primaries(G4Event* event) const;
+private:
+  const std::vector<G4ThreeVector> vertices;
+};
+
+// ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
+
 // TODO central cylinder is missing, and its attenuating properties are an
 // inherent part of the test.
 

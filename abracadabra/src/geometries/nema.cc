@@ -22,6 +22,24 @@ using nain4::material;
 using nain4::place;
 using nain4::volume;
 
+// ===== Section 3: Spatial Resolution =======================================================
+
+nema_spatial_resolution::nema_spatial_resolution(G4double fov_length)
+  : vertices{{0,  1*cm, 0},
+             {0, 10*cm, 0},
+             {0, 20*cm, 0},
+             {0,  1*cm, fov_length * 3 / 8},
+             {0, 10*cm, fov_length * 3 / 8},
+             {0, 20*cm, fov_length * 3 / 8}}
+{}
+
+void nema_spatial_resolution::generate_primaries(G4Event* event) const {
+  G4ThreeVector position = vertices[fair_die(6)];
+  G4double time = 0;
+  generate_back_to_back_511_keV_gammas(event, position, time);
+}
+
+// ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
 
 build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activity) {
   spheres.emplace_back(radius, activity);
