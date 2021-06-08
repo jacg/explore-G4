@@ -84,7 +84,7 @@ struct generator_messenger : G4UImessenger {
       generate = choices[choice];
     }
   }
-
+private:
   unique_ptr<G4UIdirectory> dir;
   unique_ptr<G4UIcmdWithAString> cmd;
   n4::generator::function& generate;
