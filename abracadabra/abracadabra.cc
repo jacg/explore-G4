@@ -91,6 +91,26 @@ private:
   std::map<G4String, n4::generator::function>& choices;
 };
 
+struct UI {
+  UI(int argc, char** argv) {
+    if (argc == 1) { // ----- interactive mode -----------------------------------------
+      ui =          make_unique<G4UIExecutive>(argc, argv);
+      vis_manager = make_unique<G4VisExecutive>();
+      // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
+      // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
+      vis_manager -> Initialize();
+      ui_manager -> ApplyCommand("/control/execute init_vis.mac");
+    } else { // ----- batch mode --------------------------------------------------------
+      G4String file_name = argv[1];
+      ui_manager -> ApplyCommand("/control/execute " + file_name);
+    }
+  }
+  //private:
+  G4UImanager* ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
+  unique_ptr<G4UIExecutive>           ui{nullptr};
+  unique_ptr<G4VisExecutive> vis_manager{nullptr};
+};
+
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
 
@@ -234,26 +254,9 @@ int main(int argc, char** argv) {
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization(new n4::actions{generator});
 
-  // ===== UI ===============================================================================
-  auto ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
-  unique_ptr<G4UIExecutive>           ui{nullptr};
-  unique_ptr<G4VisExecutive> vis_manager{nullptr};
-  if (argc == 1) { // ----- interactive mode -----------------------------------------
+  UI ui{argc, argv};
 
-    ui =          make_unique<G4UIExecutive>(argc, argv);
-    vis_manager = make_unique<G4VisExecutive>();
-    // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-    // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
-    vis_manager -> Initialize();
-    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
-
-  } else { // ----- batch mode --------------------------------------------------------
-
-    G4String file_name = argv[1];
-    ui_manager -> ApplyCommand("/control/execute " + file_name);
-  }
-
-  if (ui && messenger.spin) {
+  if (ui.ui && messenger.spin) {
 
     // ----- spin the viewport ------------------------------------------------------------
     struct waypoint { float phi; float theta; size_t steps; };
@@ -267,22 +270,22 @@ int main(int argc, char** argv) {
         for (size_t step=0; step<=steps; step++) {
           auto   phi =   phi_start +   phi_d * step;
           auto theta = theta_start + theta_d * step;
-          ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
-                                   + std::to_string(theta) + ' ' + std::to_string(phi));
+          ui.ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
+                                      + std::to_string(theta) + ' ' + std::to_string(phi));
         }
         phi_start =   phi_stop;
         theta_start = theta_stop;
       }
     };
 
-    spin_view(ui_manager, {{-400, 205,   1},
-                           {-360,  25, 300},
-                           {   0,   0, 500}});
+    spin_view(ui.ui_manager, {{-400, 205,   1},
+                              {-360,  25, 300},
+                              {   0,   0, 500}});
 
   }
 
   // ----- hand over control to interactive user ------------------------------------------
-  if (ui) { ui -> SessionStart(); }
+  if (ui.ui) { ui.ui -> SessionStart(); }
 
   // user actions, physics_list and detector_description are owned and deleted
   // by the run manager, so they should not be deleted by us.
