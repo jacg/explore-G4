@@ -105,6 +105,13 @@ struct UI {
       ui_manager -> ApplyCommand("/control/execute " + file_name);
     }
   }
+
+  void run() {
+    if (ui) { // ----- interactive mode -------------------------------------------------
+      ui -> SessionStart();
+    } else { // ----- batch mode -------------------------------------------------------
+    }
+  }
   //private:
   G4UImanager* ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
   unique_ptr<G4UIExecutive>           ui{nullptr};
@@ -285,7 +292,7 @@ int main(int argc, char** argv) {
   }
 
   // ----- hand over control to interactive user ------------------------------------------
-  if (ui.ui) { ui.ui -> SessionStart(); }
+  ui.run();
 
   // user actions, physics_list and detector_description are owned and deleted
   // by the run manager, so they should not be deleted by us.
