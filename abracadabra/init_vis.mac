@@ -6,11 +6,6 @@
 /control/saveHistory
 /run/verbose 2
 
-/abracadabra/geometry  phantom_in_cylinder
-/abracadabra/cylinder_length 20
-#/abracadabra/cylinder_radius 350
-#/abracadabra/xenon_thickness 50
-#/generator/choose origin
 /abracadabra/spin_view True
 /abracadabra/spin_speed 20
 

@@ -91,18 +91,21 @@ private:
   std::map<G4String, n4::generator::function>& choices;
 };
 
-// Abstract class with two concrete implementations: interactive and batch
+// ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
 struct UI {
   static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
-  UI(abracadabra_messenger& messenger) : messenger{messenger} {}
+  UI(char** argv, abracadabra_messenger& messenger) : messenger{messenger} {
+      G4String model_filename = argv[1];
+      ui_manager -> ApplyCommand("/control/execute " + model_filename);
+  }
   virtual void run() = 0;
   //private:
   G4UImanager* ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
   abracadabra_messenger& messenger;
 };
-
+// ----------------------------------------------------------------------------------------------
 struct UI_interactive : public UI {
-  UI_interactive(int argc, char** argv, abracadabra_messenger& messenger) : UI{messenger} {
+  UI_interactive(int argc, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger} {
       ui =          make_unique<G4UIExecutive>(argc, argv);
       vis_manager = make_unique<G4VisExecutive>();
       // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
@@ -115,17 +118,21 @@ struct UI_interactive : public UI {
   unique_ptr<G4UIExecutive>           ui{nullptr};
   unique_ptr<G4VisExecutive> vis_manager{nullptr};
 };
-
+// ----------------------------------------------------------------------------------------------
 struct UI_batch : public UI {
-  UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{messenger} {
-      G4String file_name = argv[1];
+  UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger} {
+      G4String file_name = argv[2];
       ui_manager -> ApplyCommand("/control/execute " + file_name);
   }
   void run() { }
 };
 
 UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
-  if (argc == 1) { return new UI_interactive(argc, argv, messenger); }
+  if (argc  < 2) {
+    std::cerr << "A model macro file must be provided" << std::endl;
+    throw "A model macro file must be provided";
+  }
+  if (argc == 2) { return new UI_interactive(argc, argv, messenger); }
   else           { return new UI_batch      (argc, argv, messenger); }
 }
 

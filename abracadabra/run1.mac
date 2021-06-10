@@ -1,11 +1,13 @@
-# Macro file for abracadabra
-#
+# abracadabra run control
+
 # Can be run in batch, without graphic
 # or interactively: Idle> /control/execute run1.mac
 
+# The model should be defined in a separate macro file, passed as the first
+# argument to abracadabra. This file should be passed as the second argument.
+
 /abracadabra/outfile "default-out.h5"
 /abracadabra/event-number-offset 40000
-/abracadabra/geometry cylinder
 
 # Initialize kernel
 /run/initialize
