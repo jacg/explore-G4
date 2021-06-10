@@ -51,7 +51,7 @@ struct abracadabra_messenger {
   }
   size_t offset = 0;
   G4String outfile    = "default_out.h5";
-  G4String geometry   = "phantom";
+  G4String geometry   = "both";
   G4String detector   = "imas";
   bool     spin       = true;
   G4int    spin_speed = 10;
@@ -240,24 +240,26 @@ int main(int argc, char** argv) {
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed detector " + d;
   };
-  // ----- A variety of geometries to choose from, for experimentation -------------------
+  // ----- A choice of phantoms -----------------------------------------------------------
+  // TODO
+
+  // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
-  auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
-    auto dr_LXe = messenger.xenon_thickness * mm;
-    auto length = messenger.cylinder_length * mm;
-    auto radius = messenger.cylinder_radius * mm;
-    return
-      g == "phantom"             ? phantom.geometry() :
-      g == "cylinder"            ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      g == "phantom_in_cylinder" ? phantom_in_cylinder(phantom,   length, radius, dr_LXe, sd) :
-      g == "imas"                ? imas_demonstrator(sd) :
-      g == "square"              ? square_array_of_sipms(sd) :
-      g == "hamamatsu"           ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
-      throw "Unrecoginzed geometry " + g;
+
+  auto combine = [](auto phantom, auto detector_envelope) {
+    auto phantom_envelope = phantom -> GetLogicalVolume();
+    auto phantom_contents = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume();
+    n4::place(phantom_contents).in(detector_envelope->GetLogicalVolume()).now();
+    return detector_envelope;
   };
 
-  // ----- A choice of phantoms -----------------------------------------------------------
-
+  auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
+    return
+      g == "detector" ? detector()         :
+      g == "phantom"  ? phantom.geometry() :
+      g == "both"     ? combine(phantom.geometry(), detector()) :
+      throw "Unrecoginzed geometry " + g;
+  };
 
   // ----- A choice of generators ---------------------------------------------------------
   // Can choose generator in macros with `/abracadabra/generator <choice>`

@@ -4,8 +4,8 @@
 
 # Select detector geometry, generators and phantom here
 
-/abracadabra/geometry cylinder
-/abracadabra/geometry phantom_in_cylinder
+/abracadabra/geometry both
+/abracadabra/detector cylinder
 /abracadabra/cylinder_length 20
 #/abracadabra/cylinder_radius 350
 #/abracadabra/xenon_thickness 50
