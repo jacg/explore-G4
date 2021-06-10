@@ -256,14 +256,8 @@ int main(int argc, char** argv) {
     }}
   };
 
-  // Generator is passed to run manager before the specific choice of generator
-  // is read from the configuration file, so we add an indirection which allows
-  // us to use the actual generator which is chosen later.
-  // TODO can we avoid these contortions by initialising run manager after
-  // reading the UI macros?
-  n4::generator::function chosen_generator = [](auto) { throw "No generator has been chosen"; };
-  n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
-  generator_messenger generator_messenger{chosen_generator, generators};
+  n4::generator::function generator = [](auto) { throw "No generator has been chosen"; };
+  generator_messenger generator_messenger{generator, generators};
 
   UI* ui = UI::make(argc, argv, messenger);
 
