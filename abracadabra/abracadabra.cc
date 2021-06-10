@@ -43,6 +43,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
     messenger -> DeclareProperty("detector"  , detector  ,  "Detector to be instantiated");
+    messenger -> DeclareProperty("phantom"   , phantom   ,  "Phantom to be used");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
@@ -53,6 +54,7 @@ struct abracadabra_messenger {
   G4String outfile    = "default_out.h5";
   G4String geometry   = "both";
   G4String detector   = "imas";
+  G4String phantom    = "nema_7";
   bool     spin       = true;
   G4int    spin_speed = 10;
   G4double xenon_thickness =  40 * mm;
@@ -141,6 +143,16 @@ UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
   else           { return new UI_batch      (argc, argv, messenger); }
 }
 
+// ----- Polymorphic access to phantoms without subclassing
+struct phantom_t {
+  phantom_t(n4::generator::function generate, n4::geometry::construct_fn geometry)
+    : generate{generate}
+    , geometry{geometry}
+  {}
+  const n4::generator::function    generate;
+  const n4::geometry::construct_fn geometry;
+};
+
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
 
@@ -214,7 +226,7 @@ int main(int argc, char** argv) {
   //auto sd = nullptr; // If you only want to visualize geometry
 
   // ----- Available phantoms -----------------------------------------------------------
-  auto phantom = build_nema_7_phantom{}
+  auto nema_7_phantom = build_nema_7_phantom{}
     .activity(0)
     .length(140*mm)
     .inner_radius(114.4*mm)
@@ -226,6 +238,33 @@ int main(int argc, char** argv) {
     .sphere(28*mm / 2, 0)
     .sphere(37*mm / 2, 0)
     .build();
+
+  auto second_phantom_while_hacking = build_nema_7_phantom{}
+    .activity(0)
+    .length(640*mm)
+    .inner_radius(114.4*mm)
+    .outer_radius(152.0*mm)
+    .sphere(10*mm / 2, 20)
+    .sphere(13*mm / 2, 20)
+    .sphere(17*mm / 2, 20)
+    .build();
+
+  // ----- Choice of phantom -------------------------------------------------------------
+  // Can choose phantom in macros with `/abracadabra/phantom <choice>`
+  auto xxx = [](auto& phantom) {
+    return
+      new phantom_t([&phantom](auto event) {        phantom.generate_primaries(event); },
+                    [&phantom](          ) { return phantom.geometry(); });
+  };
+
+  unique_ptr<phantom_t> phantom;
+
+  auto set_phantom = [&](G4String p) {
+    return
+      p == "nema_7" ? phantom.reset(xxx(nema_7_phantom)) :
+      p == "other"  ? phantom.reset(xxx(second_phantom_while_hacking)) :
+      throw "Unrecoginzed phantom " + p;
+  };
 
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
@@ -240,9 +279,6 @@ int main(int argc, char** argv) {
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed detector " + d;
   };
-  // ----- A choice of phantoms -----------------------------------------------------------
-  // TODO
-
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
 
@@ -256,8 +292,8 @@ int main(int argc, char** argv) {
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
     return
       g == "detector" ? detector()         :
-      g == "phantom"  ? phantom.geometry() :
-      g == "both"     ? combine(phantom.geometry(), detector()) :
+      g == "phantom"  ? phantom -> geometry() :
+      g == "both"     ? combine(phantom -> geometry(), detector()) :
       throw "Unrecoginzed geometry " + g;
   };
 
@@ -265,7 +301,7 @@ int main(int argc, char** argv) {
   // Can choose generator in macros with `/abracadabra/generator <choice>`
   std::map<G4String, n4::generator::function> generators = {
     {"origin"      , [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
-    {"phantom"     , [&](auto event) { phantom.generate_primaries(event); }},
+    {"phantom"     , [&](auto event) { phantom -> generate(event); }},
     {"quarter_ring", [ ](auto event) {
       // Lots of asymmetry to help verify orientation
       auto r = 250 * mm;
@@ -280,7 +316,7 @@ int main(int argc, char** argv) {
   generator_messenger generator_messenger{generators};
 
   UI* ui = UI::make(argc, argv, messenger);
-
+  set_phantom(messenger.phantom);
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager

@@ -6,7 +6,8 @@
 
 /abracadabra/geometry both
 /abracadabra/detector cylinder
+/abracadabra/phantom other
 /abracadabra/cylinder_length 20
 #/abracadabra/cylinder_radius 350
 #/abracadabra/xenon_thickness 50
-/generator/choose origin
+#/generator/choose origin
