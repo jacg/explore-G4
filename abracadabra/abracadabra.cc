@@ -42,6 +42,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
+    messenger -> DeclareProperty("detector"  , detector  ,  "Detector to be instantiated");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
@@ -51,6 +52,7 @@ struct abracadabra_messenger {
   size_t offset = 0;
   G4String outfile    = "default_out.h5";
   G4String geometry   = "phantom";
+  G4String detector   = "imas";
   bool     spin       = true;
   G4int    spin_speed = 10;
   G4double xenon_thickness =  40 * mm;
@@ -211,9 +213,7 @@ int main(int argc, char** argv) {
   auto sd = new n4::sensitive_detector{"Writing_detector", store_hits, write_hits};
   //auto sd = nullptr; // If you only want to visualize geometry
 
-  // ----- A variety of geometries to choose from, for experimentation -------------------
-
-  // some of the available geometries use this phantom
+  // ----- Available phantoms -----------------------------------------------------------
   auto phantom = build_nema_7_phantom{}
     .activity(0)
     .length(140*mm)
@@ -227,6 +227,20 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
+  // ----- Available detector geometries -------------------------------------------------
+  // Can choose detector in macros with `/abracadabra/detector <choice>`
+  auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
+    auto dr_LXe = messenger.xenon_thickness * mm;
+    auto length = messenger.cylinder_length * mm;
+    auto radius = messenger.cylinder_radius * mm;
+    return
+      d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
+      d == "imas"      ? imas_demonstrator(sd) :
+      d == "square"    ? square_array_of_sipms(sd) :
+      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
+      throw "Unrecoginzed detector " + d;
+  };
+  // ----- A variety of geometries to choose from, for experimentation -------------------
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
     auto dr_LXe = messenger.xenon_thickness * mm;
@@ -241,6 +255,9 @@ int main(int argc, char** argv) {
       g == "hamamatsu"           ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed geometry " + g;
   };
+
+  // ----- A choice of phantoms -----------------------------------------------------------
+
 
   // ----- A choice of generators ---------------------------------------------------------
   // Can choose generator in macros with `/abracadabra/generator <choice>`
