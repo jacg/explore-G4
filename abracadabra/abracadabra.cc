@@ -59,12 +59,12 @@ struct abracadabra_messenger {
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
-
+// --------------------------------------------------------------------------------------------
 struct generator_messenger : G4UImessenger {
-  generator_messenger(n4::generator::function& generate, std::map<G4String, n4::generator::function>& choices)
+  generator_messenger(std::map<G4String, n4::generator::function>& choices)
     : dir{new G4UIdirectory     ("/generator/")}
     , cmd{new G4UIcmdWithAString("/generator/choose", this)}
-    , generate{generate}
+    , generate{[] (auto) { throw "No generator has been chosen"; }}
     , choices{choices}
   {
     auto default_ = "phantom";
@@ -84,13 +84,15 @@ struct generator_messenger : G4UImessenger {
       generate = choices[choice];
     }
   }
+  n4::generator::function generator() { return generate; }
 private:
   unique_ptr<G4UIdirectory> dir;
   unique_ptr<G4UIcmdWithAString> cmd;
-  n4::generator::function& generate;
+  n4::generator::function generate;
   std::map<G4String, n4::generator::function>& choices;
 };
 
+// =============================================================================================
 // ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
 struct UI {
   static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
@@ -256,8 +258,7 @@ int main(int argc, char** argv) {
     }}
   };
 
-  n4::generator::function generator = [](auto) { throw "No generator has been chosen"; };
-  generator_messenger generator_messenger{generator, generators};
+  generator_messenger generator_messenger{generators};
 
   UI* ui = UI::make(argc, argv, messenger);
 
@@ -273,7 +274,7 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager -> SetUserInitialization(new n4::actions{generator});
+  run_manager -> SetUserInitialization(new n4::actions{generator_messenger.generator()});
 
 
   // ----- second phase --------------------------------------------------------------------
