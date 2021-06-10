@@ -120,11 +120,9 @@ struct UI_interactive : public UI {
 };
 // ----------------------------------------------------------------------------------------------
 struct UI_batch : public UI {
-  UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger} {
-      G4String file_name = argv[2];
-      ui_manager -> ApplyCommand("/control/execute " + file_name);
-  }
-  void run() { }
+  UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger}, run_macro_filename{argv[2]} {}
+  void run() { ui_manager -> ApplyCommand("/control/execute " + run_macro_filename); }
+  G4String run_macro_filename;
 };
 
 UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
@@ -277,9 +275,9 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
+  UI* ui = UI::make(argc, argv, messenger);
   run_manager -> SetUserInitialization(new n4::actions{generator});
 
-  UI* ui = UI::make(argc, argv, messenger);
 
   // ----- second phase --------------------------------------------------------------------
   ui -> run();
