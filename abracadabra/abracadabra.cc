@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
   // ----- A variety of geometries to choose from, for experimentation -------------------
 
   // some of the available geometries use this phantom
-  auto phantom = build_nema_phantom{}
+  auto phantom = build_nema_7_phantom{}
     .activity(0)
     .length(140*mm)
     .inner_radius(114.4*mm)

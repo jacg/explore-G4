@@ -25,7 +25,7 @@ private:
   const std::vector<G4ThreeVector> vertices;
 };
 
-// ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
+// ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
 
 // TODO central cylinder is missing, and its attenuating properties are an
 // inherent part of the test.
@@ -35,9 +35,7 @@ private:
 // ROIs. Maybe the shape should then be adjusted to match the official one, but
 // maybe it's a pointless PITA.
 
-// TODO needs to be renamed to something like nema_image_quality_phantom
-
-class nema_phantom {
+class nema_7_phantom {
 
 public:
   G4PVPlacement* geometry() const;
@@ -67,14 +65,14 @@ protected:
 };
 
 // ----- Builder ----------------------------------------------------------------------
-class build_nema_phantom : private nema_phantom {
+class build_nema_7_phantom : private nema_7_phantom {
 public:
-  build_nema_phantom& length(G4double);
-  build_nema_phantom& inner_radius(G4double);
-  build_nema_phantom& outer_radius(G4double);
-  build_nema_phantom& activity(G4double);
-  build_nema_phantom& sphere(G4double radius, G4double activity);
-  nema_phantom build();
+  build_nema_7_phantom& length(G4double);
+  build_nema_7_phantom& inner_radius(G4double);
+  build_nema_7_phantom& outer_radius(G4double);
+  build_nema_7_phantom& activity(G4double);
+  build_nema_7_phantom& sphere(G4double radius, G4double activity);
+  nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------
 

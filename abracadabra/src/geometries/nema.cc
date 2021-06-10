@@ -41,19 +41,19 @@ void nema_spatial_resolution::generate_primaries(G4Event* event) const {
 
 // ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
 
-build_nema_phantom& build_nema_phantom::sphere(G4double radius, G4double activity) {
+build_nema_7_phantom& build_nema_7_phantom::sphere(G4double radius, G4double activity) {
   spheres.emplace_back(radius, activity);
   return *this;
 };
 
-build_nema_phantom& build_nema_phantom::length(G4double l) { half_length = l / 2;  return *this; };
-build_nema_phantom& build_nema_phantom::inner_radius(G4double r) { inner_r = r;    return *this; };
-build_nema_phantom& build_nema_phantom::outer_radius(G4double r) { outer_r = r;    return *this; };
-build_nema_phantom& build_nema_phantom::activity    (G4double a) { background = a; return *this; };
+build_nema_7_phantom& build_nema_7_phantom::length(G4double l) { half_length = l / 2;  return *this; };
+build_nema_7_phantom& build_nema_7_phantom::inner_radius(G4double r) { inner_r = r;    return *this; };
+build_nema_7_phantom& build_nema_7_phantom::outer_radius(G4double r) { outer_r = r;    return *this; };
+build_nema_7_phantom& build_nema_7_phantom::activity    (G4double a) { background = a; return *this; };
 
 
 
-nema_phantom build_nema_phantom::build() {
+nema_7_phantom build_nema_7_phantom::build() {
 
   //
 
@@ -80,14 +80,14 @@ nema_phantom build_nema_phantom::build() {
   return std::move(*this);
 }
 
-G4ThreeVector nema_phantom::sphere_position(size_t n) const {
+G4ThreeVector nema_7_phantom::sphere_position(size_t n) const {
   auto angle = n * 360 * deg / spheres.size();
   auto x     = inner_r * sin(angle);
   auto y     = inner_r * cos(angle);
   return {x, y, 0};
 }
 
-G4PVPlacement* nema_phantom::geometry() const {
+G4PVPlacement* nema_7_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
   auto air = material("G4_AIR");
 
@@ -122,12 +122,12 @@ void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position
   event -> AddPrimaryVertex(vertex);
 }
 
-void nema_phantom::generate_primaries(G4Event* event) const {
+void nema_7_phantom::generate_primaries(G4Event* event) const {
   auto position = generate_vertex();        G4double time = 0;
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
-G4ThreeVector nema_phantom::generate_vertex() const {
+G4ThreeVector nema_7_phantom::generate_vertex() const {
   G4ThreeVector offset; // TODO adjust for physical placement of logical geometry
   G4ThreeVector local_position;
   auto region = (*pick_region)();
@@ -144,19 +144,19 @@ G4ThreeVector nema_phantom::generate_vertex() const {
   return local_position + offset; // TODO: rotation!
 }
 
-bool nema_phantom::inside_this_sphere(size_t n, G4ThreeVector& position) const {
+bool nema_7_phantom::inside_this_sphere(size_t n, G4ThreeVector& position) const {
     auto r = spheres[n].radius;
     auto r2 = r*r;
     auto centre = sphere_position(n);
     return (position - centre).mag2() < r2;
 }
 
-bool nema_phantom::inside_a_sphere(G4ThreeVector& position) const {
+bool nema_7_phantom::inside_a_sphere(G4ThreeVector& position) const {
   auto region = in_which_region(position);
   return region && region.value() < spheres.size();
 }
 
-std::optional<size_t> nema_phantom::in_which_region(G4ThreeVector& position) const {
+std::optional<size_t> nema_7_phantom::in_which_region(G4ThreeVector& position) const {
   for (size_t n=0; n<spheres.size(); ++n) {
     if (inside_this_sphere(n, position)) { return n; }
   }

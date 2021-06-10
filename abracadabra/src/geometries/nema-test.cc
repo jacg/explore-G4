@@ -13,7 +13,7 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   using std::setw;
 
   auto geometry =
-    build_nema_phantom{}
+    build_nema_7_phantom{}
     .sphere(10*mm, 2.8)
     .sphere(13*mm, 2.8)
     .sphere(17*mm, 2.8)
@@ -50,7 +50,7 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   G4double a = 10, r = 10*mm;            // Inner spheres basis
   G4double A =  1, R = 60*mm, H = 50*mm; // Phantom body cylinder
 
-  auto phantom = build_nema_phantom{}
+  auto phantom = build_nema_7_phantom{}
     // inner hot/cold spheres
     .sphere(2*r,   0) // region 0
     .sphere(  r,   a) //        1

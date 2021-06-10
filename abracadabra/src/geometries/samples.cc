@@ -20,7 +20,7 @@ using SD = G4VSensitiveDetector;
 auto a_nema_phantom() {
   // Use build_nema_phantom to create one realization of the cylyndrical NEMA
   // phantom pattern
-  return build_nema_phantom{}
+  return build_nema_7_phantom{}
     .activity(0)
     .length(140*mm)
     .inner_radius(114.4*mm)
@@ -68,7 +68,7 @@ G4VPhysicalVolume* cylinder_lined_with_hamamatsus(double length, double radius, 
 
 // TODO write (or find) something that walks geometries with pointer dynamic
 // casting and pointer deref safety
-G4VPhysicalVolume* phantom_in_cylinder(nema_phantom const& phantom, G4double length, double radius, double dr_Xe, SD* sd) {
+G4VPhysicalVolume* phantom_in_cylinder(nema_7_phantom const& phantom, G4double length, double radius, double dr_Xe, SD* sd) {
   auto phantom_envelope = phantom.geometry() -> GetLogicalVolume();
   auto phantom_cylinder = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume();
   auto sensor_envelope = cylinder_lined_with_hamamatsus(length, radius, dr_Xe, sd);
