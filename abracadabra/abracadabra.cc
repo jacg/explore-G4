@@ -93,14 +93,16 @@ private:
 
 // Abstract class with two concrete implementations: interactive and batch
 struct UI {
-  static UI* make(int argc, char** argv); // Polymorphic constructor
+  static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
+  UI(abracadabra_messenger& messenger) : messenger{messenger} {}
   virtual void run() = 0;
   //private:
   G4UImanager* ui_manager = G4UImanager::GetUIpointer(); // G4 manages lifetime
+  abracadabra_messenger& messenger;
 };
 
 struct UI_interactive : public UI {
-  UI_interactive(int argc, char** argv) : UI{} {
+  UI_interactive(int argc, char** argv, abracadabra_messenger& messenger) : UI{messenger} {
       ui =          make_unique<G4UIExecutive>(argc, argv);
       vis_manager = make_unique<G4VisExecutive>();
       // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
@@ -108,22 +110,23 @@ struct UI_interactive : public UI {
       vis_manager -> Initialize();
       ui_manager -> ApplyCommand("/control/execute init_vis.mac");
   }
-  void run() { ui -> SessionStart(); }
+  void run() { spin(); ui -> SessionStart(); }
+  void spin();
   unique_ptr<G4UIExecutive>           ui{nullptr};
   unique_ptr<G4VisExecutive> vis_manager{nullptr};
 };
 
 struct UI_batch : public UI {
-  UI_batch(int, char** argv) : UI{} {
+  UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{messenger} {
       G4String file_name = argv[1];
       ui_manager -> ApplyCommand("/control/execute " + file_name);
   }
   void run() { }
 };
 
-UI* UI::make(int argc, char** argv) {
-  if (argc == 1) { return new UI_interactive(argc, argv); }
-  else           { return new UI_batch      (argc, argv); }
+UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
+  if (argc == 1) { return new UI_interactive(argc, argv, messenger); }
+  else           { return new UI_batch      (argc, argv, messenger); }
 }
 
 // ============================== MAIN =======================================================
@@ -269,39 +272,39 @@ int main(int argc, char** argv) {
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization(new n4::actions{generator});
 
-  UI* ui = UI::make(argc, argv);
+  UI* ui = UI::make(argc, argv, messenger);
 
-  // if (ui->ui && messenger.spin) {
-
-  //   // ----- spin the viewport ------------------------------------------------------------
-  //   struct waypoint { float phi; float theta; size_t steps; };
-  //   auto spin_view = [&](auto ui_manager, std::vector<waypoint> data) {
-  //     nain4::silence _{G4cout};
-  //     float phi_start = 0, theta_start = 0;
-  //     for (auto [phi_stop, theta_stop, steps] : data) {
-  //       steps /= messenger.spin_speed;
-  //       auto   phi_d = (  phi_stop -   phi_start) / steps;
-  //       auto theta_d = (theta_stop - theta_start) / steps;
-  //       for (size_t step=0; step<=steps; step++) {
-  //         auto   phi =   phi_start +   phi_d * step;
-  //         auto theta = theta_start + theta_d * step;
-  //         ui.ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
-  //                                     + std::to_string(theta) + ' ' + std::to_string(phi));
-  //       }
-  //       phi_start =   phi_stop;
-  //       theta_start = theta_stop;
-  //     }
-  //   };
-
-  //   spin_view(ui.ui_manager, {{-400, 205,   1},
-  //                             {-360,  25, 300},
-  //                             {   0,   0, 500}});
-
-  // }
-
-  // ----- hand over control to interactive user ------------------------------------------
-  ui->run();
+  // ----- second phase --------------------------------------------------------------------
+  ui -> run();
 
   // user actions, physics_list and detector_description are owned and deleted
   // by the run manager, so they should not be deleted by us.
+}
+
+void UI_interactive::spin() {
+  if (messenger.spin) {
+    // ----- spin the viewport ------------------------------------------------------------
+    struct waypoint { float phi; float theta; size_t steps; };
+    auto spin_view = [&](auto ui_manager, std::vector<waypoint> data) {
+      nain4::silence _{G4cout};
+      float phi_start = 0, theta_start = 0;
+      for (auto [phi_stop, theta_stop, steps] : data) {
+        steps /= messenger.spin_speed;
+        auto   phi_d = (  phi_stop -   phi_start) / steps;
+        auto theta_d = (theta_stop - theta_start) / steps;
+        for (size_t step=0; step<=steps; step++) {
+          auto   phi =   phi_start +   phi_d * step;
+          auto theta = theta_start + theta_d * step;
+          ui_manager->ApplyCommand("/vis/viewer/set/viewpointThetaPhi "
+                                   + std::to_string(theta) + ' ' + std::to_string(phi));
+        }
+        phi_start =   phi_stop;
+        theta_start = theta_stop;
+      }
+    };
+
+    spin_view(ui_manager, {{-400, 205,   1},
+                           {-360,  25, 300},
+                           {   0,   0, 500}});
+  }
 }
