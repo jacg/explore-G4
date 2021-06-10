@@ -48,7 +48,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
   }
-  size_t offset;
+  size_t offset = 0;
   G4String outfile    = "default_out.h5";
   G4String geometry   = "phantom";
   bool     spin       = true;
