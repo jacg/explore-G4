@@ -108,12 +108,15 @@ struct UI_interactive : public UI {
   UI_interactive(int argc, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger} {
       ui =          make_unique<G4UIExecutive>(argc, argv);
       vis_manager = make_unique<G4VisExecutive>();
-      // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-      // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
-      vis_manager -> Initialize();
-      ui_manager -> ApplyCommand("/control/execute init_vis.mac");
   }
-  void run() { spin(); ui -> SessionStart(); }
+  void run() {
+    // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
+    // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
+    vis_manager -> Initialize();
+    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
+    spin();
+    ui -> SessionStart();
+  }
   void spin();
   unique_ptr<G4UIExecutive>           ui{nullptr};
   unique_ptr<G4VisExecutive> vis_manager{nullptr};
@@ -262,6 +265,7 @@ int main(int argc, char** argv) {
   n4::generator::function generator = [&chosen_generator](auto event) { chosen_generator(event); };
   generator_messenger generator_messenger{chosen_generator, generators};
 
+  UI* ui = UI::make(argc, argv, messenger);
 
   // ===== Mandatory G4 initializations ===================================================
 
@@ -275,7 +279,6 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
-  UI* ui = UI::make(argc, argv, messenger);
   run_manager -> SetUserInitialization(new n4::actions{generator});
 
 
