@@ -7,7 +7,7 @@
 /run/verbose 2
 
 /abracadabra/spin_view True
-/abracadabra/spin_speed 20
+/abracadabra/spin_speed 50
 
 # Initialize kernel
 /run/initialize

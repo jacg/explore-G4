@@ -153,6 +153,33 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
+auto combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVolume* detector) {
+  auto detector_envelope = detector -> GetLogicalVolume();
+  auto phantom_envelope  =  phantom -> GetLogicalVolume();
+  auto phantom_contents = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume(); // TODO Can we avoid this?
+
+  // Check whether phantom envelope fits inside detector envelope, with margin.
+  auto& pbox = dynamic_cast<G4Box&>(* phantom_envelope -> GetSolid());
+  auto& dbox = dynamic_cast<G4Box&>(*detector_envelope -> GetSolid());
+  auto expand = false;
+  auto make_space = [&expand](auto p, auto d) {
+    auto space_needed = std::max(p * 1.1, d);
+    if (space_needed > d) { expand = true; }
+    return space_needed;
+  };
+  auto x = make_space(pbox.GetXHalfLength(), dbox.GetXHalfLength());
+  auto y = make_space(pbox.GetYHalfLength(), dbox.GetYHalfLength());
+  auto z = make_space(pbox.GetZHalfLength(), dbox.GetZHalfLength());
+  // Expand detector envelope if needed
+  if (expand) {
+    auto new_box = new G4Box(detector_envelope->GetName(), x, y, z);
+    detector_envelope -> SetSolid(new_box);
+  }
+
+  n4::place(phantom_contents).in(detector_envelope).now();
+  return detector;
+};
+
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
 
@@ -274,39 +301,11 @@ int main(int argc, char** argv) {
   };
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
-
-  auto combine = [](auto phantom, auto detector) {
-    auto detector_envelope = detector -> GetLogicalVolume();
-    auto phantom_envelope  =  phantom -> GetLogicalVolume();
-    auto phantom_contents = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume(); // TODO Can we avoid this?
-
-    // Check whether phantom envelope fits inside detector envelope, with margin.
-    auto& pbox = dynamic_cast<G4Box&>(* phantom_envelope -> GetSolid());
-    auto& dbox = dynamic_cast<G4Box&>(*detector_envelope -> GetSolid());
-    auto expand = false;
-    auto make_space = [&expand](auto p, auto d) {
-      auto space_needed = std::max(p * 1.1, d);
-      if (space_needed > d) { expand = true; }
-      return space_needed;
-    };
-    auto x = make_space(pbox.GetXHalfLength(), dbox.GetXHalfLength());
-    auto y = make_space(pbox.GetYHalfLength(), dbox.GetYHalfLength());
-    auto z = make_space(pbox.GetZHalfLength(), dbox.GetZHalfLength());
-    // Expand detector envelope if needed
-    if (expand) {
-      auto new_box = new G4Box(detector_envelope->GetName(), x, y, z);
-      detector_envelope -> SetSolid(new_box);
-    }
-
-    n4::place(phantom_contents).in(detector_envelope).now();
-    return detector;
-  };
-
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
     return
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom -> geometry() :
-      g == "both"     ? combine(phantom -> geometry(), detector()) :
+      g == "both"     ? combine_geometries(phantom -> geometry(), detector()) :
       throw "Unrecoginzed geometry " + g;
   };
 
