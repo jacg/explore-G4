@@ -17,10 +17,11 @@
 // pointlike sources, and there are no materials around them that are supposed
 // to attenuate or scatter, so the generator is the only thing that matters.
 
-class nema_spatial_resolution {
+class nema_3_phantom {
 public:
-  nema_spatial_resolution(G4double fov_length);
+  nema_3_phantom(G4double fov_length);
   void generate_primaries(G4Event* event) const;
+  G4PVPlacement* geometry() const;
 private:
   const std::vector<G4ThreeVector> vertices;
 };

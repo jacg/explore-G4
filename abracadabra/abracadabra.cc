@@ -239,19 +239,12 @@ int main(int argc, char** argv) {
     .sphere(37*mm / 2, 0)
     .build();
 
-  auto second_phantom_while_hacking = build_nema_7_phantom{}
-    .activity(0)
-    .length(640*mm)
-    .inner_radius(114.4*mm)
-    .outer_radius(152.0*mm)
-    .sphere(10*mm / 2, 20)
-    .sphere(13*mm / 2, 20)
-    .sphere(17*mm / 2, 20)
-    .build();
+  auto fov_length = 60 * cm;
+  nema_3_phantom nema_3_phantom(fov_length);
 
   // ----- Choice of phantom -------------------------------------------------------------
   // Can choose phantom in macros with `/abracadabra/phantom <choice>`
-  auto xxx = [](auto& phantom) {
+  auto use_phantom = [](auto& phantom) {
     return
       new phantom_t([&phantom](auto event) {        phantom.generate_primaries(event); },
                     [&phantom](          ) { return phantom.geometry(); });
@@ -261,8 +254,8 @@ int main(int argc, char** argv) {
 
   auto set_phantom = [&](G4String p) {
     return
-      p == "nema_7" ? phantom.reset(xxx(nema_7_phantom)) :
-      p == "other"  ? phantom.reset(xxx(second_phantom_while_hacking)) :
+      p == "nema_7" ? phantom.reset(use_phantom(nema_7_phantom)) :
+      p == "nema_3" ? phantom.reset(use_phantom(nema_3_phantom)) :
       throw "Unrecoginzed phantom " + p;
   };
 

@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 using nain4::material;
 using nain4::place;
@@ -24,7 +25,7 @@ using nain4::volume;
 
 // ===== Section 3: Spatial Resolution =======================================================
 
-nema_spatial_resolution::nema_spatial_resolution(G4double fov_length)
+nema_3_phantom::nema_3_phantom(G4double fov_length)
   : vertices{{0,  1*cm, 0},
              {0, 10*cm, 0},
              {0, 20*cm, 0},
@@ -33,10 +34,44 @@ nema_spatial_resolution::nema_spatial_resolution(G4double fov_length)
              {0, 20*cm, fov_length * 3 / 8}}
 {}
 
-void nema_spatial_resolution::generate_primaries(G4Event* event) const {
+void nema_3_phantom::generate_primaries(G4Event* event) const {
   G4ThreeVector position = vertices[fair_die(6)];
   G4double time = 0;
   generate_back_to_back_511_keV_gammas(event, position, time);
+}
+
+G4PVPlacement* nema_3_phantom::geometry() const {
+  // ----- Materials --------------------------------------------------------------
+  auto air = material("G4_AIR");
+
+  // Find extent of bounding box to deduce envelope size.
+  G4double x_max = 0, y_max = 0, z_max = 0;
+  for (auto p: vertices) {
+    x_max = std::max(x_max, std::abs(p.getX()));
+    y_max = std::max(y_max, std::abs(p.getY()));
+    z_max = std::max(z_max, std::abs(p.getZ()));
+  }
+
+  // Envelope size:
+  // - 10% margin around content bounding box,
+  // - minimum 1cm in any dimension
+  // - must be centred at origin (when used as world) otherwise G4 crashes
+  auto half_x = std::max(x_max, 9*mm) * 1.1;
+  auto half_y = std::max(y_max, 9*mm) * 1.1;
+  auto half_z = std::max(z_max, 9*mm) * 1.1;
+
+  auto container = volume<G4Box>("Cylinder", air, half_x      , half_y      , half_z);
+  auto envelope  = volume<G4Box>("Envelope", air, half_x * 1.1, half_y * 1.1, half_z * 1.1);
+
+  // Indicate positions of point sources with finite spheres
+  auto marker_radius = 10 * mm;
+  for (auto [count, position]: enumerate(vertices)) {
+    std::string name = "Source_" + std::to_string(count);
+    auto ball  = volume<G4Orb>(name, air, marker_radius);
+    place(ball).in(container).at(position).now();
+  }
+  place(container).in(envelope).now();
+  return place(envelope).now();
 }
 
 // ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
