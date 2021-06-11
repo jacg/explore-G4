@@ -295,8 +295,8 @@ int main(int argc, char** argv) {
     auto radius = messenger.cylinder_radius * mm;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd) :
-      d == "square"    ? square_array_of_sipms(sd) :
+      d == "imas"      ? imas_demonstrator(sd, 70*cm)                      :
+      d == "square"    ? square_array_of_sipms(sd)                         :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed detector " + d;
   };

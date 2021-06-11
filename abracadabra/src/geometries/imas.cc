@@ -25,8 +25,7 @@ using nain4::volume;
 using std::make_tuple;
 using std::optional;
 
-G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
-  auto length = 70 * cm;
+G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length) {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
