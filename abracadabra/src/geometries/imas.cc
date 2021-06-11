@@ -33,7 +33,6 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   auto vacuum  = material("G4_Galactic");
   auto quartz  = material("G4_WATER");    // TODO
   auto LXe     = LXe_with_properties();
-  auto housing = steel;
 
   // ----- Utility for wrapping smaller cylinder inside a larger one --------------
   G4LogicalVolume* outer_layer = nullptr;
@@ -46,14 +45,14 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   };
 
   // ----- Build geometry by adding concentric cylinders of increasing radius -----
-  layer("Cavity"       , air    , 325 * mm);
-  layer("Housing"      , housing,   3 * mm);
-  layer("Inner_vacuum" , vacuum ,  25 * mm);
-  layer("Inner_steel"  , steel  ,   3 * mm);
-  layer("LXe"          , LXe    ,  40 * mm); auto xenon        = outer_layer;
-  layer("Quartz"       , quartz ,  20 * mm); auto outside_quartz = radius;
-  layer("Outer_vacuum" , vacuum , 200 * mm); auto outer_vacuum = outer_layer;
-  layer("Outer_steel"  , steel  ,   5 * mm);
+  layer("Cavity"      , air   , 325 * mm);
+  layer("Inner_casing", steel ,   3 * mm);
+  layer("Inner_vacuum", vacuum,  25 * mm);
+  layer("Inner_steel" , steel ,   3 * mm);
+  layer("LXe"         , LXe   ,  40 * mm); auto xenon        = outer_layer;
+  layer("Quartz"      , quartz,  20 * mm); auto outside_quartz = radius;
+  layer("Outer_vacuum", vacuum, 200 * mm); auto outer_vacuum = outer_layer;
+  layer("Outer_casing", steel ,   5 * mm);
 
   // Helper for placing sensors in different layers according to detector design version
   auto place_sipms = [&sd](auto layer, optional<G4double> radius) {
