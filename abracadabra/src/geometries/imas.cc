@@ -55,13 +55,13 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   layer("Outer_casing", steel ,   5 * mm);
 
   // Helper for placing sensors in different layers according to detector design version
-  auto place_sipms_in = [&sd](auto layer, optional<G4double> radius) {
+  auto place_sipms_in = [&sd](auto layer, optional<G4double> radius = {}) {
     line_cylinder_with_tiles(layer, sipm_hamamatsu_blue(true, sd), 1 * mm, radius);
   };
 
   // Two versions: SiPMs either in 1. xenon; 2. vacuum outside quartz
   if (version == 2) { place_sipms_in(outer_vacuum, outside_quartz + 3*mm); }
-  else              { place_sipms_in(xenon       , {                   }); }
+  else              { place_sipms_in(xenon                              ); }
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;
