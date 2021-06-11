@@ -70,8 +70,6 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto vol_steel_out  = vol("Outer_steel" , steel  , r_steel_out );
   auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
 
-  // TODO world volume ?
-
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
   place(vol_cavity    ).in(vol_housing   ).now();
   place(vol_housing   ).in(vol_vacuum_in ).now();
