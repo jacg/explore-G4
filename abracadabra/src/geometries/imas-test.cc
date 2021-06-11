@@ -28,7 +28,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   // Verify the number of volumes that make up the geometry
 
-  CHECK(std::distance(begin(geometry), end(geometry)) == 111385);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 111384);
 
   size_t count = 0;
   for (auto volume: geometry) {

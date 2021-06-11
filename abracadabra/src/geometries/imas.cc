@@ -15,6 +15,7 @@
 
 #include <initializer_list>
 #include <tuple>
+#include <optional>
 
 using CLHEP::pi;
 using CLHEP::twopi;
@@ -22,7 +23,7 @@ using nain4::material;
 using nain4::place;
 using nain4::volume;
 using std::make_tuple;
-
+using std::optional;
 
 G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto length = 70 * cm;
@@ -31,7 +32,6 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
-  auto sensors = material("G4_WATER");    // TODO
   auto quartz  = material("G4_WATER");    // TODO
   auto LXe     = LXe_with_properties();
   auto housing = steel;
@@ -52,12 +52,11 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   layer("Inner_vacuum" , vacuum ,  25 * mm);
   layer("Inner_steel"  , steel  ,   3 * mm);
   layer("LXe"          , LXe    ,  40 * mm);
-  layer("Quartz"       , quartz ,  20 * mm);
-  layer("Sensors"      , sensors,   3 * mm); auto vol_sensors = outer_layer;
-  layer("Outer_vacuum" , vacuum , 200 * mm);
+  layer("Quartz"       , quartz ,  20 * mm); auto sensor_radius = radius + 3*mm;
+  layer("Outer_vacuum" , vacuum , 200 * mm); auto outer_vacuum = outer_layer;
   layer("Outer_steel"  , steel  ,   5 * mm);
 
-  line_cylinder_with_tiles(vol_sensors, sipm_hamamatsu_blue(true, sd), 1*mm);
+  line_cylinder_with_tiles(outer_vacuum, sipm_hamamatsu_blue(true, sd), 1*mm, sensor_radius);
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;
@@ -95,13 +94,13 @@ auto angular_positioning(double outer_r, double dz, double pitch) {
 }
 
 // TODO: this is not adequately tested
-void line_cylinder_with_tiles(G4LogicalVolume* cylinder, G4LogicalVolume* tile, G4double gap) {
+void line_cylinder_with_tiles(G4LogicalVolume* cylinder, G4LogicalVolume* tile, G4double gap, optional<G4double> r) {
 
   // Cylinder dimensions
   auto tub = dynamic_cast<G4Tubs*>(cylinder -> GetSolid());
   if (!tub) { throw "Cylinder should be a G4Tubs"; }
-  auto outer_r = tub -> GetRMax();
   auto length  = tub -> GetDz() * 2;
+  auto outer_r = r.value_or(tub->GetRMax());
 
   // Tile dimensions
   auto [dx, dy, dz] = box_dimensions(tile);
