@@ -6,6 +6,7 @@
 #include "nain4.hh"
 
 #include <G4Box.hh>
+#include <G4LogicalVolume.hh>
 #include <G4RotationMatrix.hh>
 #include <G4ThreeVector.hh>
 #include <G4Tubs.hh>
@@ -24,6 +25,7 @@ using std::make_tuple;
 
 
 G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
+  auto length = 70 * cm;
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
@@ -34,55 +36,34 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd) {
   auto LXe     = LXe_with_properties();
   auto housing = steel;
 
-  // ----- Dimensions -------------------------------------------------------------
-  auto inner_radius = 325 * mm;
-
-  // Thicknesses of each layer       // Outer radii of each layer
-  auto dr_housing    =   3 * mm;     auto r_housing    = inner_radius + dr_housing;
-  auto dr_vacuum_in  =  25 * mm;     auto r_vacuum_in  = r_housing    + dr_vacuum_in;
-  auto dr_steel_in   =   3 * mm;     auto r_steel_in   = r_vacuum_in  + dr_steel_in;
-  auto dr_LXe        =  40 * mm;     auto r_LXe        = r_steel_in   + dr_LXe;
-  auto dr_quartz     =  20 * mm;     auto r_quartz     = r_LXe        + dr_quartz;
-  auto dr_sensors    =   3 * mm;     auto r_sensors    = r_quartz     + dr_sensors;
-  auto dr_vacuum_out = 200 * mm;     auto r_vacuum_out = r_sensors    + dr_vacuum_out;
-  auto dr_steel_out  =   5 * mm;     auto r_steel_out  = r_vacuum_out + dr_steel_out;
-
-  auto length = 70 * cm, half_length = length / 2;
-
-  auto envelope_length = 1.1 * length;
-  auto envelope_width  = 1.1 * r_steel_out;
-
-  // ----- Logical volumes making up the geometry ---------------------------------
-
-  // Bind invariant args (3, 5, 6 and 7) of volume
-  auto vol = [half_length](auto name, auto material, auto radius) {
-    return volume<G4Tubs>(name, material, 0.0, radius, half_length, 0.0, twopi);
+  // ----- Utility for wrapping smaller cylinder inside a larger one --------------
+  G4LogicalVolume* outer_layer = nullptr;
+  auto radius = 0.0;
+  auto layer = [&radius, &outer_layer, length](auto& name, auto material, auto dr) {
+    radius += dr;
+    auto vol = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
+    if (outer_layer) { place(outer_layer).in(vol).now(); }
+    return outer_layer = vol;
   };
 
-  auto vol_cavity     = vol("Cavity"      , air    , inner_radius);
-  auto vol_housing    = vol("Housing"     , housing, r_housing   );
-  auto vol_vacuum_in  = vol("Inner_vacuum", vacuum , r_vacuum_in );
-  auto vol_steel_in   = vol("Inner_steel" , steel  , r_steel_in  );
-  auto vol_LXe        = vol("LXe"         , LXe    , r_LXe       );
-  auto vol_quartz     = vol("Quartz"      , quartz , r_quartz    );
-  auto vol_sensors    = vol("Sensors"     , sensors, r_sensors   );
-  auto vol_vacuum_out = vol("Outer_vacuum", vacuum , r_vacuum_out);
-  auto vol_steel_out  = vol("Outer_steel" , steel  , r_steel_out );
-  auto vol_envelope = volume<G4Box>("Envelope", air, envelope_width, envelope_width, envelope_length);
-
-  // ----- Build geometry by organizing volumes in a hierarchy --------------------
-  place(vol_cavity    ).in(vol_housing   ).now();
-  place(vol_housing   ).in(vol_vacuum_in ).now();
-  place(vol_vacuum_in ).in(vol_steel_in  ).now();
-  place(vol_steel_in  ).in(vol_LXe       ).now();
-  place(vol_LXe       ).in(vol_quartz    ).now();
-  place(vol_quartz    ).in(vol_sensors   ).now();
-  place(vol_sensors   ).in(vol_vacuum_out).now();
-  place(vol_vacuum_out).in(vol_steel_out ).now();
-  place(vol_steel_out ).in(vol_envelope  ).now();
+  // ----- Build geometry by adding concentric cylinders of increasing radius -----
+  layer("Cavity"       , air    , 325 * mm);
+  layer("Housing"      , housing,   3 * mm);
+  layer("Inner_vacuum" , vacuum ,  25 * mm);
+  layer("Inner_steel"  , steel  ,   3 * mm);
+  layer("LXe"          , LXe    ,  40 * mm);
+  layer("Quartz"       , quartz ,  20 * mm);
+  layer("Sensors"      , sensors,   3 * mm); auto vol_sensors = outer_layer;
+  layer("Outer_vacuum" , vacuum , 200 * mm);
+  layer("Outer_steel"  , steel  ,   5 * mm);
 
   line_cylinder_with_tiles(vol_sensors, sipm_hamamatsu_blue(true, sd), 1*mm);
 
+  auto env_length = 1.1 * length / 2;
+  auto env_width  = 1.1 * radius;
+
+  auto vol_envelope = volume<G4Box>("Envelope", air, env_width, env_width, env_length);
+  place(outer_layer).in(vol_envelope).now();
   return place(vol_envelope).now();
 }
 
