@@ -7,6 +7,7 @@
 /abracadabra/geometry both
 /abracadabra/detector imas
 /abracadabra/phantom nema_7
+/abracadabra/imas_version 1
 /abracadabra/cylinder_length 20
 /abracadabra/cylinder_radius 350
 #/abracadabra/xenon_thickness 50

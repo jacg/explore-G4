@@ -49,6 +49,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
+    messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
   }
   size_t offset = 0;
   G4String outfile    = "default_out.h5";
@@ -60,6 +61,7 @@ struct abracadabra_messenger {
   G4double xenon_thickness =  40 * mm;
   G4double cylinder_length = 600 * mm;
   G4double cylinder_radius = 200 * mm;
+  unsigned imas_version = 1;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -295,9 +297,9 @@ int main(int argc, char** argv) {
     auto radius = messenger.cylinder_radius * mm;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, 70*cm)                      :
-      d == "square"    ? square_array_of_sipms(sd)                         :
-      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
+      d == "imas"      ? imas_demonstrator(sd, 70*cm, messenger.imas_version) :
+      d == "square"    ? square_array_of_sipms(sd)                            :
+      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()    :
       throw "Unrecoginzed detector " + d;
   };
   // ----- Should the geometry contain phantom only / detector only / both

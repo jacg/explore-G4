@@ -8,11 +8,16 @@
 
 #include <catch2/catch.hpp>
 
+#include <tuple>
+
 TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
-  using std::setw;
+  using std::setw; using std::make_tuple;
 
-  auto& geometry = *imas_demonstrator(nullptr, 70*cm);
+  auto [version, n_elements] = GENERATE(make_tuple(1, 105147),
+                                        make_tuple(2, 111384));
+
+  auto& geometry = *imas_demonstrator(nullptr, 70*cm, version);
 
   // std::cout << std::endl;
   // for (auto v: geometry) {
@@ -28,7 +33,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   // Verify the number of volumes that make up the geometry
 
-  CHECK(std::distance(begin(geometry), end(geometry)) == 111384);
+  CHECK(std::distance(begin(geometry), end(geometry)) == n_elements);
 
   size_t count = 0;
   for (auto volume: geometry) {

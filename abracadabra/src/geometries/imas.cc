@@ -25,7 +25,7 @@ using nain4::volume;
 using std::make_tuple;
 using std::optional;
 
-G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length) {
+G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, unsigned version) {
 
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
@@ -50,12 +50,19 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length) {
   layer("Housing"      , housing,   3 * mm);
   layer("Inner_vacuum" , vacuum ,  25 * mm);
   layer("Inner_steel"  , steel  ,   3 * mm);
-  layer("LXe"          , LXe    ,  40 * mm);
-  layer("Quartz"       , quartz ,  20 * mm); auto sensor_radius = radius + 3*mm;
+  layer("LXe"          , LXe    ,  40 * mm); auto xenon        = outer_layer;
+  layer("Quartz"       , quartz ,  20 * mm); auto outside_quartz = radius;
   layer("Outer_vacuum" , vacuum , 200 * mm); auto outer_vacuum = outer_layer;
   layer("Outer_steel"  , steel  ,   5 * mm);
 
-  line_cylinder_with_tiles(outer_vacuum, sipm_hamamatsu_blue(true, sd), 1*mm, sensor_radius);
+  // Helper for placing sensors in different layers according to detector design version
+  auto place_sipms = [&sd](auto layer, optional<G4double> radius) {
+    line_cylinder_with_tiles(layer, sipm_hamamatsu_blue(true, sd), 1 * mm, radius);
+  };
+
+  // Two versions: SiPMs either in 1. xenon; 2. vacuum outside quartz
+  if (version == 2) { place_sipms(outer_vacuum, outside_quartz + 3*mm); }
+  else              { place_sipms(xenon       , {                   }); }
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;
