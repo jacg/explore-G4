@@ -5,8 +5,8 @@
 # Select detector geometry, generators and phantom here
 
 /abracadabra/geometry both
-/abracadabra/detector cylinder
-/abracadabra/phantom nema_3
+/abracadabra/detector imas
+/abracadabra/phantom nema_7
 /abracadabra/cylinder_length 20
 /abracadabra/cylinder_radius 350
 #/abracadabra/xenon_thickness 50

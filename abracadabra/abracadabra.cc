@@ -253,17 +253,18 @@ int main(int argc, char** argv) {
   //auto sd = nullptr; // If you only want to visualize geometry
 
   // ----- Available phantoms -----------------------------------------------------------
+  // TODO: the central cylinder is missing (7.3.3 c)
   auto nema_7_phantom = build_nema_7_phantom{}
-    .activity(0)
-    .length(140*mm)
-    .inner_radius(114.4*mm)
-    .outer_radius(152.0*mm)
-    .sphere(10*mm / 2, 20)
-    .sphere(13*mm / 2, 20)
-    .sphere(17*mm / 2, 20)
-    .sphere(22*mm / 2, 20)
-    .sphere(28*mm / 2, 0)
-    .sphere(37*mm / 2, 0)
+    .activity(1)
+    .length(180*mm)
+    .inner_radius(57.2*mm)
+    .outer_radius(77.0*mm)
+    .sphereD(10*mm / 2, 4)
+    .sphereD(13*mm / 2, 4)
+    .sphereD(17*mm / 2, 4)
+    .sphereD(22*mm / 2, 4)
+    .sphereD(28*mm / 2, 4)
+    .sphereD(37*mm / 2, 4)
     .build();
 
   auto fov_length = 60 * cm;
