@@ -59,7 +59,7 @@ struct abracadabra_messenger {
   bool     spin       = true;
   G4int    spin_speed = 10;
   G4double xenon_thickness =  40 * mm;
-  G4double cylinder_length = 600 * mm;
+  G4double cylinder_length =  15 * mm;
   G4double cylinder_radius = 200 * mm;
   unsigned imas_version = 1;
 private:
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
     auto radius = messenger.cylinder_radius * mm;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, 70*cm, messenger.imas_version) :
+      d == "imas"      ? imas_demonstrator(sd, length, messenger.imas_version) :
       d == "square"    ? square_array_of_sipms(sd)                            :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()    :
       throw "Unrecoginzed detector " + d;
