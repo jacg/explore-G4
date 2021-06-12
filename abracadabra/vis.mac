@@ -102,29 +102,37 @@
 # To get nice view
 #/vis/viewer/set/sectionPlane  on 0 0 20   cm  0 0 1
 
-/vis/geometry/set/colour     world        0  0  1  0 .1
-/vis/geometry/set/colour     Envelope     0  0  1  0 .1
-/vis/geometry/set/colour     Outer_steel  0 .7 .7 .7 .1
-/vis/geometry/set/colour     Outer_vacuum 0 .1 .1 .1 .1
-/vis/geometry/set/colour     Sensors      0  0  0  1 .1
-/vis/geometry/set/colour     Quartz       0  1  0  0 .3
-/vis/geometry/set/colour     LXe          0  1  0  0 .5
-/vis/geometry/set/colour     Inner_steel  0 .7 .7 .7 .1
-/vis/geometry/set/colour     Inner_vacuum 0 .7 .7 .7 .1
-/vis/geometry/set/colour     Housing      0 .7 .7 .7 .1
 /vis/geometry/set/colour     Cavity       0  0  0  0 .4
+/vis/geometry/set/visibility Cavity       0 false
+
+/vis/geometry/set/colour     Inner_casing 0 .7 .7 .7 .1
+/vis/geometry/set/visibility Inner_casing 0 true
+
+/vis/geometry/set/colour     Inner_vacuum 0 .7 .7 .7 .1
+/vis/geometry/set/visibility Inner_vacuum 0 false
+
+/vis/geometry/set/colour     Inner_steel  0 .7 .7 .7 .1
+/vis/geometry/set/visibility Inner_steel  0 true
+
+/vis/geometry/set/colour     LXe          0  0  0  1 .5
+/vis/geometry/set/visibility LXe          0 true
+
+/vis/geometry/set/colour     Quartz       0  1  0  0 .3
+/vis/geometry/set/visibility Quartz       0 true
+
+/vis/geometry/set/colour     Outer_vacuum 0 .1 .1 .1 .1
+/vis/geometry/set/visibility Outer_vacuum 0 false
+
+/vis/geometry/set/colour     Outer_casing 0 .7 .7 .7 .1
+/vis/geometry/set/visibility Outer_casing 0 true
+
 /vis/geometry/set/colour     Cylinder     0 .7 .7 .7 .1
 
+/vis/geometry/set/colour     Envelope     0  0  1  0 .1
 /vis/geometry/set/visibility Envelope     0 true
-/vis/geometry/set/visibility Outer_steel  0 true
-/vis/geometry/set/visibility Outer_vacuum 0 false
-/vis/geometry/set/visibility Sensors      0 true
-/vis/geometry/set/visibility Quartz       0 true
-/vis/geometry/set/visibility LXe          0 true
-/vis/geometry/set/visibility Inner_steel  0 false
-/vis/geometry/set/visibility Inner_vacuum 0 false
-/vis/geometry/set/visibility Housing      0 false
-/vis/geometry/set/visibility Cavity       0 false
+
+/vis/geometry/set/colour     world        0  0  1  0 .1
+
 
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface
