@@ -10,6 +10,7 @@ let
   geant4-debug-overlay = final: previous: {
    geant4 = previous.geant4.overrideAttrs (old: {
      cmakeBuildType = "Debug";
+     dontStrip = true;
    });
 
 };
