@@ -52,7 +52,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
   }
   size_t offset = 0;
-  G4String outfile    = "default_out.h5";
+  G4String outfile    = "default-out.h5";
   G4String geometry   = "both";
   G4String detector   = "imas";
   G4String phantom    = "nema_7";
