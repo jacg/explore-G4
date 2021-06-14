@@ -38,9 +38,8 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   G4LogicalVolume* outer_layer = nullptr;
   auto radius = 0.0;
   auto layer = [&radius, &outer_layer, length](auto& name, auto material, auto dr) {
-    auto inner_radius = radius;
     radius += dr;
-    auto vol = volume<G4Tubs>(name, material, inner_radius, radius, length/2, 0.0, twopi);
+    auto vol = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
     if (outer_layer) { place(outer_layer).in(vol).now(); }
     return outer_layer = vol;
   };
