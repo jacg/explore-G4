@@ -269,7 +269,8 @@ int main(int argc, char** argv) {
     .sphereD(37*mm / 2, 4)
     .build();
 
-  auto fov_length = 60 * cm;
+  // TODO break circular dependence and read this from messenger.cylinder_length
+  auto fov_length = 15 * cm * 3 / 8;
   nema_3_phantom nema_3_phantom(fov_length);
 
   // ----- Choice of phantom -------------------------------------------------------------
