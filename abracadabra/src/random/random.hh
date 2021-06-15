@@ -18,7 +18,7 @@ class biased_choice {
 public:
 
   biased_choice(std::vector<G4double> weights);
-  unsigned operator()();
+  unsigned operator()() const;
 
 private:
   std::vector<G4double> prob;

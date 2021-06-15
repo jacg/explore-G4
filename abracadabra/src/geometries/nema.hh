@@ -62,7 +62,7 @@ protected:
   G4double inner_r     = 114.4*mm;
   G4double outer_r     = 152.0*mm;
   G4double half_length =  70.0*mm;
-  std::unique_ptr<biased_choice> pick_region;
+  biased_choice pick_region{{}};
 };
 
 // ----- Builder ----------------------------------------------------------------------
