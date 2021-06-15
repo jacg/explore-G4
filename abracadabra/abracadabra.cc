@@ -24,6 +24,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <variant>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -255,39 +256,50 @@ int main(int argc, char** argv) {
   //auto sd = nullptr; // If you only want to visualize geometry
 
   // ----- Available phantoms -----------------------------------------------------------
-  // TODO: the central cylinder is missing (7.3.3 c)
-  auto nema_7_phantom = build_nema_7_phantom{}
-    .activity(1)
-    .length(180*mm)
-    .inner_radius(57.2*mm)
-    .outer_radius(77.0*mm)
-    .sphereD(10*mm / 2, 4)
-    .sphereD(13*mm / 2, 4)
-    .sphereD(17*mm / 2, 4)
-    .sphereD(22*mm / 2, 4)
-    .sphereD(28*mm / 2, 4)
-    .sphereD(37*mm / 2, 4)
-    .build();
+  auto nema_7 = []() {
+    // TODO: the central cylinder is missing (7.3.3 c)
+    return build_nema_7_phantom{}
+      .activity(1)
+      .length(180*mm)
+      .inner_radius(57.2*mm)
+      .outer_radius(77.0*mm)
+      .sphereD(10*mm / 2, 4)
+      .sphereD(13*mm / 2, 4)
+      .sphereD(17*mm / 2, 4)
+      .sphereD(22*mm / 2, 4)
+      .sphereD(28*mm / 2, 4)
+      .sphereD(37*mm / 2, 4)
+      .build();
+  };
 
-  // TODO break circular dependence and read this from messenger.cylinder_length
-  auto fov_length = 15 * cm * 3 / 8;
-  nema_3_phantom nema_3_phantom(fov_length);
+  auto nema_3 = [&messenger]() {
+    auto fov_length = messenger.cylinder_length * mm * 3 / 8;
+    return nema_3_phantom{fov_length};
+  };
 
   // ----- Choice of phantom -------------------------------------------------------------
   // Can choose phantom in macros with `/abracadabra/phantom <choice>`
-  auto use_phantom = [](auto& phantom) {
-    return
-      new phantom_t([&phantom](auto event) {        phantom.generate_primaries(event); },
-                    [&phantom](          ) { return phantom.geometry(); });
-  };
+  // The nema_3 phantom's length is determined by `/abracadabra/cylinder_length` in mm
 
-  unique_ptr<phantom_t> phantom;
+  using polymorphic_phantom = std::variant<nema_3_phantom, nema_7_phantom>;
 
+  // A variable containing the phantom is needed early on, because it is
+  // captured by various lambdas. Need to construct the variant with type that
+  // satisfies the common interface, so std::monostate won't do. The specific
+  // value will be overridden when config file is read.
+  polymorphic_phantom phantom = nema_3();
+
+  // Dispatch to the chosen phantom's `geometry` and `generate_primaries`
+  // methods. This imposes a static Duck Type interface on the phantom types in
+  // `polymorphic_phantom`.
+  auto phantom_geometry = [&phantom](          ) { return std::visit([     ](auto& ph) { return ph.geometry          (     ); }, phantom); };
+  auto phantom_generate = [&phantom](auto event) { return std::visit([event](auto& ph) { return ph.generate_primaries(event); }, phantom); };
+
+  // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    return
-      p == "nema_7" ? phantom.reset(use_phantom(nema_7_phantom)) :
-      p == "nema_3" ? phantom.reset(use_phantom(nema_3_phantom)) :
-      throw "Unrecoginzed phantom " + p;
+    p == "nema_7" ? phantom = nema_7() :
+    p == "nema_3" ? phantom = nema_3() :
+    throw "Unrecoginzed phantom " + p;
   };
 
   // ----- Available detector geometries -------------------------------------------------
@@ -308,8 +320,8 @@ int main(int argc, char** argv) {
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
     return
       g == "detector" ? detector()         :
-      g == "phantom"  ? phantom -> geometry() :
-      g == "both"     ? combine_geometries(phantom -> geometry(), detector()) :
+      g == "phantom"  ? phantom_geometry() :
+      g == "both"     ? combine_geometries(phantom_geometry(), detector()) :
       throw "Unrecoginzed geometry " + g;
   };
 
@@ -317,7 +329,7 @@ int main(int argc, char** argv) {
   // Can choose generator in macros with `/abracadabra/generator <choice>`
   std::map<G4String, n4::generator::function> generators = {
     {"origin"      , [ ](auto event) { generate_back_to_back_511_keV_gammas(event, {}, 0); }},
-    {"phantom"     , [&](auto event) { phantom -> generate(event); }},
+    {"phantom"     , [&](auto event) { phantom_generate(event); }},
     {"quarter_ring", [ ](auto event) {
       // Lots of asymmetry to help verify orientation
       auto r = 250 * mm;
@@ -333,6 +345,7 @@ int main(int argc, char** argv) {
 
   UI* ui = UI::make(argc, argv, messenger);
   set_phantom(messenger.phantom);
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
