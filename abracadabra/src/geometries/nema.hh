@@ -23,7 +23,7 @@ public:
   void generate_primaries(G4Event* event) const;
   G4PVPlacement* geometry() const;
 private:
-  const std::vector<G4ThreeVector> vertices;
+  std::vector<G4ThreeVector> vertices;
 };
 
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
