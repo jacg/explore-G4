@@ -9,6 +9,8 @@
 /abracadabra/outfile "default-out.h5"
 /abracadabra/event-number-offset 40000
 
+/random/setSeeds 123456 987654
+
 # Initialize kernel
 /run/initialize
 
@@ -17,4 +19,4 @@
 /event/verbose 0
 /tracking/verbose 0
 
-/run/beamOn 5
+/run/beamOn 5000

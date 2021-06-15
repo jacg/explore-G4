@@ -110,7 +110,7 @@ nema_7_phantom build_nema_7_phantom::build() {
     auto body_weight = body_volume * background;
     weights.push_back(body_weight);
   }
-  pick_region.reset(new biased_choice(weights));
+  pick_region = biased_choice(weights);
 
   return std::move(*this);
 }
@@ -165,7 +165,7 @@ void nema_7_phantom::generate_primaries(G4Event* event) const {
 G4ThreeVector nema_7_phantom::generate_vertex() const {
   G4ThreeVector offset; // TODO adjust for physical placement of logical geometry
   G4ThreeVector local_position;
-  auto region = (*pick_region)();
+  auto region = pick_region();
   if (region < spheres.size()) { // One of the spheres
     auto centre = sphere_position(region);
     local_position = centre + random_in_sphere(spheres[region].radius);

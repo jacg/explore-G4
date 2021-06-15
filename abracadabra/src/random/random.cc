@@ -64,7 +64,7 @@ biased_choice::biased_choice(std::vector<G4double> weights)
   while (something_in(under)) { auto i = pop(under); prob[i] = 1; } // Impossible without numerical instability
 }
 
-unsigned biased_choice::operator()() {
+unsigned biased_choice::operator()() const {
   auto n = fair_die(prob.size());
   return biased_coin(prob[n]) ? n : topup[n];
 }

@@ -23,7 +23,7 @@ public:
   void generate_primaries(G4Event* event) const;
   G4PVPlacement* geometry() const;
 private:
-  const std::vector<G4ThreeVector> vertices;
+  std::vector<G4ThreeVector> vertices;
 };
 
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
@@ -62,7 +62,7 @@ protected:
   G4double inner_r     = 114.4*mm;
   G4double outer_r     = 152.0*mm;
   G4double half_length =  70.0*mm;
-  std::unique_ptr<biased_choice> pick_region;
+  biased_choice pick_region{{}};
 };
 
 // ----- Builder ----------------------------------------------------------------------
