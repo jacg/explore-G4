@@ -273,7 +273,7 @@ int main(int argc, char** argv) {
   };
 
   auto nema_3 = [&messenger]() {
-    auto fov_length = messenger.cylinder_length * mm * 3 / 8;
+    auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
   };
 
