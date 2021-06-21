@@ -108,26 +108,17 @@ target_include_directories(
 )
 
 #----------------------------------------------------------------------------
-# Copy all scripts to the build directory, i.e. the directory in which we
-# build abracadabra. This is so that we can run the executable directly because it
-# relies on these scripts being in the current working directory.
+# Link macro files directory to the build directory, i.e. the directory in which
+# we build abracadabra. This is so that we can run the executable directly
+# because it relies on these macros being in the current working directory.
 #
-set(ABRACADABRA_SCRIPTS
-  abracadabra.in
-  abracadabra.out
-  init_vis.mac
-  run1.mac
-  run2.mac
-  vis.mac
+add_custom_command(
+  TARGET abracadabra POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+  ${CMAKE_SOURCE_DIR}/macs $<TARGET_FILE_DIR:abracadabra>/macs
+  COMMENT "Symlinking G4 macros directory" VERBATIM
   )
 
-foreach(_script ${ABRACADABRA_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
-endforeach()
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

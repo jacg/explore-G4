@@ -7,10 +7,12 @@
 /run/verbose 2
 
 /abracadabra/spin_view false
-/abracadabra/spin_speed 50
+/abracadabra/spin_speed 10
 
 # Initialize kernel
 /run/initialize
 #
 # Visualization setting
-/control/execute vis.mac
+/control/execute macs/vis.mac
+#/vis/viewer/zoomTo 20
+#/vis/viewer/panTo 0.52 0

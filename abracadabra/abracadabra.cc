@@ -122,7 +122,7 @@ struct UI_interactive : public UI {
     // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
     // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
     vis_manager -> Initialize();
-    ui_manager -> ApplyCommand("/control/execute init_vis.mac");
+    ui_manager -> ApplyCommand("/control/execute macs/init_vis.mac");
     spin();
     ui -> SessionStart();
   }
