@@ -178,8 +178,18 @@ TEST_CASE("hamamatsu app", "[app]") {
   std::sort(begin(detected) , end(detected));
   std::sort(begin(written)  , end(written));
 
+  // Adjust to downgraded precision used in written data
+  std::vector<G4ThreeVector> expected_f32(written.size());
+  std::transform(begin(expected), end(expected), begin(expected_f32),
+                 [](auto v) {
+                   auto x = (float)v.x();
+                   auto y = (float)v.y();
+                   auto z = (float)v.z();
+                   return G4ThreeVector{x,y,z};
+                 });
+
   CHECK(detected == expected);
-  CHECK(written  == expected);
+  CHECK(written  == expected_f32);
 
   // So far we have only checked spatial positions: need to do time and event number
   for (auto [evt_id, x,y,z,t] : written_hit_structs) {

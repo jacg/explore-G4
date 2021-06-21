@@ -1,22 +1,26 @@
 #ifndef IO_HDF5_IO_H
 #define IO_HDF5_IO_H
 
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include <highfive/H5File.hpp>
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
 #include <highfive/H5DataType.hpp>
 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdint>
+
+// TODO: make this reliable across different architectures
+using f32 = float;
+using u32 = uint32_t;
 
 struct hit_t {
-  unsigned int event_id;
-  double x;
-  double y;
-  double z;
-  double t;
+  u32 event_id;
+  f32 x;
+  f32 y;
+  f32 z;
+  f32 t;
 };
 
 
@@ -29,14 +33,14 @@ public:
   ~hdf5_io() { if (open_for_writing) { open_for_writing -> flush(); }}
 
   template<class T>
-  void write(std::string const& dataset, unsigned int& index, T const& data);
+  void write(std::string const& dataset, size_t& index, T const& data);
 
   void write_run_info(const char* param_key, const char* param_value);
-  void write_hit_info(unsigned int evt_id, double x, double y, double z, double t);
-  void write_waveform(unsigned int evt_id, unsigned int sensor_id, std::vector<double> times);
-  void write_total_charge(unsigned int evt_id, unsigned int sensor_id, size_t charge);
-  void write_sensor_xyz(unsigned int sensor_id, double x, double y, double z);
-  void write_q_t0(unsigned event_id, unsigned sensor_id, unsigned q, double t0);
+  void write_hit_info      (u32 evt_id, f32 x, f32 y, f32 z, f32 t);
+  void write_waveform      (u32 evt_id, u32 sensor_id, std::vector<f32> times);
+  void write_total_charge  (u32 evt_id, u32 sensor_id, u32 charge);
+  void write_q_t0          (u32 evt_id, u32 sensor_id, u32 q, f32 t0);
+  void write_sensor_xyz                (u32 sensor_id, f32 x, f32 y, f32 z);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
@@ -47,16 +51,16 @@ private:
   void ensure_open_for_writing();
 
   std::string filename;
-  unsigned int runinfo_index;
-  unsigned int hit_index;
-  unsigned int waveform_index;
-  unsigned int total_charge_index;
-  unsigned int q_t0_index;
+  size_t runinfo_index;
+  size_t hit_index;
+  size_t waveform_index;
+  size_t total_charge_index;
+  size_t q_t0_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
 template<class T>
-void hdf5_io::write(std::string const& dataset, unsigned int& index, T const& data) {
+void hdf5_io::write(std::string const& dataset, size_t& index, T const& data) {
   unsigned int n_elements = data.size();
 
   ensure_open_for_writing();
@@ -76,29 +80,24 @@ struct run_info_t {
 };
 
 struct waveform_t {
-  unsigned int event_id;
-  unsigned int sensor_id;
-  double time;
+  u32 event_id, sensor_id;
+  f32 time;
 };
 
 struct total_charge_t {
-  unsigned int event_id;
-  unsigned int sensor_id;
-  size_t charge;
+  u32 event_id, sensor_id;
+  u32 charge;
 };
 
 struct sensor_xyz_t {
-  unsigned int sensor_id;
-  double       x;
-  double       y;
-  double       z;
+  u32 sensor_id;
+  f32 x, y, z;
 };
 
 struct q_t0_t {
-  unsigned int event_id;
-  unsigned int sensor_id;
-  unsigned int q;
-  double t0;
+  u32 event_id, sensor_id;
+  u32 q;
+  f32 t0;
 };
 
 #endif
