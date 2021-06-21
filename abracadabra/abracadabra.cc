@@ -101,11 +101,13 @@ private:
 
 // =============================================================================================
 // ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
+void stop_if_failed(G4int status) { if (status != 0) { throw "up"; } }
+
 struct UI {
   static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
   UI(char** argv, abracadabra_messenger& messenger) : messenger{messenger} {
       G4String model_filename = argv[1];
-      ui_manager -> ApplyCommand("/control/execute " + model_filename);
+      stop_if_failed(ui_manager -> ApplyCommand("/control/execute " + model_filename));
   }
   virtual void run() = 0;
   //private:
@@ -122,7 +124,7 @@ struct UI_interactive : public UI {
     // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
     // G4VisManager* visManager = new G4VisExecutive{"Quiet"};
     vis_manager -> Initialize();
-    ui_manager -> ApplyCommand("/control/execute macs/init_vis.mac");
+    stop_if_failed(ui_manager -> ApplyCommand("/control/execute macs/init_vis.mac"));
     spin();
     ui -> SessionStart();
   }
@@ -133,7 +135,9 @@ struct UI_interactive : public UI {
 // ----------------------------------------------------------------------------------------------
 struct UI_batch : public UI {
   UI_batch(int, char** argv, abracadabra_messenger& messenger) : UI{argv, messenger}, run_macro_filename{argv[2]} {}
-  void run() { ui_manager -> ApplyCommand("/control/execute " + run_macro_filename); }
+  void run() {
+    stop_if_failed(ui_manager -> ApplyCommand("/control/execute " + run_macro_filename));
+  }
   G4String run_macro_filename;
 };
 
