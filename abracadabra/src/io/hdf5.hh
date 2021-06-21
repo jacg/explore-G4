@@ -37,6 +37,7 @@ public:
 
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info      (u32 evt_id, f32 x, f32 y, f32 z, f32 t);
+  void write_primary_vertex(u32 evt_id, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
   void write_waveform      (u32 evt_id, u32 sensor_id, std::vector<f32> times);
   void write_total_charge  (u32 evt_id, u32 sensor_id, u32 charge);
   void write_q_t0          (u32 evt_id, u32 sensor_id, u32 q, f32 t0);
@@ -56,6 +57,7 @@ private:
   size_t waveform_index;
   size_t total_charge_index;
   size_t q_t0_index;
+  size_t primary_vertex_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
@@ -98,6 +100,12 @@ struct q_t0_t {
   u32 event_id, sensor_id;
   u32 q;
   f32 t0;
+};
+
+struct primary_vertex_t {
+  u32 event_id;
+  f32  x,  y,  z;
+  f32 px, py, pz;
 };
 
 #endif

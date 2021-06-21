@@ -13,6 +13,7 @@ hdf5_io::hdf5_io(std::string fname)
 , waveform_index{0}
 , total_charge_index{0}
 , q_t0_index{0}
+, primary_vertex_index{0}
 {}
 
 template<class T> using hdf_t = HF::AtomicType<T>;
@@ -62,6 +63,17 @@ HF::CompoundType create_q_t0_type() {
 }
 HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
 
+HF::CompoundType create_primary_vertex_type() {
+  return {{"event_id", hdf_t<u32>{}},
+          { "x"      , hdf_t<f32>{}},
+          { "y"      , hdf_t<f32>{}},
+          { "z"      , hdf_t<f32>{}},
+          {"vx"      , hdf_t<f32>{}},
+          {"vy"      , hdf_t<f32>{}},
+          {"vz"      , hdf_t<f32>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
+
 void set_string_param(char * to, const char * from, u32 max_len) {
   memset(to, 0, max_len);
   strcpy(to, from);
@@ -86,12 +98,13 @@ void hdf5_io::ensure_open_for_writing() {
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  group.createDataSet("hits"         , dataspace, create_hit_type()         , props);
-  group.createDataSet("configuration", dataspace, create_runinfo_type()     , props);
-  group.createDataSet("waveform"     , dataspace, create_waveform_type()    , props);
-  group.createDataSet("total_charge" , dataspace, create_total_charge_type(), props);
-  group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()  , props);
-  group.createDataSet("q_t0"         , dataspace, create_q_t0_type()        , props);
+  group.createDataSet("hits"         , dataspace, create_hit_type()           , props);
+  group.createDataSet("configuration", dataspace, create_runinfo_type()       , props);
+  group.createDataSet("waveform"     , dataspace, create_waveform_type()      , props);
+  group.createDataSet("total_charge" , dataspace, create_total_charge_type()  , props);
+  group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
+  group.createDataSet("q_t0"         , dataspace, create_q_t0_type()          , props);
+  group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
 }
 
 
