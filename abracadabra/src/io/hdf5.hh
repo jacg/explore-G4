@@ -36,12 +36,12 @@ public:
   void write(std::string const& dataset, size_t& index, T const& data);
 
   void write_run_info(const char* param_key, const char* param_value);
-  void write_hit_info      (u32 evt_id, f32 x, f32 y, f32 z, f32 t);
-  void write_primary_vertex(u32 evt_id, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
-  void write_waveform      (u32 evt_id, u32 sensor_id, std::vector<f32> times);
-  void write_total_charge  (u32 evt_id, u32 sensor_id, u32 charge);
-  void write_q_t0          (u32 evt_id, u32 sensor_id, u32 q, f32 t0);
-  void write_sensor_xyz                (u32 sensor_id, f32 x, f32 y, f32 z);
+  void write_hit_info    (u32 evt_id, f32 x, f32 y, f32 z, f32 t);
+  void write_primary     (u32 evt_id, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
+  void write_waveform    (u32 evt_id, u32 sensor_id, std::vector<f32> times);
+  void write_total_charge(u32 evt_id, u32 sensor_id, u32 charge);
+  void write_q_t0        (u32 evt_id, u32 sensor_id, u32 q, f32 t0);
+  void write_sensor_xyz              (u32 sensor_id, f32 x, f32 y, f32 z);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();

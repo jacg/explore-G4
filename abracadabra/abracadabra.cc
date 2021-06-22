@@ -409,15 +409,17 @@ int main(int argc, char** argv) {
 
   n4::event_action::action_t show_primary_generator = [&](auto event) {
     using std::setw;
+    auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
     auto pos = vertex -> GetPosition();
     auto mom = vertex -> GetPrimary() -> GetMomentum();
     auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
     auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
-    std::cout << setw(7) << current_event()
+    std::cout << setw(7) << event_id
               << setw(6) <<  x << setw(6) <<  y << setw(6) <<  z << " "
               << setw(6) << px << setw(6) << py << setw(6) << pz << " "
               << std::endl;
+    writer -> write_primary(event_id, x,y,z, px,py,pz);
   };
   // ===== Mandatory G4 initializations ===================================================
 

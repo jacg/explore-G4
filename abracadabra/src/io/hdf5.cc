@@ -141,6 +141,11 @@ void hdf5_io::write_q_t0(u32 event_id, u32 sensor_id, u32 q, f32 t0) {
   write("q_t0", q_t0_index, data);
 }
 
+void hdf5_io::write_primary(u32 event_id, f32 x, f32 y, f32 z, f32 px, f32 py, f32 pz) {
+  std::vector<primary_vertex_t> data{{event_id, x,y,z, px,py,pz}};
+  write("primaries", primary_vertex_index, data);
+}
+
 std::vector<hit_t> hdf5_io::read_hit_info() {
   std::vector<hit_t> hits;
   // Get the table from the file
