@@ -52,6 +52,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
+    messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -64,6 +65,7 @@ struct abracadabra_messenger {
   G4double cylinder_length =  15 * mm;
   G4double cylinder_radius = 200 * mm;
   unsigned imas_version = 1;
+  bool vac_pre_lxe = false;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -314,14 +316,16 @@ int main(int argc, char** argv) {
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
-    auto dr_LXe = messenger.xenon_thickness * mm;
-    auto length = messenger.cylinder_length * mm;
-    auto radius = messenger.cylinder_radius * mm;
+    auto dr_LXe  = messenger.xenon_thickness * mm;
+    auto length  = messenger.cylinder_length * mm;
+    auto radius  = messenger.cylinder_radius * mm;
+    auto version = messenger.imas_version;
+    auto clear   = messenger.vac_pre_lxe;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, messenger.imas_version) :
-      d == "square"    ? square_array_of_sipms(sd)                            :
-      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()    :
+      d == "imas"      ? imas_demonstrator(sd, length, version, clear)     :
+      d == "square"    ? square_array_of_sipms(sd)                         :
+      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed detector " + d;
   };
   // ----- Should the geometry contain phantom only / detector only / both
