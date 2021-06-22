@@ -20,17 +20,17 @@ template<class T> using hdf_t = HF::AtomicType<T>;
 
 HF::CompoundType create_hit_type() {
   return {{"event_id", hdf_t<u32>{}},
-          {"x"       , hdf_t<f32>{}},
-          {"y"       , hdf_t<f32>{}},
-          {"z"       , hdf_t<f32>{}},
-          {"t"       , hdf_t<f32>{}}};
+          {"x"       , hdf_t<f16>{}},
+          {"y"       , hdf_t<f16>{}},
+          {"z"       , hdf_t<f16>{}},
+          {"t"       , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
 HF::CompoundType create_waveform_type() {
   return {{"event_id" , hdf_t<u32>{}},
           {"sensor_id", hdf_t<u32>{}},
-          {"time"     , hdf_t<f32>{}}};
+          {"time"     , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(waveform_t, create_waveform_type)
 
@@ -49,9 +49,9 @@ HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
 HF::CompoundType create_sensor_xyz_type() {
   return {{"sensor_id", hdf_t<u32>{}},
-          {"x"        , hdf_t<f32>{}},
-          {"y"        , hdf_t<f32>{}},
-          {"z"        , hdf_t<f32>{}}};
+          {"x"        , hdf_t<f16>{}},
+          {"y"        , hdf_t<f16>{}},
+          {"z"        , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
 
@@ -59,18 +59,18 @@ HF::CompoundType create_q_t0_type() {
   return {{"event_id" , hdf_t<u32>{}},
           {"sensor_id", hdf_t<u32>{}},
           {"q"        , hdf_t<u32>{}},
-          {"t0"       , hdf_t<f32>{}}};
+          {"t0"       , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
 
 HF::CompoundType create_primary_vertex_type() {
   return {{"event_id", hdf_t<u32>{}},
-          { "x"      , hdf_t<f32>{}},
-          { "y"      , hdf_t<f32>{}},
-          { "z"      , hdf_t<f32>{}},
-          {"vx"      , hdf_t<f32>{}},
-          {"vy"      , hdf_t<f32>{}},
-          {"vz"      , hdf_t<f32>{}}};
+          { "x"      , hdf_t<f16>{}},
+          { "y"      , hdf_t<f16>{}},
+          { "z"      , hdf_t<f16>{}},
+          {"vx"      , hdf_t<f16>{}},
+          {"vy"      , hdf_t<f16>{}},
+          {"vz"      , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
 
@@ -113,12 +113,12 @@ void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   write("configuration", runinfo_index, data);
 }
 
-void hdf5_io::write_hit_info(u32 event_id, f32 x, f32 y, f32 z, f32 time) {
+void hdf5_io::write_hit_info(u32 event_id, f16 x, f16 y, f16 z, f16 time) {
   std::vector<hit_t> data{{event_id, x, y, z, time}};
   write("hits", hit_index, data);
 }
 
-void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, std::vector<f32> times) {
+void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, std::vector<f16> times) {
   std::vector<waveform_t> data;
   for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
   write("waveform", waveform_index, data);
@@ -129,19 +129,19 @@ void hdf5_io::write_total_charge(u32 event_id, u32 sensor_id, u32 charge) {
   write("total_charge", total_charge_index, data);
 }
 
-void hdf5_io::write_sensor_xyz(u32 sensor_id, f32 x, f32 y, f32 z) {
+void hdf5_io::write_sensor_xyz(u32 sensor_id, f16 x, f16 y, f16 z) {
   // TODO what are the performance implications of doing this one-by-one rather
   // than as a whole vector in one go?
   std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
   write("sensor_xyz", hit_index, data);
 }
 
-void hdf5_io::write_q_t0(u32 event_id, u32 sensor_id, u32 q, f32 t0) {
+void hdf5_io::write_q_t0(u32 event_id, u32 sensor_id, u32 q, f16 t0) {
   std::vector<q_t0_t> data{{event_id, sensor_id, q, t0}};
   write("q_t0", q_t0_index, data);
 }
 
-void hdf5_io::write_primary(u32 event_id, f32 x, f32 y, f32 z, f32 px, f32 py, f32 pz) {
+void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
   std::vector<primary_vertex_t> data{{event_id, x,y,z, px,py,pz}};
   write("primaries", primary_vertex_index, data);
 }

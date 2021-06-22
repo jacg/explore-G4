@@ -15,12 +15,19 @@
 using f32 = float;
 using u32 = uint32_t;
 
+// TODO: most of our data don't need 32 bit precision, so we could save a lot of
+// space in the tables we write, if only the C++/HDF5 interface could express
+// 16-bit numbers.
+using f16 = f32;
+using u16 = u32;
+
+
 struct hit_t {
   u32 event_id;
-  f32 x;
-  f32 y;
-  f32 z;
-  f32 t;
+  f16 x;
+  f16 y;
+  f16 z;
+  f16 t;
 };
 
 
@@ -36,17 +43,18 @@ public:
   void write(std::string const& dataset, size_t& index, T const& data);
 
   void write_run_info(const char* param_key, const char* param_value);
-  void write_hit_info    (u32 evt_id, f32 x, f32 y, f32 z, f32 t);
-  void write_primary     (u32 evt_id, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
-  void write_waveform    (u32 evt_id, u32 sensor_id, std::vector<f32> times);
+  void write_hit_info    (u32 evt_id, f16 x, f16 y, f16 z, f16 t);
+  void write_primary     (u32 evt_id, f16 x, f16 y, f16 z, f16 vx, f16 vy, f16 vz);
+  void write_waveform    (u32 evt_id, u32 sensor_id, std::vector<f16> times);
   void write_total_charge(u32 evt_id, u32 sensor_id, u32 charge);
-  void write_q_t0        (u32 evt_id, u32 sensor_id, u32 q, f32 t0);
-  void write_sensor_xyz              (u32 sensor_id, f32 x, f32 y, f32 z);
+  void write_q_t0        (u32 evt_id, u32 sensor_id, u32 q, f16 t0);
+  void write_sensor_xyz              (u32 sensor_id, f16 x, f16 y, f16 z);
   void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
 
   std::vector<hit_t> read_hit_info();
 
   static const unsigned CONFLEN = 300;
+  static const unsigned VOLCHRS =  12;
 
 private:
   void ensure_open_for_writing();
@@ -83,29 +91,29 @@ struct run_info_t {
 
 struct waveform_t {
   u32 event_id, sensor_id;
-  f32 time;
+  f16 time;
 };
 
 struct total_charge_t {
   u32 event_id, sensor_id;
-  u32 charge;
+  u32 charge; // u16 ?
 };
 
 struct sensor_xyz_t {
   u32 sensor_id;
-  f32 x, y, z;
+  f16 x, y, z;
 };
 
 struct q_t0_t {
   u32 event_id, sensor_id;
-  u32 q;
-  f32 t0;
+  u32 q; // u16 ?
+  f16 t0;
 };
 
 struct primary_vertex_t {
   u32 event_id;
-  f32  x,  y,  z;
-  f32 px, py, pz;
+  f16  x,  y,  z;
+  f16 px, py, pz;
 };
 
 #endif
