@@ -29,6 +29,9 @@
 
 using std::make_unique;
 using std::unique_ptr;
+using std::cout;
+using std::endl;
+using std::setw;
 
 // ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
@@ -246,9 +249,6 @@ int main(int argc, char** argv) {
   n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
     size_t event_id = current_event();
 
-    // std::cout << event_id << std::endl;
-    // std::cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << std::endl;
-
     for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
       // std::vector<double> t{};
@@ -362,55 +362,56 @@ int main(int argc, char** argv) {
   // ----- Identifying vertices in LXe ----------------------------------------------------
   auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
 
-#define DBG(stuff) std::cout << stuff << std::endl;
-
-  n4::stepping_action::action_t xxxstep = [&](auto step) {
+  n4::stepping_action::action_t get_vertex = [&](auto step) {
+    static size_t previous_event = 666;
+    static size_t header_last_printed = 666;
+    static bool track_1_printed_this_event = false;
     auto pst_pt = step -> GetPostStepPoint();
-    auto process = pst_pt -> GetProcessDefinedStep();
-    auto name = transp(process -> GetProcessName());
     auto track = step -> GetTrack();
     auto particle = track -> GetParticleDefinition();
     if (particle == G4Gamma::Definition()) {
+      auto id = track -> GetTrackID();
       auto pre_pt = step -> GetPreStepPoint();
       auto pre_proc = pre_pt -> GetProcessDefinedStep();
-      auto pre_name = transp(pre_proc ? pre_proc -> GetProcessName() : "  -  ");
-      if (!pre_proc) { DBG(' ') }
-      auto id = track -> GetTrackID();
+      auto event_id = current_event();
+      previous_event = event_id;
       auto parent = track -> GetParentID();
-      auto p = pst_pt -> GetPosition();
-      auto x = p.x(); auto y = p.y(); auto z = p.z();
-      auto r = sqrt(x*x + y*y);
+      auto pos = pst_pt -> GetPosition();
+      auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
       auto moved = step -> GetDeltaPosition().mag();
       auto dep_E = step -> GetTotalEnergyDeposit() / keV;
       auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
-      auto dynamic_particle = track -> GetDynamicParticle();
-      auto dyn_TE = dynamic_particle -> GetTotalEnergy() / keV;
-      auto dyn_KE = dynamic_particle -> GetKineticEnergy() / keV;
       auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
       auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
-      auto pst_TE = pst_pt -> GetTotalEnergy() / keV;
-      assert(pst_TE == pst_KE);
-      assert(dyn_TE == dyn_KE);
-      assert(dyn_TE == pst_TE);
-      auto event_id = current_event();
-      if (name == "---->") return;
+      auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+      if (process_name == "---->") return;
 
-      using std::setw;
-      std::cout << std::setprecision(1) << std::fixed;
-      DBG(setw(7) << event_id
-          << setw( 5) << parent << ' '
-          << setw( 5) << id
-          << setw( 6) << name
-          << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-          << setw(7) << moved << "   "
-          << setw(6) << pre_KE
-          << setw(6) << pst_KE
-          << setw(6) << dep_E
-          << setw(20) << volume_name << ' '
-          //<< particle -> GetParticleName()
-          );
+      if (event_id != header_last_printed) {
+        cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
+        cout << endl;
+        header_last_printed = event_id;
+        track_1_printed_this_event = false;
+      }
+
+      if (id == 1 && ! track_1_printed_this_event) {
+        track_1_printed_this_event = true;
+        cout << endl;
+      }
+
+      cout << std::setprecision(1) << std::fixed;
+      cout << setw(7) << event_id
+           << setw( 5) << parent << ' '
+           << setw( 5) << id
+           << setw( 6) << process_name
+           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
+           << setw(7) << moved << "   "
+           << setw(6) << pre_KE
+           << setw(6) << pst_KE
+           << setw(6) << dep_E
+           << setw(20) << volume_name << ' '
+           << endl;
       auto t = 666;
-      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, name[0], volume_name);
+      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_name[0], volume_name);
     }
   };
 
@@ -423,9 +424,10 @@ int main(int argc, char** argv) {
     auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
     auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
     std::cout << setw(7) << event_id
-              << setw(6) <<  x << setw(6) <<  y << setw(6) <<  z << " "
-              << setw(6) << px << setw(6) << py << setw(6) << pz << " "
-              << std::endl;
+              << " --------------------  "
+              << setw(6) <<  x << setw(6) <<  y << setw(6) <<  z << "     "
+              << setw(6) << px << setw(6) << py << setw(6) << pz
+              << "  -------------------------" << std::endl;
     writer -> write_primary(event_id, x,y,z, px,py,pz);
   };
   // ===== Mandatory G4 initializations ===================================================
@@ -443,7 +445,7 @@ int main(int argc, char** argv) {
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
     // -> set ((new n4::event_action) -> end(write_vertices))
     -> set ((new n4::event_action) -> begin(show_primary_generator))
-    -> set  (new n4::stepping_action{xxxstep})
+    -> set  (new n4::stepping_action{get_vertex})
   );
 
 
