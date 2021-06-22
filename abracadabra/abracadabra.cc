@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
       auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
 
       if (process_name == "---->") return;
-      auto t = 666;
+      auto t = pst_pt -> GetGlobalTime();
       writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_name[0], volume_name);
 
       if (!messenger.print) return;
