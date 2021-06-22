@@ -257,7 +257,6 @@ int main(int argc, char** argv) {
       std::copy_n(cbegin(ts), N, begin(tvec));
       writer -> write_waveform    (event_id, sensor_id, tvec);
       writer -> write_total_charge(event_id, sensor_id, ts.size());
-      //if (sensor_id) {writer -> write_q_t0(event_id, sensor_id, ts.size(), start);}
     }
     times.clear();
   };

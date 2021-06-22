@@ -12,7 +12,6 @@ hdf5_io::hdf5_io(std::string fname)
 , hit_index{0}
 , waveform_index{0}
 , total_charge_index{0}
-, q_t0_index{0}
 , primary_vertex_index{0}
 , vertex_index{0}
 {}
@@ -55,14 +54,6 @@ HF::CompoundType create_sensor_xyz_type() {
           {"z"        , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
-
-HF::CompoundType create_q_t0_type() {
-  return {{"event_id" , hdf_t<u32>{}},
-          {"sensor_id", hdf_t<u32>{}},
-          {"q"        , hdf_t<u32>{}},
-          {"t0"       , hdf_t<f16>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
 
 HF::CompoundType create_primary_vertex_type() {
   return {{"event_id", hdf_t<u32>{}}, {"x", hdf_t<f16>{}},  {"y", hdf_t<f16>{}}, {"z", hdf_t<f16>{}},
@@ -118,7 +109,6 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("waveform"     , dataspace, create_waveform_type()      , props);
   group.createDataSet("total_charge" , dataspace, create_total_charge_type()  , props);
   group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
-  group.createDataSet("q_t0"         , dataspace, create_q_t0_type()          , props);
   group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
   group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
 }
@@ -149,11 +139,6 @@ void hdf5_io::write_sensor_xyz(u32 sensor_id, f16 x, f16 y, f16 z) {
   // than as a whole vector in one go?
   std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
   write("sensor_xyz", hit_index, data);
-}
-
-void hdf5_io::write_q_t0(u32 event_id, u32 sensor_id, u32 q, f16 t0) {
-  std::vector<q_t0_t> data{{event_id, sensor_id, q, t0}};
-  write("q_t0", q_t0_index, data);
 }
 
 void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
