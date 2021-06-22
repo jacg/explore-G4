@@ -46,11 +46,12 @@ struct abracadabra_messenger {
     // TODO units, ranges etc.
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
-    messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
-    messenger -> DeclareProperty("detector"  , detector  ,  "Detector to be instantiated");
-    messenger -> DeclareProperty("phantom"   , phantom   ,  "Phantom to be used");
+    messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
+    messenger -> DeclareProperty("detector"  , detector  , "Detector to be instantiated");
+    messenger -> DeclareProperty("phantom"   , phantom   , "Phantom to be used");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
+    messenger -> DeclareProperty("print"     , print     , "Print live event information");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
@@ -64,6 +65,7 @@ struct abracadabra_messenger {
   G4String phantom    = "nema_7";
   bool     spin       = true;
   G4int    spin_speed = 10;
+  bool     print      = false;
   G4double xenon_thickness =  40 * mm;
   G4double cylinder_length =  15 * mm;
   G4double cylinder_radius = 200 * mm;
@@ -372,7 +374,6 @@ int main(int argc, char** argv) {
     if (particle == G4Gamma::Definition()) {
       auto id = track -> GetTrackID();
       auto pre_pt = step -> GetPreStepPoint();
-      auto pre_proc = pre_pt -> GetProcessDefinedStep();
       auto event_id = current_event();
       previous_event = event_id;
       auto parent = track -> GetParentID();
@@ -384,7 +385,12 @@ int main(int argc, char** argv) {
       auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
       auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
       auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+
       if (process_name == "---->") return;
+      auto t = 666;
+      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_name[0], volume_name);
+
+      if (!messenger.print) return;
 
       if (event_id != header_last_printed) {
         cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
@@ -399,10 +405,10 @@ int main(int argc, char** argv) {
       }
 
       cout << std::setprecision(1) << std::fixed;
-      cout << setw(7) << event_id
-           << setw( 5) << parent << ' '
-           << setw( 5) << id
-           << setw( 6) << process_name
+      cout << setw(9) << event_id
+           << setw(5) << parent << ' '
+           << setw(5) << id
+           << setw(6) << process_name
            << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
            << setw(7) << moved << "   "
            << setw(6) << pre_KE
@@ -410,8 +416,6 @@ int main(int argc, char** argv) {
            << setw(6) << dep_E
            << setw(20) << volume_name << ' '
            << endl;
-      auto t = 666;
-      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_name[0], volume_name);
     }
   };
 
@@ -423,12 +427,14 @@ int main(int argc, char** argv) {
     auto mom = vertex -> GetPrimary() -> GetMomentum();
     auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
     auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
-    std::cout << setw(7) << event_id
-              << " --------------------  "
-              << setw(6) <<  x << setw(6) <<  y << setw(6) <<  z << "     "
-              << setw(6) << px << setw(6) << py << setw(6) << pz
-              << "  -------------------------" << std::endl;
     writer -> write_primary(event_id, x,y,z, px,py,pz);
+    cout << std::setprecision(1) << std::fixed;
+    cout << setw(9) << event_id;
+    if (!messenger.print) { cout << endl; return; }
+    cout << " -----------------  "
+         << setw(7) <<  x << setw(7) <<  y << setw(7) <<  z << "     "
+         << setw(7) << px << setw(7) << py << setw(7) << pz
+         << "  ----------------------" << std::endl;
   };
   // ===== Mandatory G4 initializations ===================================================
 
