@@ -192,6 +192,7 @@ auto combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVolume* detector)
 int main(int argc, char** argv) {
 
   abracadabra_messenger messenger;
+  auto current_event = [&]() { return n4::event_number() + messenger.offset; };
 
   // ----- collecting arrival times of optical photons in sensors ----------------------------
   std::map<size_t, times_set> times;
@@ -240,10 +241,12 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn write_hits = [&times, &writer, &messenger](auto) {
-    size_t event_id = n4::event_number() + messenger.offset;
-    std::cout << event_id << std::endl;
-    std::cout << " parent  id            x    y    z     r            moved     pre-KE   post-KE   deposited" << std::endl;
+  n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
+    size_t event_id = current_event();
+
+    // std::cout << event_id << std::endl;
+    // std::cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << std::endl;
+
     for (auto& [sensor_id, ts] : times) {
       auto start = *cbegin(ts);
       // std::vector<double> t{};
@@ -357,8 +360,6 @@ int main(int argc, char** argv) {
 
 #define DBG(stuff) std::cout << stuff << std::endl;
 
-  bool lxe1 = false, lxe2 = false;
-
   n4::stepping_action::action_t xxxstep = [&](auto step) {
     auto pst_pt = step -> GetPostStepPoint();
     auto process = pst_pt -> GetProcessDefinedStep();
@@ -387,38 +388,37 @@ int main(int argc, char** argv) {
       assert(pst_TE == pst_KE);
       assert(dyn_TE == dyn_KE);
       assert(dyn_TE == pst_TE);
-      auto ratio = (pst_KE - pre_KE) / dep_E;
       using std::setw;
 
-#define RATIO(pre, post, dep) \
-      << '('                  \
-      << setw(7) << pre       \
-      << " - "                \
-      << setw(7) << post      \
-      << ") / "               \
-      << setw(7) << dep       \
-      << " = "                \
-      << setw(7) << (pre - post) / dep << " "
-
-
-      DBG(setw( 5) << parent << ' '
+      if (name == "---->") return;
+      std::cout << std::setprecision(1) << std::fixed;
+      DBG(setw(7) << current_event()
+          << setw( 5) << parent << ' '
           << setw( 5) << id
-          //<< setw( 6) << pre_name
           << setw( 6) << name
           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-          << setw(14) << dist << "   "
-          // << setw( 7) << dep_E << " / "
-          // << setw( 7) << dyn_TE << "  "
-          // << setw( 7) << dyn_KE << "  "
-          // << setw( 7) << ratio << "  "
-          RATIO(pre_KE, pst_KE, dep_E)
+          << setw(7) << dist << "   "
+          << setw(6) << pre_KE
+          << setw(6) << pst_KE
+          << setw(6) << dep_E
           << setw(20) << volume_name << ' '
           //<< particle -> GetParticleName()
           );
     }
   };
 
-
+  n4::event_action::action_t show_primary_generator = [&](auto event) {
+    using std::setw;
+    auto vertex = event -> GetPrimaryVertex();
+    auto pos = vertex -> GetPosition();
+    auto mom = vertex -> GetPrimary() -> GetMomentum();
+    auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
+    auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
+    std::cout << setw(7) << current_event()
+              << setw(6) <<  x << setw(6) <<  y << setw(6) <<  z << " "
+              << setw(6) << px << setw(6) << py << setw(6) << pz << " "
+              << std::endl;
+  };
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -433,7 +433,8 @@ int main(int argc, char** argv) {
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
     // -> set ((new n4::event_action) -> end(write_vertices))
-    -> set(new n4::stepping_action{xxxstep})
+    -> set ((new n4::event_action) -> begin(show_primary_generator))
+    -> set  (new n4::stepping_action{xxxstep})
   );
 
 
