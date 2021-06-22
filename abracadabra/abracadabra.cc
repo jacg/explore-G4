@@ -249,17 +249,15 @@ int main(int argc, char** argv) {
   };
 
   n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
+    const size_t times_per_sensor_to_keep = 100;
     size_t event_id = current_event();
-
     for (auto& [sensor_id, ts] : times) {
-      auto start = *cbegin(ts);
-      // std::vector<double> t{};
-      // TODO reserve space once good size is known from statistics
-      // std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
-      //              [start](auto t) { return t < start + 100 * ps; });
-      // writer -> write_waveform(event_id, sensor_id, t);
-      // writer -> write_total_charge(event_id, sensor_id, ts.size());
-      if (sensor_id) {writer -> write_q_t0(event_id, sensor_id, ts.size(), start);}
+      const size_t N = std::min(times_per_sensor_to_keep, ts.size());
+      std::vector<float> tvec(N);
+      std::copy_n(cbegin(ts), N, begin(tvec));
+      writer -> write_waveform    (event_id, sensor_id, tvec);
+      writer -> write_total_charge(event_id, sensor_id, ts.size());
+      //if (sensor_id) {writer -> write_q_t0(event_id, sensor_id, ts.size(), start);}
     }
     times.clear();
   };
