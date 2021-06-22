@@ -57,6 +57,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
     messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
+    messenger -> DeclareProperty("waveform-length", waveform_length, "Maximum number of entries in waveform");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -71,6 +72,7 @@ struct abracadabra_messenger {
   G4double cylinder_radius = 200 * mm;
   unsigned imas_version = 1;
   bool vac_pre_lxe = false;
+  size_t waveform_length = 10;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -249,10 +251,9 @@ int main(int argc, char** argv) {
   };
 
   n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
-    const size_t times_per_sensor_to_keep = 100;
     size_t event_id = current_event();
     for (auto& [sensor_id, ts] : times) {
-      const size_t N = std::min(times_per_sensor_to_keep, ts.size());
+      const size_t N = std::min(messenger.waveform_length, ts.size());
       std::vector<float> tvec(N);
       std::copy_n(cbegin(ts), N, begin(tvec));
       writer -> write_waveform    (event_id, sensor_id, tvec);

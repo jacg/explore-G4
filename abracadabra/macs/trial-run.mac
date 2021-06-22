@@ -12,5 +12,6 @@
 /tracking/verbose 0
 
 #/abracadabra/print true
+#/abracadabra/waveform-length 10
 
 /run/beamOn 50
