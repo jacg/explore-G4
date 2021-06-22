@@ -21,7 +21,6 @@ using u32 = uint32_t;
 using f16 = f32;
 using u16 = u32;
 
-
 struct hit_t {
   u32 event_id;
   f16 x;
@@ -49,7 +48,15 @@ public:
   void write_total_charge(u32 evt_id, u32 sensor_id, u32 charge);
   void write_q_t0        (u32 evt_id, u32 sensor_id, u32 q, f16 t0);
   void write_sensor_xyz              (u32 sensor_id, f16 x, f16 y, f16 z);
-  void flush() { if (open_for_writing) { open_for_writing -> flush(); } }
+  void write_vertex(u32 evt_id, u32 track_id, u32 parent_id,
+                    f16 x, f16 y, f16 z, f16 t,
+                    f16 moved,
+                    f16 pre_KE, f16 post_KE, f16 deposited,
+                    char process,
+                    std::string& volume);
+  void flush() {
+    if (open_for_writing) { open_for_writing->flush(); }
+  }
 
   std::vector<hit_t> read_hit_info();
 
@@ -66,6 +73,7 @@ private:
   size_t total_charge_index;
   size_t q_t0_index;
   size_t primary_vertex_index;
+  size_t vertex_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
@@ -114,6 +122,16 @@ struct primary_vertex_t {
   u32 event_id;
   f16  x,  y,  z;
   f16 px, py, pz;
+};
+
+struct vertex_t {
+  u32 event_id;
+  u32 track_id, parent_id;
+  f16 x,y,z,t;
+  f16 moved;
+  f16 pre_KE, post_KE, deposited;
+  char process;
+  //char volume[hdf5_io::VOLCHRS];
 };
 
 #endif

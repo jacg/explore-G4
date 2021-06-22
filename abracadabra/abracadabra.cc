@@ -378,9 +378,9 @@ int main(int argc, char** argv) {
       auto id = track -> GetTrackID();
       auto parent = track -> GetParentID();
       auto p = pst_pt -> GetPosition();
-      auto x = p.getX(); auto y = p.getY(); auto z = p.getZ();
+      auto x = p.x(); auto y = p.y(); auto z = p.z();
       auto r = sqrt(x*x + y*y);
-      auto dist = step -> GetDeltaPosition().mag();
+      auto moved = step -> GetDeltaPosition().mag();
       auto dep_E = step -> GetTotalEnergyDeposit() / keV;
       auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
       auto dynamic_particle = track -> GetDynamicParticle();
@@ -392,22 +392,25 @@ int main(int argc, char** argv) {
       assert(pst_TE == pst_KE);
       assert(dyn_TE == dyn_KE);
       assert(dyn_TE == pst_TE);
-      using std::setw;
-
+      auto event_id = current_event();
       if (name == "---->") return;
+
+      using std::setw;
       std::cout << std::setprecision(1) << std::fixed;
-      DBG(setw(7) << current_event()
+      DBG(setw(7) << event_id
           << setw( 5) << parent << ' '
           << setw( 5) << id
           << setw( 6) << name
           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-          << setw(7) << dist << "   "
+          << setw(7) << moved << "   "
           << setw(6) << pre_KE
           << setw(6) << pst_KE
           << setw(6) << dep_E
           << setw(20) << volume_name << ' '
           //<< particle -> GetParticleName()
           );
+      auto t = 666;
+      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, name[0], volume_name);
     }
   };
 

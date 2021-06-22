@@ -14,6 +14,7 @@ hdf5_io::hdf5_io(std::string fname)
 , total_charge_index{0}
 , q_t0_index{0}
 , primary_vertex_index{0}
+, vertex_index{0}
 {}
 
 template<class T> using hdf_t = HF::AtomicType<T>;
@@ -64,15 +65,29 @@ HF::CompoundType create_q_t0_type() {
 HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
 
 HF::CompoundType create_primary_vertex_type() {
-  return {{"event_id", hdf_t<u32>{}},
-          { "x"      , hdf_t<f16>{}},
-          { "y"      , hdf_t<f16>{}},
-          { "z"      , hdf_t<f16>{}},
-          {"vx"      , hdf_t<f16>{}},
-          {"vy"      , hdf_t<f16>{}},
-          {"vz"      , hdf_t<f16>{}}};
+  return {{"event_id", hdf_t<u32>{}}, {"x", hdf_t<f16>{}},  {"y", hdf_t<f16>{}}, {"z", hdf_t<f16>{}},
+          {"vx", hdf_t<f16>{}},       {"vy", hdf_t<f16>{}}, {"vz", hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
+
+// clang-format off
+HF::CompoundType create_vertex_type() {
+  return {{ "event_id", hdf_t<u32>{}},
+          { "track_id", hdf_t<u32>{}},
+          {"parent_id", hdf_t<u32>{}},
+          {"x"        , hdf_t<f16>{}},
+          {"y"        , hdf_t<f16>{}},
+          {"z"        , hdf_t<f16>{}},
+          {"t"        , hdf_t<f16>{}},
+          {"moved"    , hdf_t<f16>{}},
+          {"pre_KE"   , hdf_t<f16>{}},
+          {"post_KE"  , hdf_t<f16>{}},
+          {"deposited", hdf_t<f16>{}},
+          {"process"  , hdf_t<char>{}},
+          //{"volume"   , hdf_t<char[hdf5_io::VOLCHRS]>{}}
+  };
+}
+HIGHFIVE_REGISTER_TYPE(vertex_t, create_vertex_type)
 
 void set_string_param(char * to, const char * from, u32 max_len) {
   memset(to, 0, max_len);
@@ -105,8 +120,8 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
   group.createDataSet("q_t0"         , dataspace, create_q_t0_type()          , props);
   group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
+  group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
 }
-
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};
@@ -142,8 +157,25 @@ void hdf5_io::write_q_t0(u32 event_id, u32 sensor_id, u32 q, f16 t0) {
 }
 
 void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
-  std::vector<primary_vertex_t> data{{event_id, x,y,z, px,py,pz}};
+  std::vector<primary_vertex_t> data{{event_id, x, y, z, px, py, pz}};
   write("primaries", primary_vertex_index, data);
+}
+
+void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
+                           f16 x, f16 y, f16 z, f16 t,
+                           f16 moved,
+                           f16 pre_KE, f16 post_KE, f16 deposited,
+                           char process,
+                           std::string& volume) {
+  std::vector<vertex_t> data{
+    {event_id, track_id, parent_id,
+     x,y,z,t,
+     moved,
+     pre_KE, post_KE, deposited,
+     process,
+     //volume
+    }};
+  write("vertices", vertex_index, data);
 }
 
 std::vector<hit_t> hdf5_io::read_hit_info() {
