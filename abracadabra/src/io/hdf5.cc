@@ -97,22 +97,6 @@ void hdf5_io::ensure_open_for_writing() {
   // TODO                                                                              Why truncate?
   open_for_writing = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
 
-  std::vector<std::string> string_list{
-    "Once upon a time",
-    "there were three little bears",
-    "and they lived happily ever after",
-    "THE END"
-  };
-
-  // create a dataset ready to contains strings of the size of the vector
-  // string_list
-  HF::DataSet dataset = open_for_writing -> createDataSet<std::string>("story", HF::DataSpace::From(string_list));
-
-  // let's write our vector of  string
-  dataset.write(string_list);
-
-
-
   HF::Group group = open_for_writing->createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
@@ -128,6 +112,19 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
   group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
   group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
+
+  std::vector<std::string> some_strings{
+    "Once upon a time",
+    "there were three little bears",
+    "and they lived happily ever after",
+    "THE END"
+  };
+
+  // create a dataset ready to contains strings of the size of the vector some_strings
+  HF::DataSet dataset = group.createDataSet<std::string>("story", HF::DataSpace::From(some_strings));
+
+  // Write vector of strings
+  dataset.write(some_strings);
 }
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
