@@ -53,6 +53,9 @@ public:
                     f16 pre_KE, f16 post_KE, f16 deposited,
                     char process,
                     std::string& volume);
+
+  void write_strings(const std::string& dataset_name, const std::vector<std::string>& data);
+
   void flush() {
     if (open_for_writing) { open_for_writing->flush(); }
   }

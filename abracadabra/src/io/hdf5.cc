@@ -112,20 +112,16 @@ void hdf5_io::ensure_open_for_writing() {
   group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
   group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
   group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
-
-  std::vector<std::string> some_strings{
-    "Once upon a time",
-    "there were three little bears",
-    "and they lived happily ever after",
-    "THE END"
-  };
-
-  // create a dataset ready to contains strings of the size of the vector some_strings
-  HF::DataSet dataset = group.createDataSet<std::string>("story", HF::DataSpace::From(some_strings));
-
-  // Write vector of strings
-  dataset.write(some_strings);
 }
+
+void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
+  ensure_open_for_writing();
+  HF::Group group = open_for_writing -> getGroup("MC");
+  // create a dataset adapted to the size of `data`
+  HF::DataSet dataset = group.createDataSet<std::string>(dataset_name, HF::DataSpace::From(data));
+  dataset.write(data);
+}
+
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};

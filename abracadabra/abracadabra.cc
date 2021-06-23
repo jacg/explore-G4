@@ -221,6 +221,12 @@ int main(int argc, char** argv) {
   // ----- Extract sensor positions from geometry and write to hdf5 --------------------------
   auto write_sensor_database = [&writer, &open_writer](auto geometry) {
     open_writer();
+    std::vector<std::string> test_strings{
+      "Here is a bunch of stirings.",
+      "We'll write them out to an HDF5 table.",
+      "They'll go in the MC group."
+    };
+    writer -> write_strings("some_strings", test_strings);
     for(auto* vol: geometry) {
        auto name = vol -> GetName();
       if (name.rfind("Hamamatsu_Blue", 0) == 0) { // starts with
