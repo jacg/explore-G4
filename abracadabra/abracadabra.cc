@@ -40,6 +40,41 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 #include <set>
 using times_set = std::multiset<double>;
 
+// NB: I can't help feeling that we're reinventing a wheel that HDF5 should
+// already be implementing for us, but I haven't managed to find it in the
+// documentation:
+
+// Some of our HDF5 tables need to store strings whose values repeat many times.
+// For example, we expect only 3 different processes at our LXe vertices (Rayl,
+// compt, phot), but they will be stored *many* times. Similarly, the name of
+// the volume in which a step terminates, can take on a limited number of
+// values, but will be recorded in each vertex. Rather storing a copy each time,
+// it's much more memory-efficient to store each name once, along with a unique
+// identifier int, and store that int instead of the string itself. For this we
+// need a utility which can tell us the id of any such string, creating new ids
+// on the fly, for values we haven't seen before, and retrieving the already
+// assigned ids of values that we have seen before.
+template<class T>
+class id_store {
+public:
+  id_store(const std::initializer_list<T>& data) { for (auto& item : data) { id(item); } }
+  size_t id(const T& item) {
+    auto found = ids.find(item);
+    if (found != ids.end()) { // Known item: return its id
+      return found->second;
+    } else { // New item: insert into store and return new id
+      auto this_id = items.size();
+      ids.insert({item, this_id});
+      items.push_back(item);
+      return this_id;
+    }
+  }
+  const std::vector<T>& items_ordered_by_id() const { return items; }
+private:
+  std::map<T, size_t> ids;
+  std::vector<T> items;
+};
+
 // ----- Choices which can be made in configuration files -----------------------------------
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
@@ -221,12 +256,6 @@ int main(int argc, char** argv) {
   // ----- Extract sensor positions from geometry and write to hdf5 --------------------------
   auto write_sensor_database = [&writer, &open_writer](auto geometry) {
     open_writer();
-    std::vector<std::string> test_strings{
-      "Here is a bunch of stirings.",
-      "We'll write them out to an HDF5 table.",
-      "They'll go in the MC group."
-    };
-    writer -> write_strings("some_strings", test_strings);
     for(auto* vol: geometry) {
        auto name = vol -> GetName();
       if (name.rfind("Hamamatsu_Blue", 0) == 0) { // starts with
@@ -368,6 +397,9 @@ int main(int argc, char** argv) {
   // ----- Identifying vertices in LXe ----------------------------------------------------
   auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
 
+  id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
+  id_store<std::string>  volume_names{};
+
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;
     static size_t header_last_printed = 666;
@@ -392,7 +424,9 @@ int main(int argc, char** argv) {
 
       if (process_name == "---->") return;
       auto t = pst_pt -> GetGlobalTime();
-      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_name[0], volume_name);
+      auto process_id = process_names.id(process_name);
+      auto  volume_id =  volume_names.id( volume_name);
+      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
 
       if (!messenger.print) return;
 
@@ -440,6 +474,12 @@ int main(int argc, char** argv) {
          << setw(7) << px << setw(7) << py << setw(7) << pz
          << "  ----------------------" << std::endl;
   };
+
+  n4::run_action::action_t write_string_tables = [&](auto) {
+    writer -> write_strings("process_names", process_names.items_ordered_by_id());
+    writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -455,6 +495,7 @@ int main(int argc, char** argv) {
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
     -> set ((new n4::event_action) -> begin(write_primary_generator))
     -> set  (new n4::stepping_action{write_vertex})
+    -> set ((new n4::run_action) -> end(write_string_tables))
   );
 
 

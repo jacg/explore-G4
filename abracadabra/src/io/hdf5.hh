@@ -51,8 +51,7 @@ public:
                     f16 x, f16 y, f16 z, f16 t,
                     f16 moved,
                     f16 pre_KE, f16 post_KE, f16 deposited,
-                    char process,
-                    std::string& volume);
+                    u32 process_id, u32 volume_id);
 
   void write_strings(const std::string& dataset_name, const std::vector<std::string>& data);
 
@@ -63,7 +62,6 @@ public:
   std::vector<hit_t> read_hit_info();
 
   static const unsigned CONFLEN = 300;
-  static const unsigned VOLCHRS =  12;
 
 private:
   void ensure_open_for_writing();
@@ -125,8 +123,7 @@ struct vertex_t {
   f16 x,y,z,t;
   f16 moved;
   f16 pre_KE, post_KE, deposited;
-  char process;
-  //char volume[hdf5_io::VOLCHRS];
+  u32 process_id, volume_id;
 };
 
 #endif
