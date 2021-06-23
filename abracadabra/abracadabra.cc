@@ -362,7 +362,7 @@ int main(int argc, char** argv) {
   // ----- Identifying vertices in LXe ----------------------------------------------------
   auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
 
-  n4::stepping_action::action_t get_vertex = [&](auto step) {
+  n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
@@ -417,7 +417,7 @@ int main(int argc, char** argv) {
     }
   };
 
-  n4::event_action::action_t show_primary_generator = [&](auto event) {
+  n4::event_action::action_t write_primary_generator = [&](auto event) {
     using std::setw;
     auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
@@ -447,9 +447,8 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
-    // -> set ((new n4::event_action) -> end(write_vertices))
-    -> set ((new n4::event_action) -> begin(show_primary_generator))
-    -> set  (new n4::stepping_action{get_vertex})
+    -> set ((new n4::event_action) -> begin(write_primary_generator))
+    -> set  (new n4::stepping_action{write_vertex})
   );
 
 
