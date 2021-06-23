@@ -96,6 +96,23 @@ void hdf5_io::ensure_open_for_writing() {
   if (open_for_writing) { return; }
   // TODO                                                                              Why truncate?
   open_for_writing = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+
+  std::vector<std::string> string_list{
+    "Once upon a time",
+    "there were three little bears",
+    "and they lived happily ever after",
+    "THE END"
+  };
+
+  // create a dataset ready to contains strings of the size of the vector
+  // string_list
+  HF::DataSet dataset = open_for_writing -> createDataSet<std::string>("story", HF::DataSpace::From(string_list));
+
+  // let's write our vector of  string
+  dataset.write(string_list);
+
+
+
   HF::Group group = open_for_writing->createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
