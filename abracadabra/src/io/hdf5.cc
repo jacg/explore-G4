@@ -56,8 +56,14 @@ HF::CompoundType create_sensor_xyz_type() {
 HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
 
 HF::CompoundType create_primary_vertex_type() {
-  return {{"event_id", hdf_t<u32>{}}, {"x", hdf_t<f16>{}},  {"y", hdf_t<f16>{}}, {"z", hdf_t<f16>{}},
-          {"vx", hdf_t<f16>{}},       {"vy", hdf_t<f16>{}}, {"vz", hdf_t<f16>{}}};
+  return {{"event_id", hdf_t<u32>{}},
+          {"x"       , hdf_t<f16>{}},
+          {"y"       , hdf_t<f16>{}},
+          {"z"       , hdf_t<f16>{}},
+          {"vx"      , hdf_t<f16>{}},
+          {"vy"      , hdf_t<f16>{}},
+          {"vz"      , hdf_t<f16>{}},
+  };
 }
 HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
 
