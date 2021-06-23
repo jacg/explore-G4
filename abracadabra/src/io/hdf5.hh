@@ -44,7 +44,7 @@ public:
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info    (u32 evt_id, f16 x, f16 y, f16 z, f16 t);
   void write_primary     (u32 evt_id, f16 x, f16 y, f16 z, f16 vx, f16 vy, f16 vz);
-  void write_waveform    (u32 evt_id, u32 sensor_id, std::vector<f16> times);
+  void write_waveform    (u32 evt_id, u32 sensor_id, const std::vector<f16>& times);
   void write_total_charge(u32 evt_id, u32 sensor_id, u32 charge);
   void write_sensor_xyz              (u32 sensor_id, f16 x, f16 y, f16 z);
   void write_vertex(u32 evt_id, u32 track_id, u32 parent_id,

@@ -139,7 +139,7 @@ void hdf5_io::write_hit_info(u32 event_id, f16 x, f16 y, f16 z, f16 time) {
   write("hits", hit_index, data);
 }
 
-void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, std::vector<f16> times) {
+void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, const std::vector<f16>& times) {
   std::vector<waveform_t> data;
   for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
   write("waveform", waveform_index, data);
