@@ -398,7 +398,10 @@ int main(int argc, char** argv) {
   auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
 
   id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
-  id_store<std::string>  volume_names{};
+  id_store<std::string>  volume_names{
+    {"LXe", // Ensure that LXe has id 0: the rest in inside-out order
+     "Cavity", "Inner_casing", "Inner_vacuum", "Inner_steel", "Quartz",
+     "Outer_vacuum", "Outer_casing"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;
