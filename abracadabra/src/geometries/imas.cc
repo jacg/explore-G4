@@ -25,8 +25,8 @@ using nain4::volume;
 using std::make_tuple;
 using std::optional;
 
-G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, unsigned version) {
-
+G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, unsigned version,
+                                 bool vacuum_before_xenon) {
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
@@ -34,14 +34,21 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   auto quartz  = material("G4_WATER");    // TODO
   auto LXe     = LXe_with_properties();
 
+  // For trials where we want a cleaner signal in the Xenon
+  if (vacuum_before_xenon) {
+    steel = vacuum;
+    air   = vacuum;
+  }
+
   // ----- Utility for wrapping smaller cylinder inside a larger one --------------
   G4LogicalVolume* outer_layer = nullptr;
   auto radius = 0.0;
-  auto layer = [&radius, &outer_layer, length](auto& name, auto material, auto dr) {
+  auto layer = [=, &radius, &outer_layer](auto& name, auto material, auto dr) {
+    if (name == "Quartz" && version == 1) { return; } // Skip quartz layer in version 1
     radius += dr;
     auto vol = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
     if (outer_layer) { place(outer_layer).in(vol).now(); }
-    return outer_layer = vol;
+    outer_layer = vol;
   };
 
   // ----- Build geometry by adding concentric cylinders of increasing radius -----

@@ -10,4 +10,5 @@
 /abracadabra/imas_version 1
 /abracadabra/cylinder_length 150
 
+#/abracadabra/clear-pre-lxe true
 #/abracadabra/xenon_thickness 50

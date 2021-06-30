@@ -12,56 +12,81 @@ hdf5_io::hdf5_io(std::string fname)
 , hit_index{0}
 , waveform_index{0}
 , total_charge_index{0}
-, q_t0_index{0} {}
+, primary_vertex_index{0}
+, vertex_index{0}
+{}
 
+template<class T> using hdf_t = HF::AtomicType<T>;
 
 HF::CompoundType create_hit_type() {
-  return {{"event_id", HF::AtomicType<unsigned int>{}},
-          {"x", HF::AtomicType<double>{}},
-          {"y", HF::AtomicType<double>{}},
-          {"z", HF::AtomicType<double>{}},
-          {"t", HF::AtomicType<double>{}}};
+  return {{"event_id", hdf_t<u32>{}},
+          {"x"       , hdf_t<f16>{}},
+          {"y"       , hdf_t<f16>{}},
+          {"z"       , hdf_t<f16>{}},
+          {"t"       , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
 
 HF::CompoundType create_waveform_type() {
-  return {{"event_id", HF::AtomicType<unsigned int>{}},
-          {"sensor_id", HF::AtomicType<unsigned int>{}},
-          {"time", HF::AtomicType<double>{}}};
+  return {{"event_id" , hdf_t<u32>{}},
+          {"sensor_id", hdf_t<u32>{}},
+          {"time"     , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(waveform_t, create_waveform_type)
 
 HF::CompoundType create_total_charge_type() {
-  return {{"event_id", HF::AtomicType<unsigned int>{}},
-          {"sensor_id", HF::AtomicType<unsigned int>{}},
-          {"charge", HF::AtomicType<size_t>{}}};
+  return {{"event_id" , hdf_t<u32>{}},
+          {"sensor_id", hdf_t<u32>{}},
+          {"charge"   , hdf_t<u32>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(total_charge_t, create_total_charge_type)
 
-
 HF::CompoundType create_runinfo_type() {
-  return {{"param_key"  , HF::AtomicType<char[hdf5_io::CONFLEN]>{}},
-          {"param_value", HF::AtomicType<char[hdf5_io::CONFLEN]>{}}};
+  return {{"param_key"  , hdf_t<char[hdf5_io::CONFLEN]>{}},
+          {"param_value", hdf_t<char[hdf5_io::CONFLEN]>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
 HF::CompoundType create_sensor_xyz_type() {
-  return {{"sensor_id"  , HF::AtomicType<unsigned int>{}},
-          {"x", HF::AtomicType<double>{}},
-          {"y", HF::AtomicType<double>{}},
-          {"z", HF::AtomicType<double>{}}};
+  return {{"sensor_id", hdf_t<u32>{}},
+          {"x"        , hdf_t<f16>{}},
+          {"y"        , hdf_t<f16>{}},
+          {"z"        , hdf_t<f16>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
 
-HF::CompoundType create_q_t0_type() {
-  return {{"event_id" , HF::AtomicType<unsigned>{}},
-          {"sensor_id", HF::AtomicType<unsigned>{}},
-          {"q"        , HF::AtomicType<unsigned>{}},
-          {"t0"       , HF::AtomicType<double>{}}};
+HF::CompoundType create_primary_vertex_type() {
+  return {{"event_id", hdf_t<u32>{}},
+          {"x"       , hdf_t<f16>{}},
+          {"y"       , hdf_t<f16>{}},
+          {"z"       , hdf_t<f16>{}},
+          {"vx"      , hdf_t<f16>{}},
+          {"vy"      , hdf_t<f16>{}},
+          {"vz"      , hdf_t<f16>{}},
+  };
 }
-HIGHFIVE_REGISTER_TYPE(q_t0_t, create_q_t0_type)
+HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
 
-void set_string_param(char * to, const char * from, unsigned int max_len) {
+// clang-format off
+HF::CompoundType create_vertex_type() {
+  return {{ "event_id" , hdf_t<u32>{}},
+          { "track_id" , hdf_t<u32>{}},
+          {"parent_id" , hdf_t<u32>{}},
+          {"x"         , hdf_t<f16>{}},
+          {"y"         , hdf_t<f16>{}},
+          {"z"         , hdf_t<f16>{}},
+          {"t"         , hdf_t<f16>{}},
+          {"moved"     , hdf_t<f16>{}},
+          {"pre_KE"    , hdf_t<f16>{}},
+          {"post_KE"   , hdf_t<f16>{}},
+          {"deposited" , hdf_t<f16>{}},
+          {"process_id", hdf_t<u32>{}},
+          { "volume_id", hdf_t<u32>{}},
+  };
+}
+HIGHFIVE_REGISTER_TYPE(vertex_t, create_vertex_type)
+
+void set_string_param(char * to, const char * from, u32 max_len) {
   memset(to, 0, max_len);
   strcpy(to, from);
 }
@@ -77,6 +102,7 @@ void hdf5_io::ensure_open_for_writing() {
   if (open_for_writing) { return; }
   // TODO                                                                              Why truncate?
   open_for_writing = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+
   HF::Group group = open_for_writing->createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
@@ -85,12 +111,21 @@ void hdf5_io::ensure_open_for_writing() {
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  group.createDataSet("hits"         , dataspace, create_hit_type()     , props);
-  group.createDataSet("configuration", dataspace, create_runinfo_type() , props);
-  group.createDataSet("waveform"     , dataspace, create_waveform_type(), props);
-  group.createDataSet("total_charge" , dataspace, create_total_charge_type(), props);
-  group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type(), props);
-  group.createDataSet("q_t0"         , dataspace, create_q_t0_type()     , props);
+  group.createDataSet("hits"         , dataspace, create_hit_type()           , props);
+  group.createDataSet("configuration", dataspace, create_runinfo_type()       , props);
+  group.createDataSet("waveform"     , dataspace, create_waveform_type()      , props);
+  group.createDataSet("total_charge" , dataspace, create_total_charge_type()  , props);
+  group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
+  group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
+  group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
+}
+
+void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
+  ensure_open_for_writing();
+  HF::Group group = open_for_writing -> getGroup("MC");
+  // create a dataset adapted to the size of `data`
+  HF::DataSet dataset = group.createDataSet<std::string>(dataset_name, HF::DataSpace::From(data));
+  dataset.write(data);
 }
 
 
@@ -99,32 +134,47 @@ void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   write("configuration", runinfo_index, data);
 }
 
-void hdf5_io::write_hit_info(unsigned int event_id, double x, double y, double z, double time) {
+void hdf5_io::write_hit_info(u32 event_id, f16 x, f16 y, f16 z, f16 time) {
   std::vector<hit_t> data{{event_id, x, y, z, time}};
   write("hits", hit_index, data);
 }
 
-void hdf5_io::write_waveform(unsigned int event_id, unsigned int sensor_id, std::vector<double> times) {
+void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, const std::vector<f16>& times) {
   std::vector<waveform_t> data;
   for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
   write("waveform", waveform_index, data);
 }
 
-void hdf5_io::write_total_charge(unsigned int event_id, unsigned int sensor_id, size_t charge) {
+void hdf5_io::write_total_charge(u32 event_id, u32 sensor_id, u32 charge) {
   std::vector<total_charge_t> data{{event_id, sensor_id, charge}};
   write("total_charge", total_charge_index, data);
 }
 
-void hdf5_io::write_sensor_xyz(unsigned int sensor_id, double x, double y, double z) {
+void hdf5_io::write_sensor_xyz(u32 sensor_id, f16 x, f16 y, f16 z) {
   // TODO what are the performance implications of doing this one-by-one rather
   // than as a whole vector in one go?
   std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
   write("sensor_xyz", hit_index, data);
 }
 
-void hdf5_io::write_q_t0(unsigned event_id, unsigned sensor_id, unsigned q, double t0) {
-  std::vector<q_t0_t> data{{event_id, sensor_id, q, t0}};
-  write("q_t0", q_t0_index, data);
+void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
+  std::vector<primary_vertex_t> data{{event_id, x, y, z, px, py, pz}};
+  write("primaries", primary_vertex_index, data);
+}
+
+void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
+                           f16 x, f16 y, f16 z, f16 t,
+                           f16 moved,
+                           f16 pre_KE, f16 post_KE, f16 deposited,
+                           u32 process_id, u32 volume_id) {
+  std::vector<vertex_t> data{
+    {event_id, track_id, parent_id,
+     x,y,z,t,
+     moved,
+     pre_KE, post_KE, deposited,
+     process_id, volume_id
+    }};
+  write("vertices", vertex_index, data);
 }
 
 std::vector<hit_t> hdf5_io::read_hit_info() {

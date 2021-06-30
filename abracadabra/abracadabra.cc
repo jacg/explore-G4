@@ -19,6 +19,7 @@
 #include <G4GenericMessenger.hh>
 
 #include <G4OpticalPhoton.hh>
+#include <G4Gamma.hh>
 #include <Randomize.hh>
 
 #include <memory>
@@ -28,6 +29,9 @@
 
 using std::make_unique;
 using std::unique_ptr;
+using std::cout;
+using std::endl;
+using std::setw;
 
 // ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
@@ -36,21 +40,59 @@ bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 #include <set>
 using times_set = std::multiset<double>;
 
+// NB: I can't help feeling that we're reinventing a wheel that HDF5 should
+// already be implementing for us, but I haven't managed to find it in the
+// documentation:
+
+// Some of our HDF5 tables need to store strings whose values repeat many times.
+// For example, we expect only 3 different processes at our LXe vertices (Rayl,
+// compt, phot), but they will be stored *many* times. Similarly, the name of
+// the volume in which a step terminates, can take on a limited number of
+// values, but will be recorded in each vertex. Rather storing a copy each time,
+// it's much more memory-efficient to store each name once, along with a unique
+// identifier int, and store that int instead of the string itself. For this we
+// need a utility which can tell us the id of any such string, creating new ids
+// on the fly, for values we haven't seen before, and retrieving the already
+// assigned ids of values that we have seen before.
+template<class T>
+class id_store {
+public:
+  id_store(const std::initializer_list<T>& data) { for (auto& item : data) { id(item); } }
+  size_t id(const T& item) {
+    auto found = ids.find(item);
+    if (found != ids.end()) { // Known item: return its id
+      return found->second;
+    } else { // New item: insert into store and return new id
+      auto this_id = items.size();
+      ids.insert({item, this_id});
+      items.push_back(item);
+      return this_id;
+    }
+  }
+  const std::vector<T>& items_ordered_by_id() const { return items; }
+private:
+  std::map<T, size_t> ids;
+  std::vector<T> items;
+};
+
 // ----- Choices which can be made in configuration files -----------------------------------
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
-    messenger -> DeclareProperty("geometry"  , geometry  ,  "Geometry to be instantiated");
-    messenger -> DeclareProperty("detector"  , detector  ,  "Detector to be instantiated");
-    messenger -> DeclareProperty("phantom"   , phantom   ,  "Phantom to be used");
+    messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
+    messenger -> DeclareProperty("detector"  , detector  , "Detector to be instantiated");
+    messenger -> DeclareProperty("phantom"   , phantom   , "Phantom to be used");
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
+    messenger -> DeclareProperty("print"     , print     , "Print live event information");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
+    messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
+    messenger -> DeclareProperty("waveform-length", waveform_length, "Maximum number of entries in waveform");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -59,10 +101,13 @@ struct abracadabra_messenger {
   G4String phantom    = "nema_7";
   bool     spin       = true;
   G4int    spin_speed = 10;
+  bool     print      = false;
   G4double xenon_thickness =  40 * mm;
   G4double cylinder_length =  15 * mm;
   G4double cylinder_radius = 200 * mm;
   unsigned imas_version = 1;
+  bool vac_pre_lxe = false;
+  size_t waveform_length = 10;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -191,6 +236,7 @@ auto combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVolume* detector)
 int main(int argc, char** argv) {
 
   abracadabra_messenger messenger;
+  auto current_event = [&]() { return n4::event_number() + messenger.offset; };
 
   // ----- collecting arrival times of optical photons in sensors ----------------------------
   std::map<size_t, times_set> times;
@@ -239,18 +285,14 @@ int main(int argc, char** argv) {
     return false; // Still not *entirely* sure about the return value meaning
   };
 
-  n4::sensitive_detector::end_of_event_fn write_hits = [&times, &writer, &messenger](auto) {
-    size_t event_id = n4::event_number() + messenger.offset;
-    std::cout << event_id << std::endl;
+  n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
+    size_t event_id = current_event();
     for (auto& [sensor_id, ts] : times) {
-      auto start = *cbegin(ts);
-      // std::vector<double> t{};
-      // TODO reserve space once good size is known from statistics
-      // std::copy_if(cbegin(ts), cend(ts), back_inserter(t),
-      //              [start](auto t) { return t < start + 100 * ps; });
-      // writer -> write_waveform(event_id, sensor_id, t);
-      // writer -> write_total_charge(event_id, sensor_id, ts.size());
-      if (sensor_id) {writer -> write_q_t0(event_id, sensor_id, ts.size(), start);}
+      const size_t N = std::min(messenger.waveform_length, ts.size());
+      std::vector<float> tvec(N);
+      std::copy_n(cbegin(ts), N, begin(tvec));
+      writer -> write_waveform    (event_id, sensor_id, tvec);
+      writer -> write_total_charge(event_id, sensor_id, ts.size());
     }
     times.clear();
   };
@@ -309,14 +351,16 @@ int main(int argc, char** argv) {
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
-    auto dr_LXe = messenger.xenon_thickness * mm;
-    auto length = messenger.cylinder_length * mm;
-    auto radius = messenger.cylinder_radius * mm;
+    auto dr_LXe  = messenger.xenon_thickness * mm;
+    auto length  = messenger.cylinder_length * mm;
+    auto radius  = messenger.cylinder_radius * mm;
+    auto version = messenger.imas_version;
+    auto clear   = messenger.vac_pre_lxe;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, messenger.imas_version) :
-      d == "square"    ? square_array_of_sipms(sd)                            :
-      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()    :
+      d == "imas"      ? imas_demonstrator(sd, length, version, clear)     :
+      d == "square"    ? square_array_of_sipms(sd)                         :
+      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
       throw "Unrecoginzed detector " + d;
   };
   // ----- Should the geometry contain phantom only / detector only / both
@@ -350,6 +394,95 @@ int main(int argc, char** argv) {
   UI* ui = UI::make(argc, argv, messenger);
   set_phantom(messenger.phantom);
 
+  // ----- Identifying vertices in LXe ----------------------------------------------------
+  auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
+
+  id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
+  id_store<std::string>  volume_names{
+    {"LXe", // Ensure that LXe has id 0: the rest in inside-out order
+     "Cavity", "Inner_casing", "Inner_vacuum", "Inner_steel", "Quartz",
+     "Outer_vacuum", "Outer_casing"}};
+
+  n4::stepping_action::action_t write_vertex = [&](auto step) {
+    static size_t previous_event = 666;
+    static size_t header_last_printed = 666;
+    static bool track_1_printed_this_event = false;
+    auto pst_pt = step -> GetPostStepPoint();
+    auto track = step -> GetTrack();
+    auto particle = track -> GetParticleDefinition();
+    if (particle == G4Gamma::Definition()) {
+      auto id = track -> GetTrackID();
+      auto pre_pt = step -> GetPreStepPoint();
+      auto event_id = current_event();
+      previous_event = event_id;
+      auto parent = track -> GetParentID();
+      auto pos = pst_pt -> GetPosition();
+      auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
+      auto moved = step -> GetDeltaPosition().mag();
+      auto dep_E = step -> GetTotalEnergyDeposit() / keV;
+      auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
+      auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
+      auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
+      auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+
+      if (process_name == "---->") return;
+      auto t = pst_pt -> GetGlobalTime();
+      auto process_id = process_names.id(process_name);
+      auto  volume_id =  volume_names.id( volume_name);
+      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
+
+      if (!messenger.print) return;
+
+      if (event_id != header_last_printed) {
+        cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
+        cout << endl;
+        header_last_printed = event_id;
+        track_1_printed_this_event = false;
+      }
+
+      if (id == 1 && ! track_1_printed_this_event) {
+        track_1_printed_this_event = true;
+        cout << endl;
+      }
+
+      cout << std::setprecision(1) << std::fixed;
+      cout << setw(9) << event_id
+           << setw(5) << parent << ' '
+           << setw(5) << id
+           << setw(6) << process_name
+           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
+           << setw(7) << moved << "   "
+           << setw(6) << pre_KE
+           << setw(6) << pst_KE
+           << setw(6) << dep_E
+           << setw(20) << volume_name << ' '
+           << endl;
+    }
+  };
+
+  n4::event_action::action_t write_primary_generator = [&](auto event) {
+    using std::setw;
+    auto event_id = current_event();
+    auto vertex = event -> GetPrimaryVertex();
+    auto pos = vertex -> GetPosition();
+    auto mom = vertex -> GetPrimary() -> GetMomentum();
+    auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
+    auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
+    writer -> write_primary(event_id, x,y,z, px,py,pz);
+    cout << std::setprecision(1) << std::fixed;
+    cout << setw(9) << event_id;
+    if (!messenger.print) { cout << endl; return; }
+    cout << " -----------------  "
+         << setw(7) <<  x << setw(7) <<  y << setw(7) <<  z << "     "
+         << setw(7) << px << setw(7) << py << setw(7) << pz
+         << "  ----------------------" << std::endl;
+  };
+
+  n4::run_action::action_t write_string_tables = [&](auto) {
+    writer -> write_strings("process_names", process_names.items_ordered_by_id());
+    writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -362,7 +495,12 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager -> SetUserInitialization(new n4::actions{generator_messenger.generator()});
+  run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
+    -> set ((new n4::event_action) -> begin(write_primary_generator))
+    -> set  (new n4::stepping_action{write_vertex})
+    -> set ((new n4::run_action) -> end(write_string_tables))
+  );
+
 
 
   // ----- second phase --------------------------------------------------------------------
