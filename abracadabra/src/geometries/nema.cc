@@ -130,7 +130,8 @@ G4PVPlacement* nema_7_phantom::geometry() const {
 
   auto two_pi = 360 * deg;
 
-  auto env_half_length = 1.1 * half_length;
+  auto z_offset = half_length - 70*mm;
+  auto env_half_length = 1.1 * half_length + z_offset;
   auto env_half_width  = 1.1 * outer_r;
 
   auto cylinder     = volume<G4Tubs>("Cylinder", air , 0.0, outer_r, half_length, 0.0, two_pi);
@@ -141,12 +142,12 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, air, sphere.radius);
-    auto position = sphere_position(count);
+    auto position = sphere_position(count) + G4ThreeVector{0, 0, z_offset};
     place(ball).in(cylinder).at(position).now();
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
-  place(cylinder).in(vol_envelope).now();
+  place(cylinder).in(vol_envelope).at(0,0, -z_offset).now();
   place(vol_lung).in(cylinder).now();
   return place(vol_envelope).now();
 }
