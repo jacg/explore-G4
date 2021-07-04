@@ -77,6 +77,8 @@ public:
   build_nema_7_phantom& sphereD(G4double d     , G4double activity) { return sphereR(d/2, activity); }
   build_nema_7_phantom& lungR  (G4double r);
   build_nema_7_phantom& lungD  (G4double d)                         { return   lungR(d/2          ); }
+  build_nema_7_phantom& inner_diameter(G4double d) { return inner_radius(d/2); }
+  build_nema_7_phantom& outer_diameter(G4double d) { return outer_radius(d/2); }
   nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------

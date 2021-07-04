@@ -306,15 +306,15 @@ int main(int argc, char** argv) {
     return build_nema_7_phantom{}
       .activity(1)
       .length(180*mm)
-      .inner_radius(57.2*mm)
-      .outer_radius(77.0*mm)
-      .sphereD(10*mm / 2, 4)
-      .sphereD(13*mm / 2, 4)
-      .sphereD(17*mm / 2, 4)
-      .sphereD(22*mm / 2, 4)
-      .sphereD(28*mm / 2, 4)
-      .sphereD(37*mm / 2, 4)
+      .inner_diameter(114.4*mm)
+      .outer_radius  ( 77.0*mm)
       .lungD(50*mm)
+      .sphereD(10*mm, 4)
+      .sphereD(13*mm, 4)
+      .sphereD(17*mm, 4)
+      .sphereD(22*mm, 4)
+      .sphereD(28*mm, 4)
+      .sphereD(37*mm, 4)
       .build();
   };
 
