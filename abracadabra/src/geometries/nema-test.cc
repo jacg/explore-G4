@@ -14,12 +14,12 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
   auto geometry =
     build_nema_7_phantom{}
-    .sphere(10*mm, 2.8)
-    .sphere(13*mm, 2.8)
-    .sphere(17*mm, 2.8)
-    .sphere(22*mm, 2.8)
-    .sphere(28*mm, 0)
-    .sphere(37*mm, 0)
+    .sphereD(10*mm, 2.8)
+    .sphereD(13*mm, 2.8)
+    .sphereD(17*mm, 2.8)
+    .sphereD(22*mm, 2.8)
+    .sphereD(28*mm, 0)
+    .sphereD(37*mm, 0)
     .build()
     .geometry();
 
@@ -52,10 +52,10 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
 
   auto phantom = build_nema_7_phantom{}
     // inner hot/cold spheres
-    .sphere(2*r,   0) // region 0
-    .sphere(  r,   a) //        1
-    .sphere(2*r,   a) //        2
-    .sphere(  r, 2*a) //        3
+    .sphereR(2*r,   0) // region 0
+    .sphereR(  r,   a) //        1
+    .sphereR(2*r,   a) //        2
+    .sphereR(  r, 2*a) //        3
     // main cylinder            4
     .activity(A)
     .inner_radius(30*mm)

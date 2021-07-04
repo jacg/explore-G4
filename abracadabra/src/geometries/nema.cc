@@ -76,7 +76,7 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
 // ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
 
-build_nema_7_phantom& build_nema_7_phantom::sphere(G4double radius, G4double activity) {
+build_nema_7_phantom& build_nema_7_phantom::sphereR(G4double radius, G4double activity) {
   spheres.emplace_back(radius, activity);
   return *this;
 };
