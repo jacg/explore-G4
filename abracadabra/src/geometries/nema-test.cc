@@ -36,7 +36,7 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   std::cout << std::endl;
 
   // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 8);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 9);
 
   for (auto volume: geometry) {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
@@ -60,6 +60,7 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     .activity(A)
     .inner_radius(30*mm)
     .outer_radius(R)
+    .lungD(1.0*mm)
     .length(H)
     .build();
 

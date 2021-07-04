@@ -61,6 +61,7 @@ protected:
   G4double background  = 1;
   G4double inner_r     = 114.4*mm;
   G4double outer_r     = 152.0*mm;
+  G4double  lung_r     =  25.0*mm;
   G4double half_length =  70.0*mm;
   biased_choice pick_region{{}};
 };
@@ -74,6 +75,7 @@ public:
   build_nema_7_phantom& activity(G4double);
   build_nema_7_phantom& sphereR(G4double radius, G4double activity);
   build_nema_7_phantom& sphereD(G4double d     , G4double activity) { return sphereR(d/2, activity); }
+  build_nema_7_phantom& lungD  (G4double d);
   nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------

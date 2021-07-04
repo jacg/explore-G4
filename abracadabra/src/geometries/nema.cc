@@ -85,6 +85,7 @@ build_nema_7_phantom& build_nema_7_phantom::length(G4double l) { half_length = l
 build_nema_7_phantom& build_nema_7_phantom::inner_radius(G4double r) { inner_r = r;    return *this; }
 build_nema_7_phantom& build_nema_7_phantom::outer_radius(G4double r) { outer_r = r;    return *this; }
 build_nema_7_phantom& build_nema_7_phantom::activity    (G4double a) { background = a; return *this; }
+build_nema_7_phantom& build_nema_7_phantom::lungD       (G4double d) { lung_r = d / 2; return *this; }
 
 nema_7_phantom build_nema_7_phantom::build() {
 
@@ -122,16 +123,19 @@ G4ThreeVector nema_7_phantom::sphere_position(size_t n) const {
 
 G4PVPlacement* nema_7_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
-  auto air = material("G4_AIR");
+  auto air  = material("G4_AIR");
+  auto lung = material("G4_AIR"); // TODO low atomic number material with density 0.3 ± 0.1 g/mL
 
   auto two_pi = 360 * deg;
 
   auto env_half_length = 1.1 * half_length;
   auto env_half_width  = 1.1 * outer_r;
 
-  auto cylinder     = volume<G4Tubs>("Cylinder", air, 0.0, outer_r, half_length, 0.0, two_pi);
-  auto vol_envelope = volume<G4Box> ("Envelope", air, env_half_width, env_half_width, env_half_length);
+  auto cylinder     = volume<G4Tubs>("Cylinder", air , 0.0, outer_r, half_length, 0.0, two_pi);
+  auto vol_envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
+  auto vol_lung     = volume<G4Tubs>("Lung"    , lung, 0.0,  lung_r, half_length, 0.0, two_pi);
 
+  // TODO 17mm diameter sphere shall be placed along the horizontal axis of the platform
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);
@@ -142,7 +146,7 @@ G4PVPlacement* nema_7_phantom::geometry() const {
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
   place(cylinder).in(vol_envelope).now();
-
+  place(vol_lung).in(cylinder).now();
   return place(vol_envelope).now();
 }
 
