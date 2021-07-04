@@ -114,10 +114,10 @@ nema_7_phantom build_nema_7_phantom::build() {
   return std::move(*this);
 }
 
-G4ThreeVector nema_7_phantom::sphere_position(size_t n) const {
-  auto angle = n * 360 * deg / spheres.size();
-  auto x     = inner_r * sin(angle);
-  auto y     = inner_r * cos(angle);
+G4ThreeVector nema_7_phantom::sphere_position(int n) const {
+  auto angle = (n+1) * 360 * deg / spheres.size();
+  auto x     = inner_r * cos(angle);
+  auto y     = inner_r * sin(angle);
   return {x, y, 0};
 }
 
@@ -135,7 +135,6 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto vol_envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
   auto vol_lung     = volume<G4Tubs>("Lung"    , lung, 0.0,  lung_r, half_length, 0.0, two_pi);
 
-  // TODO 17mm diameter sphere shall be placed along the horizontal axis of the platform
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);

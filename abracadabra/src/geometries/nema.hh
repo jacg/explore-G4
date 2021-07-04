@@ -43,7 +43,7 @@ public:
   void generate_primaries(G4Event* event) const;
   G4ThreeVector generate_vertex() const;
 
-  G4ThreeVector sphere_position(size_t n) const;
+  G4ThreeVector sphere_position(int n) const;
   bool inside_a_sphere(G4ThreeVector&) const;
   bool inside_this_sphere(size_t, G4ThreeVector&) const;
   bool inside_whole(G4ThreeVector&) const { return true; }
