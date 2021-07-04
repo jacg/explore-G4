@@ -49,6 +49,7 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   // Activities (intensities), radii and cylinder length
   G4double a = 10, r = 10*mm;            // Inner spheres basis
   G4double A =  1, R = 60*mm, H = 50*mm; // Phantom body cylinder
+  G4double        lr = 10*mm;            // Lung radius
 
   auto phantom = build_nema_7_phantom{}
     // inner hot/cold spheres
@@ -60,7 +61,7 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     .activity(A)
     .inner_radius(30*mm)
     .outer_radius(R)
-    .lungD(1.0*mm)
+    .lungR(lr)
     .length(H)
     .build();
 

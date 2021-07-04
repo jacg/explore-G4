@@ -84,8 +84,8 @@ build_nema_7_phantom& build_nema_7_phantom::sphereR(G4double radius, G4double ac
 build_nema_7_phantom& build_nema_7_phantom::length(G4double l) { half_length = l / 2;  return *this; }
 build_nema_7_phantom& build_nema_7_phantom::inner_radius(G4double r) { inner_r = r;    return *this; }
 build_nema_7_phantom& build_nema_7_phantom::outer_radius(G4double r) { outer_r = r;    return *this; }
+build_nema_7_phantom& build_nema_7_phantom::lungR       (G4double r) {  lung_r = r;    return *this; }
 build_nema_7_phantom& build_nema_7_phantom::activity    (G4double a) { background = a; return *this; }
-build_nema_7_phantom& build_nema_7_phantom::lungD       (G4double d) { lung_r = d / 2; return *this; }
 
 nema_7_phantom build_nema_7_phantom::build() {
 
