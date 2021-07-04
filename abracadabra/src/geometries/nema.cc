@@ -103,9 +103,11 @@ nema_7_phantom build_nema_7_phantom::build() {
   }
   {
     auto r = outer_r;
+    auto l =  lung_r;
     auto h = half_length * 2;
     auto cylinder_volume = r * r * h;
-    auto body_volume = cylinder_volume - spheres_total_volume;
+    auto     lung_volume = l * l * h;
+    auto body_volume = cylinder_volume - spheres_total_volume - lung_volume;
     auto body_weight = body_volume * background;
     weights.push_back(body_weight);
   }
@@ -175,9 +177,16 @@ G4ThreeVector nema_7_phantom::generate_vertex() const {
       auto [x, y] = random_on_disc(outer_r);
       auto z = uniform(-half_length, half_length);
       local_position = {x, y, z};
-    } while (inside_a_sphere(local_position));
+    } while (inside_lung(local_position) || inside_a_sphere(local_position));
   }
   return local_position + offset; // TODO: rotation!
+}
+
+bool nema_7_phantom::inside_lung(G4ThreeVector& position) const {
+  auto r2 = lung_r * lung_r;
+  auto x = position.x();
+  auto y = position.y();
+  return x*x + y*y < r2;
 }
 
 bool nema_7_phantom::inside_this_sphere(size_t n, G4ThreeVector& position) const {
@@ -196,7 +205,8 @@ std::optional<size_t> nema_7_phantom::in_which_region(G4ThreeVector& position) c
   for (size_t n=0; n<spheres.size(); ++n) {
     if (inside_this_sphere(n, position)) { return n; }
   }
-  if (inside_whole(position)) { return spheres.size(); }
+  if (inside_lung (position)) { return spheres.size(); }
+  if (inside_whole(position)) { return spheres.size() + 1; }
   return {};
 
 }
