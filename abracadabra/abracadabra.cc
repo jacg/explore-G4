@@ -303,7 +303,6 @@ int main(int argc, char** argv) {
 
   // ----- Available phantoms -----------------------------------------------------------
   auto nema_7 = []() {
-    // TODO: the central cylinder is missing (7.3.3 c)
     return build_nema_7_phantom{}
       .activity(1)
       .length(180*mm)
@@ -315,6 +314,7 @@ int main(int argc, char** argv) {
       .sphereD(22*mm / 2, 4)
       .sphereD(28*mm / 2, 4)
       .sphereD(37*mm / 2, 4)
+      .lungD(50*mm)
       .build();
   };
 
