@@ -8,6 +8,7 @@
 #include <G4Box.hh>
 #include <G4Orb.hh>
 #include <G4Tubs.hh>
+#include <G4MultiUnion.hh>
 
 #include <G4RandomDirection.hh>
 #include <G4PVPlacement.hh>
@@ -127,28 +128,53 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
   auto air  = material("G4_AIR");
   auto lung = material("G4_AIR"); // TODO low atomic number material with density 0.3 ± 0.1 g/mL
+  // TODO source and body materials should not be air
+  auto body_material = air;
 
-  auto two_pi = 360 * deg;
+  auto pi = 180 * deg;
 
-  auto z_offset = half_length - 70*mm;
+  auto    top_r = 147 * mm;
+  auto corner_r =  77 * mm;
+
+  auto z_offset = half_length - 70*mm; // NEMA requires shperes at 7cm from phantom end
   auto env_half_length = 1.1 * half_length + z_offset;
-  auto env_half_width  = 1.1 * outer_r;
+  auto env_half_width  = 1.1 * top_r;
 
-  auto cylinder     = volume<G4Tubs>("Cylinder", air , 0.0, outer_r, half_length, 0.0, two_pi);
   auto vol_envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
-  auto vol_lung     = volume<G4Tubs>("Lung"    , lung, 0.0,  lung_r, half_length, 0.0, two_pi);
+  auto vol_lung     = volume<G4Tubs>("Lung"    , lung, 0.0,  lung_r, half_length, 0.0, 2*pi);
+
+  auto corner_c_x = top_r - corner_r;
+  auto corner_c_y = - corner_c_x / 2;
+  auto base_half_x = corner_c_x;
+  auto base_half_y = corner_r / 2;
+  auto top_half = new G4Tubs("Top"   , 0.0, top_r   , half_length, 0, pi);
+  auto corner   = new G4Tubs("Corner", 0.0, corner_r, half_length, pi, pi);
+  auto base     = new G4Box ("Base"  , base_half_x, base_half_y, half_length);
+  G4Transform3D top_half_trasform{{}, {        0  , corner_c_y              , 0}};
+  G4Transform3D  corner1_trasform{{}, {-corner_c_x, corner_c_y              , 0}};
+  G4Transform3D  corner2_trasform{{}, { corner_c_x, corner_c_y              , 0}};
+  G4Transform3D     base_trasform{{}, {        0  , corner_c_y - base_half_y, 0}};
+
+  auto body_solid = new G4MultiUnion("Body");
+  body_solid -> AddNode(*top_half, top_half_trasform);
+  body_solid -> AddNode(*corner  ,  corner1_trasform);
+  body_solid -> AddNode(*corner  ,  corner2_trasform);
+  body_solid -> AddNode(*base    ,     base_trasform);
+  body_solid -> Voxelize();
+
+  auto vol_body = new G4LogicalVolume(body_solid, body_material, "Body");
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, air, sphere.radius);
     auto position = sphere_position(count) + G4ThreeVector{0, 0, z_offset};
-    place(ball).in(cylinder).at(position).now();
+    place(ball).in(vol_body).at(position).now();
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
-  place(cylinder).in(vol_envelope).at(0,0, -z_offset).now();
-  place(vol_lung).in(cylinder).now();
+  place(vol_body).in(vol_envelope).at(0,0, -z_offset).now();
+  place(vol_lung).in(vol_body).now();
   return place(vol_envelope).now();
 }
 
