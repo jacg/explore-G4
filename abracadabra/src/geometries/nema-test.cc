@@ -14,12 +14,13 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
   auto geometry =
     build_nema_7_phantom{}
-    .sphere(10*mm, 2.8)
-    .sphere(13*mm, 2.8)
-    .sphere(17*mm, 2.8)
-    .sphere(22*mm, 2.8)
-    .sphere(28*mm, 0)
-    .sphere(37*mm, 0)
+    .sphereD(10*mm, 2.8)
+    .sphereD(13*mm, 2.8)
+    .sphereD(17*mm, 2.8)
+    .sphereD(22*mm, 2.8)
+    .sphereD(28*mm, 0)
+    .sphereD(37*mm, 0)
+    .inner_radius(50*mm)
     .build()
     .geometry();
 
@@ -36,7 +37,7 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
   std::cout << std::endl;
 
   // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 8);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 9);
 
   for (auto volume: geometry) {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
@@ -47,28 +48,36 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
 
   // Activities (intensities), radii and cylinder length
-  G4double a = 10, r = 10*mm;            // Inner spheres basis
-  G4double A =  1, R = 60*mm, H = 50*mm; // Phantom body cylinder
+  G4double a = 10,  r =  4 * mm;               // Inner spheres basis
+  G4double A = .4, tr = 46 * mm, cr = 30 * mm; // Phantom body
+  G4double         lr = 18 * mm;               // Lung radius
+  G4double H  = 20 * mm;                       // Length of body
 
-  auto phantom = build_nema_7_phantom{}
-    // inner hot/cold spheres
-    .sphere(2*r,   0) // region 0
-    .sphere(  r,   a) //        1
-    .sphere(2*r,   a) //        2
-    .sphere(  r, 2*a) //        3
-    // main cylinder            4
+  auto phantom = build_nema_7_phantom{} // inner hot/cold spheres
+    .sphereR(r    ,     a) // region 0  (compare hit rates to this sphere)
+    .sphereR(2 * r,     0) //        1
+    .sphereR(r    , 2 * a) //        2
+    .sphereR(2 * r,     a) //        3
+    .lungR(lr)         //         4
+    // main cylinder              5
     .activity(A)
-    .inner_radius(30*mm)
-    .outer_radius(R)
+    .inner_radius(28 * mm)
+    .top_radius(tr)
+    .corner_radius(cr)
     .length(H)
+    .spheres_from_end(H / 2)
     .build();
 
   // ----- Expected ratio of vertices in   body : (sphere 1) ---------------------
-  auto pi = 3.14; // The PIs cancel, value irrelevant
-  auto sphere_1_vol = 4*pi/3 * r * r * r;
-  auto     body_vol =   pi   * R * R * H;
-  auto all_spheres_vol = sphere_1_vol * 18; // 2(1^3) + 2(2^3) = 2 x 9 = 18
-  auto body_to_1_ratio = A * (body_vol - all_spheres_vol) / (a * sphere_1_vol);
+  auto pi = 180 * deg;
+  auto sphere_0_vol = 4*pi/3 *  r *  r * r;
+  auto     lung_vol =   pi   * lr * lr *       H;
+  auto      top_vol =   pi   * tr * tr *       H / 2;
+  auto  corners_vol =   pi   * cr * cr *       H / 2;
+  auto     base_vol =    2  * (tr - cr) * cr * H;
+  auto all_spheres_vol = sphere_0_vol * 18; // 2(1^3) + 2(2^3) = 2 x 9 = 18
+  auto     body_vol =   top_vol + corners_vol + base_vol - all_spheres_vol - lung_vol;
+  auto body_to_0_ratio = A * body_vol / (a * sphere_0_vol);
 
   // ----- Ensure no volume overlaps ---------------------------------------------
   for (auto volume: phantom.geometry()) {
@@ -79,10 +88,11 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
   auto  z_min =  std::numeric_limits<G4double>::infinity();
   auto  z_max = -std::numeric_limits<G4double>::infinity();
   auto r2_max =  0.0;
-  std::vector<float> hit_count(5, 0); // 4 spheres + 1 body
+  auto r2_min = std::numeric_limits<double>::max();
+  std::vector<double> hit_count(6, 0); // 4 spheres + 1 lung + 1 body
 
   // ----- Generate sample data --------------------------------------------------
-  for (unsigned i=0; i<1e6; ++i) {
+  for (unsigned i=0; i<2e7; ++i) {
     auto vertex = phantom.generate_vertex();
     auto region = phantom.in_which_region(vertex);
 
@@ -94,18 +104,23 @@ TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
     z_min  = std::min( z_min, z);
     z_max  = std::max( z_max, z);
     r2_max = std::max(r2_max, x*x + y*y);
+    r2_min = std::min(r2_min, x*x + y*y);
   }
 
   // ----- Vertices approach edges of the phantom, but all are inside ------------
-  CHECK( z_min == Approx(-H/2).epsilon(0.001));
-  CHECK( z_max == Approx( H/2).epsilon(0.001));
-  CHECK(r2_max == Approx( R*R).epsilon(0.001));
+  // With the non-cylindrical phantom body, most of these are probably not worth
+  // the effort any more
+  // CHECK( z_min == Approx(-H/2 ).epsilon(0.001));
+  // CHECK( z_max == Approx( H/2 ).epsilon(0.001));
+  // CHECK(r2_max == Approx( R*R ).epsilon(0.001));
+  CHECK(r2_min == Approx(lr*lr).epsilon(0.001));
 
   // ----- Verify expected distribution of vertices among regions ----------------
-  CHECK(hit_count[0] == 0); // Inactive sphere should get no hits
-  CHECK(hit_count[2] / hit_count[1] == Approx(8).epsilon(0.05)); // 2 x radius   -> 8 x weight
-  CHECK(hit_count[3] / hit_count[1] == Approx(2).epsilon(0.05)); // 2 x activity -> 2 x weight
-  CHECK(hit_count[4] / hit_count[1] == Approx(body_to_1_ratio).epsilon(0.05)); // Region 4: body
+  CHECK(hit_count[1] == 0); // Inactive sphere should generate nothing
+  CHECK(hit_count[2] / hit_count[0] == Approx(2).epsilon(0.002)); // 2 x activity -> 2 x weight
+  CHECK(hit_count[3] / hit_count[0] == Approx(8).epsilon(0.002)); // 2 x radius   -> 8 x weight
+  CHECK(hit_count[4] / hit_count[0] == 0); // Inactive should generate nothing     Region 4: lung
+  CHECK(hit_count[5] / hit_count[0] == Approx(body_to_0_ratio).epsilon(0.005)); // Region 5: body
 
   // ----- Check that hits cover the whole subregions ----------------------------
   // TODO

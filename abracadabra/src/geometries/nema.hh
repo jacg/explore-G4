@@ -42,8 +42,10 @@ public:
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const;
   G4ThreeVector generate_vertex() const;
+  G4ThreeVector generate_vertex_in_body() const; // This one should probably end up private
 
-  G4ThreeVector sphere_position(size_t n) const;
+  G4ThreeVector sphere_position(int n) const;
+  bool inside_lung    (G4ThreeVector&) const;
   bool inside_a_sphere(G4ThreeVector&) const;
   bool inside_this_sphere(size_t, G4ThreeVector&) const;
   bool inside_whole(G4ThreeVector&) const { return true; }
@@ -59,21 +61,33 @@ private:
 protected:
   std::vector<one_sphere> spheres;
   G4double background  = 1;
-  G4double inner_r     = 114.4*mm;
-  G4double outer_r     = 152.0*mm;
-  G4double half_length =  70.0*mm;
+  G4double  inner_r    = 114.4*mm;
+  G4double    top_r    = 147.0*mm;
+  G4double corner_r    =  77.0*mm;
+  G4double   lung_r    =  25.0*mm;
+  G4double half_length =  90.0*mm;
+  G4double to_end      =  70.0*mm; // NEMA requires spheres at 7cm from phantom end
   biased_choice pick_region{{}};
+  biased_choice pick_sub_region{{}};
+
+protected:
+  std::tuple<G4double, G4double, G4double> sub_volumes() const;
 };
 
 // ----- Builder ----------------------------------------------------------------------
 class build_nema_7_phantom : private nema_7_phantom {
 public:
-  build_nema_7_phantom& length(G4double);
-  build_nema_7_phantom& inner_radius(G4double);
-  build_nema_7_phantom& outer_radius(G4double);
-  build_nema_7_phantom& activity(G4double);
-  build_nema_7_phantom& sphere (G4double radius, G4double activity);
-  build_nema_7_phantom& sphereD(G4double d     , G4double activity) { return sphere(d/2, activity); }
+  build_nema_7_phantom& length(G4double l) { half_length = l / 2;  return *this; }
+  build_nema_7_phantom&  inner_radius(G4double r)  {  inner_r = r; return *this; }
+  build_nema_7_phantom&    top_radius(G4double r)  {    top_r = r; return *this; }
+  build_nema_7_phantom& corner_radius(G4double r)  { corner_r = r; return *this; }
+  build_nema_7_phantom& activity(G4double a)     { background = a; return *this; }
+  build_nema_7_phantom& sphereR(G4double r, G4double activity);
+  build_nema_7_phantom& sphereD(G4double d, G4double activity) { return sphereR(d/2, activity); }
+  build_nema_7_phantom& lungD  (G4double d)                    { return   lungR(d/2          ); }
+  build_nema_7_phantom& lungR  (G4double r) {  lung_r = r;    return *this; }
+  build_nema_7_phantom& inner_diameter(G4double d) { return inner_radius(d/2); }
+  build_nema_7_phantom& spheres_from_end(G4double l) { to_end = l; return *this; }
   nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------
