@@ -22,9 +22,10 @@ auto a_nema_phantom() {
   // phantom pattern
   return build_nema_7_phantom{}
     .activity(0)
-    .length(140*mm)
-    .inner_radius(114.4*mm)
-    .outer_radius(152.0*mm)
+    .length(180*mm)
+    .inner_diameter(114.4*mm)
+    .top_radius    (147.0*mm)
+    .corner_radius ( 77.0*mm)
     .sphereD(10*mm, 2.8)
     .sphereD(13*mm, 2.8)
     .sphereD(17*mm, 2.8)

@@ -127,12 +127,15 @@
 /vis/geometry/set/visibility Outer_casing 0 true
 
 /vis/geometry/set/colour     Cylinder     0 .7 .7 .7 .1
+/vis/geometry/set/colour     Body         0 .7 .7 .7 .1
 
 /vis/geometry/set/colour     Envelope     0  0  1  0 .1
 /vis/geometry/set/visibility Envelope     0 true
 
 /vis/geometry/set/colour     world        0  0  1  0 .1
 
+/vis/geometry/set/colour     Lung         0  1  0  0 .2
+/vis/geometry/set/visibility Lung         0 true
 
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface

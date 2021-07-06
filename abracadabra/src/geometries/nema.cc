@@ -9,6 +9,7 @@
 #include <G4Orb.hh>
 #include <G4Tubs.hh>
 #include <G4MultiUnion.hh>
+#include <G4UnionSolid.hh>
 
 #include <G4RandomDirection.hh>
 #include <G4PVPlacement.hh>
@@ -82,19 +83,13 @@ build_nema_7_phantom& build_nema_7_phantom::sphereR(G4double radius, G4double ac
   return *this;
 };
 
-build_nema_7_phantom& build_nema_7_phantom::length(G4double l) { half_length = l / 2;  return *this; }
-build_nema_7_phantom& build_nema_7_phantom::inner_radius(G4double r) { inner_r = r;    return *this; }
-build_nema_7_phantom& build_nema_7_phantom::outer_radius(G4double r) { outer_r = r;    return *this; }
-build_nema_7_phantom& build_nema_7_phantom::lungR       (G4double r) {  lung_r = r;    return *this; }
-build_nema_7_phantom& build_nema_7_phantom::activity    (G4double a) { background = a; return *this; }
 
 nema_7_phantom build_nema_7_phantom::build() {
 
-  //
-
   // We care about the relative, not absolute, volumes: ignore factors of pi
   G4double spheres_total_volume = 0;
-  std::vector<G4double> weights{};
+  std::vector<G4double>     weights{};
+  std::vector<G4double> sub_weights{};
   weights.reserve(spheres.size() + 1); // Extra element for phantom body
   for (auto& sphere : spheres) {
     auto r = sphere.radius;
@@ -103,17 +98,17 @@ nema_7_phantom build_nema_7_phantom::build() {
     weights.push_back(volume * sphere.activity);
   }
   {
-    auto r = outer_r;
-    auto l =  lung_r;
+    auto l = lung_r;
     auto h = half_length * 2;
-    auto cylinder_volume = r * r * h;
-    auto     lung_volume = l * l * h;
-    auto body_volume = cylinder_volume - spheres_total_volume - lung_volume;
+    auto [top_volume, corners_volume, base_volume] = sub_volumes();
+    auto lung_volume = l * l * h;
+    auto body_volume = top_volume + corners_volume + base_volume - spheres_total_volume - lung_volume;
     auto body_weight = body_volume * background;
     weights.push_back(body_weight);
+    sub_weights = {top_volume, corners_volume/2, corners_volume/2, base_volume};
   }
-  pick_region = biased_choice(weights);
-
+  pick_region     = biased_choice(    weights);
+  pick_sub_region = biased_choice(sub_weights);
   return std::move(*this);
 }
 
@@ -133,11 +128,8 @@ G4PVPlacement* nema_7_phantom::geometry() const {
 
   auto pi = 180 * deg;
 
-  auto    top_r = 147 * mm;
-  auto corner_r =  77 * mm;
-
-  auto z_offset = half_length - 70*mm; // NEMA requires shperes at 7cm from phantom end
-  auto env_half_length = 1.1 * half_length + z_offset;
+  auto z_offset = half_length - to_end; // NEMA requires shperes at 7cm from phantom end
+  auto env_half_length = 1.1 * half_length + abs(z_offset);
   auto env_half_width  = 1.1 * top_r;
 
   auto vol_envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
@@ -147,20 +139,29 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto corner_c_y = - corner_c_x / 2;
   auto base_half_x = corner_c_x;
   auto base_half_y = corner_r / 2;
-  auto top_half = new G4Tubs("Top"   , 0.0, top_r   , half_length, 0, pi);
+  auto top_half = new G4Tubs("Top"   , 0.0, top_r   , half_length,  0, pi);
   auto corner   = new G4Tubs("Corner", 0.0, corner_r, half_length, pi, pi);
   auto base     = new G4Box ("Base"  , base_half_x, base_half_y, half_length);
-  G4Transform3D top_half_trasform{{}, {        0  , corner_c_y              , 0}};
-  G4Transform3D  corner1_trasform{{}, {-corner_c_x, corner_c_y              , 0}};
-  G4Transform3D  corner2_trasform{{}, { corner_c_x, corner_c_y              , 0}};
-  G4Transform3D     base_trasform{{}, {        0  , corner_c_y - base_half_y, 0}};
 
-  auto body_solid = new G4MultiUnion("Body");
-  body_solid -> AddNode(*top_half, top_half_trasform);
-  body_solid -> AddNode(*corner  ,  corner1_trasform);
-  body_solid -> AddNode(*corner  ,  corner2_trasform);
-  body_solid -> AddNode(*base    ,     base_trasform);
-  body_solid -> Voxelize();
+  // Using G4MultiUnion should be better than G4UnionSolid, but it seems broken
+
+  // G4Transform3D top_half_trasform{{}, {        0  , corner_c_y              , 0}};
+  // G4Transform3D  corner1_trasform{{}, {-corner_c_x, corner_c_y              , 0}};
+  // G4Transform3D  corner2_trasform{{}, { corner_c_x, corner_c_y              , 0}};
+  // G4Transform3D     base_trasform{{}, {        0  , corner_c_y - base_half_y, 0}};
+
+  // auto body_solid = new G4MultiUnion("Body");
+  // body_solid -> AddNode(*top_half, top_half_trasform);
+  // body_solid -> AddNode(*corner  ,  corner1_trasform);
+  // body_solid -> AddNode(*corner  ,  corner2_trasform);
+  // body_solid -> AddNode(*base    ,     base_trasform);
+  // body_solid -> Voxelize();
+  // auto vol_body = new G4LogicalVolume(body_solid, body_material, "Body");
+
+  auto no_rot = nullptr;
+  auto union1     = new G4UnionSolid("union1", top_half, corner, no_rot, {-corner_c_x,          0  , 0});
+  auto union2     = new G4UnionSolid("union2", union1  , corner, no_rot, { corner_c_x,          0  , 0});
+  auto body_solid = new G4UnionSolid("Body"  , union2  , base  , no_rot, {        0  , -base_half_y, 0});
 
   auto vol_body = new G4LogicalVolume(body_solid, body_material, "Body");
 
@@ -168,13 +169,13 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, air, sphere.radius);
-    auto position = sphere_position(count) + G4ThreeVector{0, 0, z_offset};
+    auto position = sphere_position(count) + G4ThreeVector{0, -corner_c_y, z_offset};
     place(ball).in(vol_body).at(position).now();
   }
 
   // ----- Build geometry by organizing volumes in a hierarchy --------------------
-  place(vol_body).in(vol_envelope).at(0,0, -z_offset).now();
-  place(vol_lung).in(vol_body).now();
+  place(vol_body).in(vol_envelope).at(0,  corner_c_y, -z_offset).now();
+  place(vol_lung).in(vol_body)    .at(0, -corner_c_y,  0       ).now();
   return place(vol_envelope).now();
 }
 
@@ -192,6 +193,37 @@ void nema_7_phantom::generate_primaries(G4Event* event) const {
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
+G4ThreeVector nema_7_phantom::generate_vertex_in_body() const {
+  auto corner_c_x = top_r - corner_r; // TODO avoid copy-paste from geometry()
+  auto corner_c_y = corner_c_x / 2;
+
+  auto z = uniform(0, 2*half_length) - 7*cm;
+  auto region = pick_sub_region();
+
+  if (region == 0) { // top
+    auto [x, y] = random_on_disc(top_r);
+    if (y < 0) { y = -y; }
+    y -= corner_c_y;
+    return {x,y,z};
+  }
+
+  if (region == 3) { // base
+    auto base_half_width  = top_r - corner_r;
+    auto base_full_height =         corner_r;
+    auto x = uniform(-base_half_width, base_half_width);
+    auto y = uniform(-base_full_height, 0) - corner_c_y;
+    return {x,y,z};
+
+  } else { // corners
+    auto [x, y] = random_on_disc(corner_r);
+    if (y > 0) { y = -y; }
+    y -= corner_c_y;
+    if (region==1) { if (x < 0) x = -x; x += corner_c_x; }
+    else           { if (x > 0) x = -x; x -= corner_c_x; }
+    return {x,y,z};
+  }
+}
+
 G4ThreeVector nema_7_phantom::generate_vertex() const {
   G4ThreeVector offset; // TODO adjust for physical placement of logical geometry
   G4ThreeVector local_position;
@@ -201,9 +233,7 @@ G4ThreeVector nema_7_phantom::generate_vertex() const {
     local_position = centre + random_in_sphere(spheres[region].radius);
   } else { // The phantom's body
     do {
-      auto [x, y] = random_on_disc(outer_r);
-      auto z = uniform(-half_length, half_length);
-      local_position = {x, y, z};
+      local_position = generate_vertex_in_body();
     } while (inside_lung(local_position) || inside_a_sphere(local_position));
   }
   return local_position + offset; // TODO: rotation!
@@ -236,4 +266,15 @@ std::optional<size_t> nema_7_phantom::in_which_region(G4ThreeVector& position) c
   if (inside_whole(position)) { return spheres.size() + 1; }
   return {};
 
+}
+std::tuple<G4double, G4double, G4double> nema_7_phantom::sub_volumes() const {
+  // All volumes scaled down by a factor of pi
+  auto pi = 180 * deg;
+  auto t =    top_r;
+  auto c = corner_r;
+  auto h = half_length * 2;
+  auto     top_volume = t * t           * h / 2;
+  auto corners_volume = c * c           * h / 2;
+  auto    base_volume = 2 * c * (t - c) * h / pi; // compensate for missing pi in circular volumes
+  return {top_volume, corners_volume, base_volume};
 }
