@@ -5,7 +5,7 @@
 # argument to abracadabra. This file should be passed as the second argument.
 
 /abracadabra/outfile "nema7-default-out.h5"
-/abracadabra/event-number-offset 40000
+/abracadabra/event-number-offset 100000
 
 /random/setSeeds 123456 987654
 
