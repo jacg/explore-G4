@@ -52,14 +52,14 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   };
 
   // ----- Build geometry by adding concentric cylinders of increasing radius -----
-  layer("Cavity"      , air   , 325 * mm);
-  layer("Inner_casing", steel ,   3 * mm);
-  layer("Inner_vacuum", vacuum,  25 * mm);
-  layer("Inner_steel" , steel ,   3 * mm);
-  layer("LXe"         , LXe   ,  40 * mm); auto xenon        = outer_layer;
-  layer("Quartz"      , quartz,  20 * mm); auto outside_quartz = radius;
-  layer("Outer_vacuum", vacuum, 200 * mm); auto outer_vacuum = outer_layer;
-  layer("Outer_casing", steel ,   5 * mm);
+  layer("Cavity"      , air   , 325   * mm);
+  layer("Inner_casing", steel ,   1.5 * mm);
+  layer("Inner_vacuum", vacuum,  25   * mm);
+  layer("Inner_steel" , steel ,   1.5 * mm);
+  layer("LXe"         , LXe   ,  40   * mm); auto xenon        = outer_layer;
+  layer("Quartz"      , quartz,  20   * mm); auto outside_quartz = radius;
+  layer("Outer_vacuum", vacuum, 200   * mm); auto outer_vacuum = outer_layer;
+  layer("Outer_casing", steel ,   5   * mm);
 
   // Helper for placing sensors in different layers according to detector design version
   auto place_sipms_in = [&sd](auto layer, optional<G4double> radius = {}) {
