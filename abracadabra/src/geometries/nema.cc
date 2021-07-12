@@ -145,10 +145,10 @@ G4ThreeVector nema_7_phantom::sphere_position(int n) const {
 
 G4PVPlacement* nema_7_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
-  auto air  = material("G4_AIR");
-  auto lung = material("G4_AIR"); // TODO low atomic number material with density 0.3 ± 0.1 g/mL
-  // TODO source and body materials should not be air
-  auto body_material = air;
+  // TODO the walls of the phantoms, sources, etc. are not modelled at all yet
+  auto air   = material("G4_AIR");
+  auto lung  = material("G4_AIR");
+  auto water = material("G4_WATER"); // The radioactive source is floating around in water
 
   auto pi = 180 * deg;
 
@@ -187,12 +187,12 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto union2     = new G4UnionSolid("union2", union1  , corner, no_rot, { corner_c_x,          0  , 0});
   auto body_solid = new G4UnionSolid("Body"  , union2  , base  , no_rot, {        0  , -base_half_y, 0});
 
-  auto vol_body = new G4LogicalVolume(body_solid, body_material, "Body");
+  auto vol_body = new G4LogicalVolume(body_solid, water, "Body");
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Sphere_" + std::to_string(count);
-    auto ball  = volume<G4Orb>(name, air, sphere.radius);
+    auto ball  = volume<G4Orb>(name, water, sphere.radius);
     auto position = sphere_position(count) + G4ThreeVector{0, -corner_c_y, z_offset};
     place(ball).in(vol_body).at(position).now();
   }
