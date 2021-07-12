@@ -9,11 +9,19 @@
 #include <catch2/catch.hpp>
 
 TEST_CASE("NEMA4 phantom geometry", "[nema4][geometry]") {
-  auto geometry = nema_4_phantom(0).geometry();
+  const G4double z_offset =  34.5 * mm;
+  const G4double y_offset = -45.0 * mm;
+  auto geometry = nema_4_phantom(z_offset).geometry();
   // Verify the number of volumes that make up the geometry
-  CHECK(std::distance(begin(geometry), end(geometry)) == 3);
+  CHECK(std::distance(begin(geometry), end(geometry)) == 3); // Envelope + cylinder + source
 
   for (auto volume : geometry) { CHECK(volume->CheckOverlaps(1000, 0, false) == false); }
+
+  bool verbose = false;
+  auto cylinder = n4::find_physical("Cylinder", verbose);
+  auto source   = n4::find_physical("Source"  , verbose);
+  CHECK(cylinder->GetTranslation() == G4ThreeVector{0,        0, z_offset});
+  CHECK(source  ->GetTranslation() == G4ThreeVector{0, y_offset,        0});
 }
 
 TEST_CASE("NEMA4 phantom generate vertex", "[nema4][generator]") {
