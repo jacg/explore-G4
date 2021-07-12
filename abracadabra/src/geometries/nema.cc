@@ -73,8 +73,10 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 // ===== Section 4: Scatter Fraction, Count Losses, and Randoms ============================
 
 G4PVPlacement* nema_4_phantom::geometry() const {
+  auto nist = G4NistManager::Instance();
+  nist -> BuildMaterialWithNewDensity("NEMA4_POLYETHYLENE", "G4_POLYETHYLENE", 0.96 * g / cm3);
   auto air  = material("G4_AIR");
-  auto poly = material("G4_POLYETHYLENE"); // TODO check density: should be 0.96
+  auto poly = material("NEMA4_POLYETHYLENE");
 
   auto l = 700 * mm;
   auto half_l = l / 2;

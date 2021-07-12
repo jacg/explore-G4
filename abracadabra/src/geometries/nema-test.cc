@@ -22,6 +22,11 @@ TEST_CASE("NEMA4 phantom geometry", "[nema4][geometry]") {
   auto source   = n4::find_physical("Source"  , verbose);
   CHECK(cylinder->GetTranslation() == G4ThreeVector{0,        0, z_offset});
   CHECK(source  ->GetTranslation() == G4ThreeVector{0, y_offset,        0});
+
+  auto cylinder_solid = n4::find_logical("Cylinder", verbose);
+  auto cylinder_material = cylinder_solid    -> GetMaterial();
+  auto cylinder_density  = cylinder_material -> GetDensity();
+  CHECK(cylinder_density / (g / mL) == 0.96);
 }
 
 TEST_CASE("NEMA4 phantom generate vertex", "[nema4][generator]") {
