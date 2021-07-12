@@ -8,7 +8,52 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
+TEST_CASE("NEMA4 phantom geometry", "[nema4][geometry]") {
+  auto geometry = nema_4_phantom(0).geometry();
+  // Verify the number of volumes that make up the geometry
+  CHECK(std::distance(begin(geometry), end(geometry)) == 3);
+
+  for (auto volume : geometry) { CHECK(volume->CheckOverlaps(1000, 0, false) == false); }
+}
+
+TEST_CASE("NEMA4 phantom generate vertex", "[nema4][generator]") {
+  const G4double y_offset =  45   * mm;
+  const G4double z_offset =  23.4 * mm;
+  const G4double length   = 700   * mm;
+
+  auto phantom = nema_4_phantom{z_offset};
+
+  // ----- Space for gathering statistics ----------------------------------------
+  auto  x_min =  std::numeric_limits<G4double>::infinity();
+  auto  x_max = -std::numeric_limits<G4double>::infinity();
+  auto  y_min =  std::numeric_limits<G4double>::infinity();
+  auto  y_max = -std::numeric_limits<G4double>::infinity();
+  auto  z_min =  std::numeric_limits<G4double>::infinity();
+  auto  z_max = -std::numeric_limits<G4double>::infinity();
+
+  // ----- Generate sample data --------------------------------------------------
+  for (unsigned i=0; i<1e6; ++i) {
+    auto vertex = phantom.generate_vertex();
+
+    // Keep track of maximum vertex distances from centre
+    auto [x, y, z] = std::make_tuple(vertex.x(), vertex.y(), vertex.z());
+    x_min  = std::min(x_min, x);
+    x_max  = std::max(x_max, x);
+    y_min  = std::min(y_min, y);
+    y_max  = std::max(y_max, y);
+    z_min  = std::min(z_min, z);
+    z_max  = std::max(z_max, z);
+  }
+
+  CHECK(x_min ==        0);
+  CHECK(x_max ==        0);
+  CHECK(y_min ==       -y_offset);
+  CHECK(y_max ==       -y_offset);
+  CHECK(z_min == Approx(z_offset - length / 2));
+  CHECK(z_max == Approx(z_offset + length / 2));
+}
+
+TEST_CASE("NEMA7 phantom geometry", "[nema7][geometry]") {
 
   using std::setw;
 
@@ -45,7 +90,7 @@ TEST_CASE("NEMA phantom geometry", "[nema][geometry]") {
 
 }
 
-TEST_CASE("NEMA phantom generate vertex", "[nema][generator]") {
+TEST_CASE("NEMA7 phantom generate vertex", "[nema7][generator]") {
 
   // Activities (intensities), radii and cylinder length
   G4double a = 10,  r =  4 * mm;               // Inner spheres basis

@@ -302,6 +302,16 @@ int main(int argc, char** argv) {
   //auto sd = nullptr; // If you only want to visualize geometry
 
   // ----- Available phantoms -----------------------------------------------------------
+
+  auto nema_3 = [&messenger]() {
+    auto fov_length = messenger.cylinder_length * mm;
+    return nema_3_phantom{fov_length};
+  };
+
+  auto nema_4 = []() {
+    return nema_4_phantom(0);
+  };
+
   auto nema_7 = []() {
     return build_nema_7_phantom{}
       .activity(1)
@@ -319,16 +329,11 @@ int main(int argc, char** argv) {
       .build();
   };
 
-  auto nema_3 = [&messenger]() {
-    auto fov_length = messenger.cylinder_length * mm;
-    return nema_3_phantom{fov_length};
-  };
-
   // ----- Choice of phantom -------------------------------------------------------------
   // Can choose phantom in macros with `/abracadabra/phantom <choice>`
   // The nema_3 phantom's length is determined by `/abracadabra/cylinder_length` in mm
 
-  using polymorphic_phantom = std::variant<nema_3_phantom, nema_7_phantom>;
+  using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom, nema_7_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -346,6 +351,7 @@ int main(int argc, char** argv) {
   auto set_phantom = [&](G4String p) {
     p == "nema_7" ? phantom = nema_7() :
     p == "nema_3" ? phantom = nema_3() :
+    p == "nema_4" ? phantom = nema_4() :
     throw "Unrecoginzed phantom " + p;
   };
 

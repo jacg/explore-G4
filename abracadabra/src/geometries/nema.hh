@@ -10,6 +10,12 @@
 #include <vector>
 
 
+template<class PHANTOM>
+void generate_primaries(PHANTOM const& phantom, G4Event* event) {
+  auto position = phantom.generate_vertex();
+  G4double time = 0;
+  generate_back_to_back_511_keV_gammas(event, position, time);
+}
 
 // ===== Section 3: Spatial Resolution =======================================================
 
@@ -20,27 +26,39 @@
 class nema_3_phantom {
 public:
   nema_3_phantom(G4double fov_length);
-  void generate_primaries(G4Event* event) const;
-  G4PVPlacement* geometry() const;
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex()         const { return vertices[fair_die(6)] ; }
+  G4PVPlacement* geometry()               const;
 private:
   std::vector<G4ThreeVector> vertices;
 };
 
+// ===== Section 4: Scatter Fraction, Count Losses, and Randoms ============================
+
+// Also used as the source in sections 6, 8, and as the source of noise in section 7
+
+class nema_4_phantom {
+public:
+  nema_4_phantom(G4double z_offset = 0.0) : z_offset{z_offset} {}
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex()         const;
+  G4PVPlacement* geometry()               const;
+private:
+  G4double z_offset    =   0;
+  G4double y_offset    = -45 * mm;
+  G4double half_length = 700 * mm / 2;
+};
+
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
 
-// TODO central cylinder is missing, and its attenuating properties are an
-// inherent part of the test.
-
-// TODO if the NEMA NU 2 section 7 analyses are to be performed, the body size
-// needs to be increased, in order to accommodate the 12 different background
-// ROIs. Maybe the shape should then be adjusted to match the official one, but
-// maybe it's a pointless PITA.
+// TODO lung material: a cylindrical insert filled with a low atomic number
+// material with an average density of 0.3 g/mL
 
 class nema_7_phantom {
 
 public:
   G4PVPlacement* geometry() const;
-  void generate_primaries(G4Event* event) const;
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
   G4ThreeVector generate_vertex_in_body() const; // This one should probably end up private
 
