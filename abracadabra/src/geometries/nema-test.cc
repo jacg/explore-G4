@@ -101,6 +101,10 @@ TEST_CASE("NEMA7 phantom geometry", "[nema7][geometry]") {
     CHECK(volume->CheckOverlaps(1000, 0, false) == false);
   }
 
+  bool verbose = false;
+  auto lung_density = n4::find_logical("Lung", verbose) -> GetMaterial() -> GetDensity();
+  CHECK(lung_density / (g / mL) == Approx(0.3));
+
 }
 
 TEST_CASE("NEMA7 phantom generate vertex", "[nema7][generator]") {
