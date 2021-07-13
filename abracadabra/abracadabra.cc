@@ -409,8 +409,7 @@ int main(int argc, char** argv) {
   id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
   id_store<std::string>  volume_names{
     {"LXe", // Ensure that LXe has id 0: the rest in inside-out order
-     "Cavity", "Inner_casing", "Inner_vacuum", "Inner_steel", "Quartz",
-     "Outer_vacuum", "Outer_casing",
+     "Cavity", "Steel_0", "Inner_vacuum", "Steel_1", "Quartz","Outer_vacuum", "Steel_2",
      // NEMA7 phantom parts (Source_N also used by NEMA3)
      "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
      // NEMA4
