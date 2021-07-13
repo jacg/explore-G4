@@ -74,9 +74,10 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
 G4PVPlacement* nema_4_phantom::geometry() const {
   auto nist = G4NistManager::Instance();
-  nist -> BuildMaterialWithNewDensity("NEMA4_POLYETHYLENE", "G4_POLYETHYLENE", 0.96 * g / cm3);
-  auto air  = material("G4_AIR");
-  auto poly = material("NEMA4_POLYETHYLENE");
+  nist -> BuildMaterialWithNewDensity("NEMA4_POLYETHYLENE", "G4_POLYETHYLENE", 0.96 * g / mL);
+  auto air   = material("G4_AIR");
+  auto water = material("G4_WATER");
+  auto poly  = material("NEMA4_POLYETHYLENE");
 
   auto l = 700 * mm;
   auto half_l = l / 2;
@@ -84,9 +85,9 @@ G4PVPlacement* nema_4_phantom::geometry() const {
   auto d =   3.2 * mm, r = d / 2;
   auto e_half_l = 1.1 * half_l + abs(z_offset);
 
-  auto cylinder = volume<G4Tubs>("Cylinder", poly, 0.0, R, half_l, 0.0, 360*deg);
-  auto source   = volume<G4Tubs>("Source"  , poly, 0.0, r, half_l, 0.0, 360*deg);
-  auto envelope = volume<G4Box> ("Envelope", air , R * 1.1, R * 1.1, e_half_l);
+  auto cylinder = volume<G4Tubs>("Cylinder", poly , 0.0, R, half_l, 0.0, 360*deg);
+  auto source   = volume<G4Tubs>("Source"  , water, 0.0, r, half_l, 0.0, 360*deg);
+  auto envelope = volume<G4Box> ("Envelope", air  , R * 1.1, R * 1.1, e_half_l);
 
   place(source)  .in(cylinder).at(0, y_offset, 0).now();
   place(cylinder).in(envelope).at(0, 0, z_offset).now();
