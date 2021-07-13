@@ -36,12 +36,6 @@ nema_3_phantom::nema_3_phantom(G4double fov_length)
              {0, 20*cm, fov_length * 3 / 8}}
 {}
 
-void nema_3_phantom::generate_primaries(G4Event* event) const {
-  G4ThreeVector position = vertices[fair_die(6)];
-  G4double time = 0;
-  generate_back_to_back_511_keV_gammas(event, position, time);
-}
-
 G4PVPlacement* nema_3_phantom::geometry() const {
   // ----- Materials --------------------------------------------------------------
   auto air = material("G4_AIR");
@@ -75,6 +69,36 @@ G4PVPlacement* nema_3_phantom::geometry() const {
   place(container).in(envelope).now();
   return place(envelope).now();
 }
+
+// ===== Section 4: Scatter Fraction, Count Losses, and Randoms ============================
+
+G4PVPlacement* nema_4_phantom::geometry() const {
+  auto nist = G4NistManager::Instance();
+  nist -> BuildMaterialWithNewDensity("NEMA4_POLYETHYLENE", "G4_POLYETHYLENE", 0.96 * g / mL);
+  auto air   = material("G4_AIR");
+  auto water = material("G4_WATER");
+  auto poly  = material("NEMA4_POLYETHYLENE");
+
+  auto l = 700 * mm;
+  auto half_l = l / 2;
+  auto D = 203   * mm, R = D / 2;
+  auto d =   3.2 * mm, r = d / 2;
+  auto e_half_l = 1.1 * half_l + abs(z_offset);
+
+  auto cylinder = volume<G4Tubs>("Cylinder", poly , 0.0, R, half_l, 0.0, 360*deg);
+  auto source   = volume<G4Tubs>("Source"  , water, 0.0, r, half_l, 0.0, 360*deg);
+  auto envelope = volume<G4Box> ("Envelope", air  , R * 1.1, R * 1.1, e_half_l);
+
+  place(source)  .in(cylinder).at(0, y_offset, 0).now();
+  place(cylinder).in(envelope).at(0, 0, z_offset).now();
+  return place(envelope)                         .now();
+}
+
+G4ThreeVector nema_4_phantom::generate_vertex() const {
+  auto z = uniform(-half_length, half_length) + z_offset;
+  return {0, y_offset, z};
+}
+
 
 // ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
 
@@ -186,11 +210,6 @@ void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position
   vertex->SetPrimary(new G4PrimaryParticle(gamma,  p.x(),  p.y(),  p.z()));
   vertex->SetPrimary(new G4PrimaryParticle(gamma, -p.x(), -p.y(), -p.z()));
   event -> AddPrimaryVertex(vertex);
-}
-
-void nema_7_phantom::generate_primaries(G4Event* event) const {
-  auto position = generate_vertex();        G4double time = 0;
-  generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
 G4ThreeVector nema_7_phantom::generate_vertex_in_body() const {

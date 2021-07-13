@@ -1,0 +1,17 @@
+# Model macro file for abracadabra
+
+# Shared by interactive and batch mode
+
+# Select detector geometry, generators and phantom here
+
+/abracadabra/geometry phantom
+/abracadabra/phantom nema_4
+/abracadabra/detector imas
+/abracadabra/imas_version 1
+/abracadabra/cylinder_length 1000
+
+# When used as source of noise for NEMA 7
+/abracadabra/z-offset 450
+
+/abracadabra/clear-pre-lxe false
+#/abracadabra/xenon_thickness 50
