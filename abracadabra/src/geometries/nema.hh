@@ -51,9 +51,6 @@ private:
 
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
 
-// TODO lung material: a cylindrical insert filled with a low atomic number
-// material with an average density of 0.3 g/mL
-
 class nema_7_phantom {
 
 public:
