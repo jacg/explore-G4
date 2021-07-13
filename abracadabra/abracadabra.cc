@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
       if (!messenger.print) return;
 
       if (event_id != header_last_printed) {
-        cout << " event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
+        cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
         cout << endl;
         header_last_printed = event_id;
         track_1_printed_this_event = false;
