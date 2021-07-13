@@ -1,4 +1,4 @@
-/abracadabra/outfile "nema4-1m-steel-1.h5"
+/abracadabra/outfile "nema3-1m-steel-1.h5"
 /abracadabra/event-number-offset 40000
 
 /random/setSeeds 123456 987654
