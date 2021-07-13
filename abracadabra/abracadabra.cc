@@ -410,7 +410,11 @@ int main(int argc, char** argv) {
   id_store<std::string>  volume_names{
     {"LXe", // Ensure that LXe has id 0: the rest in inside-out order
      "Cavity", "Inner_casing", "Inner_vacuum", "Inner_steel", "Quartz",
-     "Outer_vacuum", "Outer_casing"}};
+     "Outer_vacuum", "Outer_casing",
+     // NEMA7 phantom parts (Source_N also used by NEMA3)
+     "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
+     // NEMA4
+     "Cylinder", "Line_source"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;

@@ -85,9 +85,9 @@ G4PVPlacement* nema_4_phantom::geometry() const {
   auto d =   3.2 * mm, r = d / 2;
   auto e_half_l = 1.1 * half_l + abs(z_offset);
 
-  auto cylinder = volume<G4Tubs>("Cylinder", poly , 0.0, R, half_l, 0.0, 360*deg);
-  auto source   = volume<G4Tubs>("Source"  , water, 0.0, r, half_l, 0.0, 360*deg);
-  auto envelope = volume<G4Box> ("Envelope", air  , R * 1.1, R * 1.1, e_half_l);
+  auto cylinder = volume<G4Tubs>("Cylinder"   , poly , 0.0, R, half_l, 0.0, 360*deg);
+  auto source   = volume<G4Tubs>("Line_source", water, 0.0, r, half_l, 0.0, 360*deg);
+  auto envelope = volume<G4Box> ("Envelope"   , air  , R * 1.1, R * 1.1, e_half_l);
 
   place(source)  .in(cylinder).at(0, y_offset, 0).now();
   place(cylinder).in(envelope).at(0, 0, z_offset).now();
@@ -193,7 +193,7 @@ G4PVPlacement* nema_7_phantom::geometry() const {
 
   // Build and place spheres
   for (auto [count, sphere]: enumerate(spheres)) {
-    std::string name = "Sphere_" + std::to_string(count);
+    std::string name = "Source_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, water, sphere.radius);
     auto position = sphere_position(count) + G4ThreeVector{0, -corner_c_y, z_offset};
     place(ball).in(vol_body).at(position).now();

@@ -18,8 +18,8 @@ TEST_CASE("NEMA4 phantom geometry", "[nema4][geometry]") {
   for (auto volume : geometry) { CHECK(volume->CheckOverlaps(1000, 0, false) == false); }
 
   bool verbose = false;
-  auto cylinder = n4::find_physical("Cylinder", verbose);
-  auto source   = n4::find_physical("Source"  , verbose);
+  auto cylinder = n4::find_physical("Cylinder"   , verbose);
+  auto source   = n4::find_physical("Line_source", verbose);
   CHECK(cylinder->GetTranslation() == G4ThreeVector{0,        0, z_offset});
   CHECK(source  ->GetTranslation() == G4ThreeVector{0, y_offset,        0});
 
