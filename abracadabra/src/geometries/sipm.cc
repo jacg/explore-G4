@@ -119,7 +119,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
-    .pre_active_material(LXe)
+    .fake_active_material(LXe)
     .vis(vis_body)
     .build();
 
