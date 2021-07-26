@@ -107,7 +107,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
   auto vis_act  = visible ? va(col::Blue()).force_solid(true) : va().visible(false);
 
-  auto active = sipm_active_window("PHOTODIODES")
+  auto active = sipm_window("Quartz_window")
     .thickness(0.1*mm)
     .material(fr4)
     .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
