@@ -102,8 +102,6 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
   fr4 -> SetMaterialPropertiesTable(fr4_optical_material_properties());
 
-  auto LXe = LXe_with_properties();
-
   using va = nain4::vis_attributes;       using col = G4Colour;
 
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
@@ -119,7 +117,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
-    .fake_active_material(LXe)
+    .fake_active_material(fr4)
     .vis(vis_body)
     .build();
 
