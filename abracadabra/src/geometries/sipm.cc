@@ -82,11 +82,25 @@ G4MaterialPropertiesTable* fr4_surface_properties() {
     .done();
 }
 
+G4MaterialPropertiesTable* fr4_optical_material_properties() {
+  G4double optphot_min_E    = 1    * eV; // TODO remove copy-paste with LXe
+  G4double optphot_max_E    = 8.21 * eV;
+  G4double no_absorption    = 1e8  * m; // approx. infinity
+  G4double refractive_index = 1.6;
+
+  return n4::material_properties()
+    .add("RINDEX"   , {optphot_min_E, optphot_max_E}, {refractive_index, refractive_index})
+    .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption   , no_absorption})
+    .done();
+}
+
 G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
                                                                            {"O", 3}});
+
+  fr4 -> SetMaterialPropertiesTable(fr4_optical_material_properties());
 
   auto LXe = LXe_with_properties();
 
