@@ -164,7 +164,7 @@ TEST_CASE("hamamatsu app", "[app]") {
 
   // Generate theoretically expected hit locations
   std::vector<G4ThreeVector> expected{};
-  for (auto [x,y] : xys) { expected.emplace_back(x*mm, y*mm, 29.7*mm); }
+  for (auto [x,y] : xys) { expected.emplace_back(x*mm, y*mm, 29.8*mm); }
 
   // Translate from HDF5 compatible structs to something we like (G4ThreeVector)
   std::vector<G4ThreeVector> written{};
