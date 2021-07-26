@@ -110,7 +110,6 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
   auto active = sipm_window("Quartz_window")
     .thickness(0.1*mm)
     .material(fr4)
-    .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
     .vis(vis_act);
 
   return sipm("Hamamatsu_Blue", sd)

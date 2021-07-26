@@ -31,19 +31,10 @@ public:
   CHAIN material (G4Material* mt)            { mat = mt                    ; NEXT }
   CHAIN vis      (G4VisAttributes const& va) { vis_attributes = va         ; NEXT }
 
-  template<class... ArgTypes>
-  CHAIN skin(std::string const& surface_name, G4MaterialPropertiesTable* material_properties, ArgTypes&&... args) {
-    active_surface = new G4OpticalSurface{surface_name, std::forward<ArgTypes>(args)...};
-    active_props   = material_properties;
-    NEXT
-  }
-
 private:
   std::string name;
   G4double dz = 0, margin_x = 0, margin_y = 0;
   G4Material*                mat;
-  G4MaterialPropertiesTable* active_props;
-  G4OpticalSurface*          active_surface;
   G4VisAttributes            vis_attributes;
 
 #undef CHAIN
