@@ -19,13 +19,13 @@
 class sipm;
 
 // ----- active window --------------------------------------------------------------------------
-class sipm_active_window {
-#define CHAIN sipm_active_window&
+class sipm_window {
+#define CHAIN sipm_window&
   friend class sipm;
 
 public:
-  sipm_active_window() = default;
-  sipm_active_window(std::string const& name): name{name} {}
+  sipm_window() = default;
+  sipm_window(std::string const& name): name{name} {}
   CHAIN thickness(G4double t)                { dz = t                      ; NEXT }
   CHAIN margin   (G4double mx, G4double my)  { margin_x = mx; margin_y = my; NEXT }
   CHAIN material (G4Material* mt)            { mat = mt                    ; NEXT }
@@ -63,7 +63,7 @@ public:
   CHAIN material(std::string const& matname) { mat = nain4::material(matname) ; NEXT }
   CHAIN size    (dist x, dist y, dist z)     { half = G4ThreeVector{x,y,z} / 2; NEXT }
   CHAIN vis     (G4VisAttributes const& va)  { vis_attributes = va            ; NEXT }
-  CHAIN active  (sipm_active_window a)       { act  = a; NEXT }
+  CHAIN active  (sipm_window a)       { act  = a; NEXT }
   CHAIN wls     (sipm_wls w)                 { wls_ = w; NEXT }
   CHAIN fake_active_material(G4Material* pam) { pre_active_material_  = pam; NEXT }
 private:
@@ -71,7 +71,7 @@ private:
   G4Material *            mat;
   G4ThreeVector           half;
   G4VisAttributes         vis_attributes;
-  sipm_active_window      act;
+  sipm_window             act;
   std::optional<sipm_wls> wls_;
   G4VSensitiveDetector*   sensitive_detector;
   G4Material*             pre_active_material_;
