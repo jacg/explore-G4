@@ -97,6 +97,7 @@ G4MaterialPropertiesTable* fr4_optical_material_properties() {
 
 G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
+  // TODO: this should be Quartz
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
                                                                            {"O", 3}});
