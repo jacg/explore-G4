@@ -33,8 +33,8 @@ G4LogicalVolume* sipm::build() {
   vol_pre  -> SetVisAttributes(act.vis_attributes);
 
   // ----- geometrical relationship between components ----------------------------
-  auto z_act_in_body = act.dz/2 - half.z() + pre_z;
-  auto z_pre_in_body =  pre_z/2 - half.z();
+  auto z_act_in_body = act.dz/2 - half.z();
+  auto z_pre_in_body =  pre_z/2 - half.z() + act.dz;
   place(vol_pre).in(vol_body).at(0,0,z_pre_in_body).name("fake_active").now();
   place(vol_act).in(vol_body).at(0,0,z_act_in_body).name("true_active").now();
   return vol_body;
@@ -102,8 +102,6 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
   fr4 -> SetMaterialPropertiesTable(fr4_optical_material_properties());
 
-  auto LXe = LXe_with_properties();
-
   using va = nain4::vis_attributes;       using col = G4Colour;
 
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
@@ -119,7 +117,7 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .active(active)
-    .pre_active_material(LXe)
+    .fake_active_material(fr4)
     .vis(vis_body)
     .build();
 
