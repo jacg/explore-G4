@@ -69,7 +69,8 @@ void sipm_sensitive::EndOfEvent(G4HCofThisEvent*){
 // Hamamatsu Blue: one example of a SiPM
 #include <G4SystemOfUnits.hh>
 
-G4MaterialPropertiesTable* fr4_surface_properties() {
+// XXX This is not being used at the moment: PDE done in post-processing
+G4MaterialPropertiesTable* sipm_surface_properties() {
   auto photon_energy = scale_by(eV,
     { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
     , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
