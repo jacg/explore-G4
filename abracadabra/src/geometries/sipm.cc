@@ -69,7 +69,8 @@ void sipm_sensitive::EndOfEvent(G4HCofThisEvent*){
 // Hamamatsu Blue: one example of a SiPM
 #include <G4SystemOfUnits.hh>
 
-G4MaterialPropertiesTable* fr4_surface_properties() {
+// XXX This is not being used at the moment: PDE done in post-processing
+G4MaterialPropertiesTable* sipm_surface_properties() {
   auto photon_energy = scale_by(eV,
     { 1.37760, 1.54980, 1.79687, 1.90745, 1.99974, 2.06640, 2.21400, 2.47968, 2.75520
     , 2.91727, 3.09960, 3.22036, 3.44400, 3.54240, 3.62526, 3.73446, 3.87450});
@@ -96,6 +97,7 @@ G4MaterialPropertiesTable* fr4_optical_material_properties() {
 
 G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
+  // TODO: this should be Quartz
   auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
                                                                            {"C", 18},
                                                                            {"O", 3}});
@@ -107,10 +109,9 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
   auto vis_act  = visible ? va(col::Blue()).force_solid(true) : va().visible(false);
 
-  auto active = sipm_active_window("PHOTODIODES")
+  auto active = sipm_window("Quartz_window")
     .thickness(0.1*mm)
     .material(fr4)
-    .skin("SIPM_OPTSURF", fr4_surface_properties(), unified, polished, dielectric_metal)
     .vis(vis_act);
 
   return sipm("Hamamatsu_Blue", sd)
