@@ -15,7 +15,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   using std::setw; using std::make_tuple;
 
   auto [version, n_elements] = GENERATE(make_tuple(1, 104552),
-                                        make_tuple(2, 110493));
+                                        make_tuple(2, 112572));
 
   auto& geometry = *imas_demonstrator(nullptr, 70*cm, version);
 
@@ -43,4 +43,17 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
     count++;
     if (count > 1000) { break; }
   }
+
+  // TODO send geantino outwards, and check that the order of volumes is as
+  // expected
+
+  // std::vector<std::string> names{};
+  // for (auto volume: geometry) {
+  //   names.push_back(volume -> GetName());
+  //   auto name = volume -> GetName();
+  //   if (name != "true_active" && name != "fake_active" && name[0] != 'H') {
+  //     std::cout << volume -> GetName() << std::endl;
+  //   }
+  // }
+
 }

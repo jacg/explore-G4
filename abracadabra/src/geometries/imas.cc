@@ -31,7 +31,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
-  auto quartz  = material("G4_WATER");    // TODO
+  auto Quartz  = quartz_with_properties();
   auto LXe     = LXe_with_properties();
 
   // For trials where we want a cleaner signal in the Xenon
@@ -41,14 +41,15 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   }
 
   // ----- Utility for wrapping smaller cylinder inside a larger one --------------
-  G4LogicalVolume* outer_layer = nullptr;
+  G4LogicalVolume*   log_out = nullptr; // Current outermost logical volume
+  G4VPhysicalVolume* phy_prv = nullptr; // Physical volume directly inside log_out
   auto radius = 0.0;
-  auto layer = [=, &radius, &outer_layer](auto& name, auto material, auto dr) {
+  auto layer = [=, &radius, &log_out, &phy_prv](auto& name, auto material, auto dr) {
     if (name == "Quartz" && version == 1) { return; } // Skip quartz layer in version 1
     radius += dr;
-    auto vol = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
-    if (outer_layer) { place(outer_layer).in(vol).now(); }
-    outer_layer = vol;
+    auto log_new = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
+    if (log_out) { phy_prv = place(log_out).in(log_new).now(); }
+    log_out = log_new;
   };
 
   // ----- Build geometry by adding concentric cylinders of increasing radius -----
@@ -56,9 +57,9 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   layer("Steel_0"     , steel ,   1.5 * mm);
   layer("Inner_vacuum", vacuum,  25   * mm);
   layer("Steel_1"     , steel ,   1.5 * mm);
-  layer("LXe"         , LXe   ,  40   * mm); auto xenon        = outer_layer;
-  layer("Quartz"      , quartz,  20   * mm); auto outside_quartz = radius;
-  layer("Outer_vacuum", vacuum, 200   * mm); auto outer_vacuum = outer_layer;
+  layer("LXe"         , LXe   ,  40   * mm); auto xenon_l = log_out;
+  layer("Quartz"      , Quartz,  30   * mm); auto quartz  = log_out;
+  layer("Outer_vacuum", vacuum, 200   * mm);
   layer("Steel_2"     , steel ,   5   * mm);
 
   // Helper for placing sensors in different layers according to detector design version
@@ -67,14 +68,14 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   };
 
   // Two versions: SiPMs either in 1. xenon; 2. vacuum outside quartz
-  if (version == 2) { place_sipms_in(outer_vacuum, outside_quartz + 3*mm); }
-  else              { place_sipms_in(xenon                              ); }
+  if (version == 2) { place_sipms_in(quartz ); }
+  else              { place_sipms_in(xenon_l); }
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;
 
   auto vol_envelope = volume<G4Box>("Envelope", air, env_width, env_width, env_length);
-  place(outer_layer).in(vol_envelope).now();
+  place(log_out).in(vol_envelope).now();
   return place(vol_envelope).now();
 }
 
