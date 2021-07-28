@@ -31,7 +31,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
-  auto quartz  = material("G4_WATER");    // TODO
+  auto quartz  = quartz_with_properties();
   auto LXe     = LXe_with_properties();
 
   // For trials where we want a cleaner signal in the Xenon
