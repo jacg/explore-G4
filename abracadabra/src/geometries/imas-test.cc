@@ -15,7 +15,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   using std::setw; using std::make_tuple;
 
   auto [version, n_elements] = GENERATE(make_tuple(1, 104552),
-                                        make_tuple(2, 110493));
+                                        make_tuple(2, 113166));
 
   auto& geometry = *imas_demonstrator(nullptr, 70*cm, version);
 
