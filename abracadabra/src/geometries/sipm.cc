@@ -7,7 +7,7 @@
 #include <G4LogicalVolume.hh>
 #include <G4EventManager.hh>
 
-using nain4::material_from_elements_N;
+using nain4::material;
 using nain4::place;
 using nain4::scale_by;
 using nain4::volume;
@@ -83,7 +83,7 @@ G4MaterialPropertiesTable* sipm_surface_properties() {
     .done();
 }
 
-G4MaterialPropertiesTable* fr4_optical_material_properties() {
+G4MaterialPropertiesTable* quartz_optical_material_properties() {
   G4double optphot_min_E    = 1    * eV; // TODO remove copy-paste with LXe
   G4double optphot_max_E    = 8.21 * eV;
   G4double no_absorption    = 1e8  * m; // approx. infinity
@@ -96,13 +96,8 @@ G4MaterialPropertiesTable* fr4_optical_material_properties() {
 }
 
 G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
-
-  // TODO: this should be Quartz
-  auto fr4 = material_from_elements_N("FR4", 1.85 * g / cm3, kStateSolid, {{"H", 12},
-                                                                           {"C", 18},
-                                                                           {"O", 3}});
-
-  fr4 -> SetMaterialPropertiesTable(fr4_optical_material_properties());
+  auto quartz = material("G4_SILICON_DIOXIDE");
+  quartz -> SetMaterialPropertiesTable(quartz_optical_material_properties());
 
   using va = nain4::vis_attributes;       using col = G4Colour;
 
@@ -111,14 +106,14 @@ G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
 
   auto window = sipm_window("Quartz_window")
     .thickness(0.1*mm)
-    .material(fr4)
+    .material(quartz)
     .vis(vis_act);
 
   return sipm("Hamamatsu_Blue", sd)
     .material("G4_Si")
     .size(6*mm, 6*mm, 0.6*mm)
     .window(window)
-    .fake_active_material(fr4)
+    .fake_active_material(quartz)
     .vis(vis_body)
     .build();
 
