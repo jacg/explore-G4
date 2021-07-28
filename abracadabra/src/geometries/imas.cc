@@ -31,7 +31,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
-  auto quartz  = quartz_with_properties();
+  auto Quartz  = quartz_with_properties();
   auto LXe     = LXe_with_properties();
 
   // For trials where we want a cleaner signal in the Xenon
@@ -56,9 +56,9 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   layer("Steel_0"     , steel ,   1.5 * mm);
   layer("Inner_vacuum", vacuum,  25   * mm);
   layer("Steel_1"     , steel ,   1.5 * mm);
-  layer("LXe"         , LXe   ,  40   * mm); auto xenon        = outer_layer;
-  layer("Quartz"      , quartz,  30   * mm); auto outside_quartz = radius;
-  layer("Outer_vacuum", vacuum, 200   * mm); auto outer_vacuum = outer_layer;
+  layer("LXe"         , LXe   ,  40   * mm); auto xenon  = outer_layer;
+  layer("Quartz"      , Quartz,  30   * mm); auto quartz = outer_layer;
+  layer("Outer_vacuum", vacuum, 200   * mm);
   layer("Steel_2"     , steel ,   5   * mm);
 
   // Helper for placing sensors in different layers according to detector design version
@@ -67,8 +67,8 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   };
 
   // Two versions: SiPMs either in 1. xenon; 2. vacuum outside quartz
-  if (version == 2) { place_sipms_in(outer_vacuum, outside_quartz + 3*mm); }
-  else              { place_sipms_in(xenon                              ); }
+  if (version == 2) { place_sipms_in(quartz); }
+  else              { place_sipms_in(xenon ); }
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;
