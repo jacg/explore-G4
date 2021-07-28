@@ -56,18 +56,11 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   layer("Cavity"      , air   , 325   * mm);
   layer("Steel_0"     , steel ,   1.5 * mm);
   layer("Inner_vacuum", vacuum,  25   * mm);
-  layer("Steel_1"     , steel ,   1.5 * mm); auto steel_l = log_out;                         auto rsteel = radius;
-  layer("LXe"         , LXe   ,  40   * mm); auto xenon_l = log_out; auto steel_p = phy_prv; auto rxenon = radius;
-  layer("Steel_666"   , steel ,   1.5 * mm);                         auto xenon_p = phy_prv;
-  layer("Quartz"      , Quartz,  30   * mm); auto quartz  = log_out; //auto xenon_p = phy_prv;
+  layer("Steel_1"     , steel ,   1.5 * mm);
+  layer("LXe"         , LXe   ,  40   * mm); auto xenon_l = log_out;
+  layer("Quartz"      , Quartz,  30   * mm); auto quartz  = log_out;
   layer("Outer_vacuum", vacuum, 200   * mm);
   layer("Steel_2"     , steel ,   5   * mm);
-
-  // Two parallel steel plates to show that steel absorbs rather than reflects
-  auto block = volume<G4Box>("block", steel, 40*mm, 1*mm, 450*mm);
-  auto y = (rxenon + rsteel) * mm / 2;
-  place(block).in(xenon_l).at(90*mm, y        , 0).now();
-  place(block).in(xenon_l).at(90*mm, y - 15*mm, 0).now();
 
   // Helper for placing sensors in different layers according to detector design version
   auto place_sipms_in = [&sd](auto layer, optional<G4double> radius = {}) {

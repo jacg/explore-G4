@@ -107,7 +107,6 @@
 
 /vis/geometry/set/colour     Steel_0      0 .0 .9 .9 .2
 /vis/geometry/set/visibility Steel_0      0 true
-/vis/geometry/set/visibility Steel_666    0 false
 
 /vis/geometry/set/colour     Inner_vacuum 0 .0 .0 .0 .3
 /vis/geometry/set/visibility Inner_vacuum 0 false
