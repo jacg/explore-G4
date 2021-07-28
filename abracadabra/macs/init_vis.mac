@@ -14,5 +14,5 @@
 #
 # Visualization setting
 /control/execute macs/vis.mac
-#/vis/viewer/zoomTo 20
-#/vis/viewer/panTo 0.46 0
+#/vis/viewer/zoomTo 40
+#/vis/viewer/panTo 0.466 0
