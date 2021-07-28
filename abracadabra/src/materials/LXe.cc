@@ -8,17 +8,18 @@
 
 namespace nexus_LXe { G4MaterialPropertiesTable* OpticalMaterialProperties(); }
 
+const G4double OPTPHOT_MIN_E = 1    * eV;
+const G4double OPTPHOT_MAX_E = 8.21 * eV;
+
 G4Material* quartz_with_properties() {
-  auto optphot_min_E    = 1    * eV; // TODO remove copy-paste with LXe
-  auto optphot_max_E    = 8.21 * eV;
   auto no_absorption    = 1e8  * m; // approx. infinity
   auto refractive_index = 1.6;
 
   auto quartz = n4::material("G4_SILICON_DIOXIDE");
   quartz -> SetMaterialPropertiesTable(
       n4::material_properties()
-          .add("RINDEX", {optphot_min_E, optphot_max_E}, {refractive_index, refractive_index})
-          .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption, no_absorption})
+          .add("RINDEX"   , {OPTPHOT_MIN_E, OPTPHOT_MAX_E}, {refractive_index, refractive_index})
+          .add("ABSLENGTH", {OPTPHOT_MIN_E, OPTPHOT_MAX_E}, {no_absorption, no_absorption})
           .done());
   return quartz;
 }
@@ -92,12 +93,10 @@ G4double LXe_refractive_index(G4double energy) {
 G4MaterialPropertiesTable* LXe_optical_material_properties() {
   /// The time constants are taken from E. Hogenbirk et al 2018 JINST 13 P10031
   G4double no_absorption = 1e8  * m; // approx. infinity
-  G4double optphot_min_E = 1    * eV;
-  G4double optphot_max_E = 8.21 * eV;
 
   // Sampling from ~151 nm to 200 nm <----> from 6.20625 eV to 8.21 eV // TODO convert here
-  auto [sc_energies, sc_values] = interpolate(LXe_Scintillation   , 500, 6.20625*eV   , optphot_max_E);
-  auto [ri_energies, ri_values] = interpolate(LXe_refractive_index, 200, optphot_min_E, optphot_max_E);
+  auto [sc_energies, sc_values] = interpolate(LXe_Scintillation   , 500, 6.20625*eV   , OPTPHOT_MAX_E);
+  auto [ri_energies, ri_values] = interpolate(LXe_refractive_index, 200, OPTPHOT_MIN_E, OPTPHOT_MAX_E);
 
   return n4::material_properties()
     .add("RINDEX", ri_energies, ri_values)
@@ -110,7 +109,7 @@ G4MaterialPropertiesTable* LXe_optical_material_properties() {
     .add("ATTACHMENT"        ,  1000   * ms )
     .add("FASTCOMPONENT", sc_energies, sc_values)
     .add("SLOWCOMPONENT", sc_energies, sc_values)
-    .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption, no_absorption})
+    .add("ABSLENGTH", {OPTPHOT_MIN_E, OPTPHOT_MAX_E}, {no_absorption, no_absorption})
     .done();
 }
 
