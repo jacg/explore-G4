@@ -107,24 +107,28 @@
 
 /vis/geometry/set/colour     Steel_0      0 .0 .9 .9 .2
 /vis/geometry/set/visibility Steel_0      0 true
+/vis/geometry/set/visibility Steel_666    0 false
 
 /vis/geometry/set/colour     Inner_vacuum 0 .0 .0 .0 .3
-/vis/geometry/set/visibility Inner_vacuum 0 true
+/vis/geometry/set/visibility Inner_vacuum 0 false
+
+/vis/geometry/set/colour     block        0 .9 .0 .0 .9
+/vis/geometry/set/visibility block        0 true
 
 /vis/geometry/set/colour     Steel_1      0 .0 .9 .9 .2
 /vis/geometry/set/visibility Steel_1      0 true
 
-/vis/geometry/set/colour     LXe          0  0  0  1 .5
+/vis/geometry/set/colour     LXe          0  0  0  1 .1
 /vis/geometry/set/visibility LXe          0 true
 
-/vis/geometry/set/colour     Quartz       0  1  0  0 .5
+/vis/geometry/set/colour     Quartz       0  1  0  0 .1
 /vis/geometry/set/visibility Quartz       0 true
 
 /vis/geometry/set/colour     Outer_vacuum 0 .0 .0 .0 .3
-/vis/geometry/set/visibility Outer_vacuum 0 true
+/vis/geometry/set/visibility Outer_vacuum 0 false
 
 /vis/geometry/set/colour     Steel_2      0 .0 .9 .9 .2
-/vis/geometry/set/visibility Steel_2      0 true
+/vis/geometry/set/visibility Steel_2      0 false
 
 /vis/geometry/set/colour     Cylinder     0 .7 .7 .7 .1
 /vis/geometry/set/colour     Body         0 .7 .7 .7 .1
