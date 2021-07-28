@@ -7,7 +7,6 @@
 #include <G4LogicalVolume.hh>
 #include <G4EventManager.hh>
 
-using nain4::material;
 using nain4::place;
 using nain4::scale_by;
 using nain4::volume;
@@ -83,27 +82,13 @@ G4MaterialPropertiesTable* sipm_surface_properties() {
     .done();
 }
 
-G4MaterialPropertiesTable* quartz_optical_material_properties() {
-  G4double optphot_min_E    = 1    * eV; // TODO remove copy-paste with LXe
-  G4double optphot_max_E    = 8.21 * eV;
-  G4double no_absorption    = 1e8  * m; // approx. infinity
-  G4double refractive_index = 1.6;
-
-  return n4::material_properties()
-    .add("RINDEX"   , {optphot_min_E, optphot_max_E}, {refractive_index, refractive_index})
-    .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption   , no_absorption})
-    .done();
-}
-
 G4LogicalVolume* sipm_hamamatsu_blue(G4bool visible, G4VSensitiveDetector* sd) {
-  auto quartz = material("G4_SILICON_DIOXIDE");
-  quartz -> SetMaterialPropertiesTable(quartz_optical_material_properties());
-
   using va = nain4::vis_attributes;       using col = G4Colour;
 
   auto vis_body = visible ?    col::Yellow()                  : va().visible(false);
   auto vis_act  = visible ? va(col::Blue()).force_solid(true) : va().visible(false);
 
+  auto quartz = quartz_with_properties();
   auto window = sipm_window("Quartz_window")
     .thickness(0.1*mm)
     .material(quartz)

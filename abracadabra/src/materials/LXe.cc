@@ -8,6 +8,21 @@
 
 namespace nexus_LXe { G4MaterialPropertiesTable* OpticalMaterialProperties(); }
 
+G4Material* quartz_with_properties() {
+  auto optphot_min_E    = 1    * eV; // TODO remove copy-paste with LXe
+  auto optphot_max_E    = 8.21 * eV;
+  auto no_absorption    = 1e8  * m; // approx. infinity
+  auto refractive_index = 1.6;
+
+  auto quartz = n4::material("G4_SILICON_DIOXIDE");
+  quartz -> SetMaterialPropertiesTable(
+      n4::material_properties()
+          .add("RINDEX", {optphot_min_E, optphot_max_E}, {refractive_index, refractive_index})
+          .add("ABSLENGTH", {optphot_min_E, optphot_max_E}, {no_absorption, no_absorption})
+          .done());
+  return quartz;
+}
+
 G4Material* air_with_properties() {
   auto air = n4::material("G4_air");
   auto air_properties = n4::material_properties()
