@@ -7,7 +7,7 @@
 /abracadabra/geometry both
 /abracadabra/phantom nema_4
 /abracadabra/detector imas
-/abracadabra/imas_version 2
+/abracadabra/imas_version 1
 /abracadabra/cylinder_length 1000
 
 /abracadabra/clear-pre-lxe false
