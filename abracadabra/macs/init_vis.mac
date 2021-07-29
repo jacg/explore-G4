@@ -15,6 +15,6 @@
 # Visualization setting
 /control/execute macs/vis.mac
 /vis/viewer/zoomTo 2.5
-/abracadabra/print true
+/abracadabra/print true # will be overridden by setting in run macro
 #/vis/viewer/zoomTo 40
 #/vis/viewer/panTo 0.466 0
