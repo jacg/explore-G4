@@ -270,7 +270,8 @@ int main(int argc, char** argv) {
   };
 
   // ----- Sensitive detector ----------------------------------------------------------------
-  n4::sensitive_detector::process_hits_fn store_hits = [&add_to_waveforms](G4Step* step) {
+  auto trigger_time = std::numeric_limits<G4double>::infinity();
+  n4::sensitive_detector::process_hits_fn store_hits = [&add_to_waveforms, &trigger_time](G4Step* step) {
     static auto optical_photon = G4OpticalPhoton::Definition();
 
     auto track    = step -> GetTrack();
@@ -281,6 +282,7 @@ int main(int argc, char** argv) {
       auto time = track -> GetGlobalTime();
       auto sensor_id = step -> GetPreStepPoint() -> GetTouchable() -> GetCopyNumber(1);
       add_to_waveforms(sensor_id, time);
+      trigger_time = std::min(trigger_time, time);
       return true;
     }
 
@@ -288,13 +290,19 @@ int main(int argc, char** argv) {
   };
 
   n4::sensitive_detector::end_of_event_fn write_hits = [&](auto) {
+    const auto acquisition_widow = 500 * ns;
     size_t event_id = current_event();
     for (auto& [sensor_id, ts] : times) {
-      const size_t N = std::min(messenger.waveform_length, ts.size());
-      std::vector<float> tvec(N);
-      std::copy_n(cbegin(ts), N, begin(tvec));
-      writer -> write_waveform    (event_id, sensor_id, tvec);
-      writer -> write_total_charge(event_id, sensor_id, ts.size());
+      std::vector<float> tvec;
+      for (auto t : ts) {
+        t -= trigger_time;
+        if (t > acquisition_widow) { break; }
+        tvec.push_back(t);
+      }
+      if ( ! tvec.empty()) {
+        writer -> write_waveform    (event_id, sensor_id, tvec);
+        writer -> write_total_charge(event_id, sensor_id, tvec.size());
+      }
     }
     times.clear();
   };
