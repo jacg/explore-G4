@@ -32,6 +32,7 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     pkgs.gdb
     pkgs.hdf5
     pkgs.highfive
+    pkgs.hdfview
     # For graphics hardware matching on non-NixOS
     pkgs.libGL
     (linux nixGL.nixGLDefault)
