@@ -119,7 +119,7 @@ G4PVPlacement* nema_5_phantom::geometry() const {
 
   for (const auto [layer, r] : enumerate(inner_radii)) {
     auto sleeve = volume<G4Tubs>("Sleeve", metal, r, r+dr, half_length, 0.0, 360*deg);
-    place(sleeve).in(envelope).now();
+    place(sleeve).in(envelope).copy_no(layer).now();
     if (layer == this -> number_of_sleeves - 1) { break; }
   }
 
