@@ -375,9 +375,9 @@ int main(int argc, char** argv) {
     auto clear   = messenger.vac_pre_lxe;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, version, clear)     :
-      d == "square"    ? square_array_of_sipms(sd)                         :
-      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now() :
+      d == "imas"      ? imas_demonstrator(sd, length, version, dr_LXe, clear)      :
+      d == "square"    ? square_array_of_sipms(sd)                                  :
+      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       throw "Unrecoginzed detector " + d;
   };
   // ----- Should the geometry contain phantom only / detector only / both

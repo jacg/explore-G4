@@ -16,8 +16,10 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
 
   auto [version, n_elements] = GENERATE(make_tuple(1,  99206),
                                         make_tuple(2, 107226));
+  bool vacuum_before_xenon;
+  G4double xenon_thickness;
 
-  auto& geometry = *imas_demonstrator(nullptr, 70*cm, version);
+  auto& geometry = *imas_demonstrator(nullptr, 70*cm, version, xenon_thickness=20*mm, vacuum_before_xenon=false);
 
   // std::cout << std::endl;
   // for (auto v: geometry) {
