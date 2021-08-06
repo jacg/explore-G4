@@ -9,6 +9,7 @@
 #include <G4SystemOfUnits.hh>
 #include <vector>
 
+// TODO consider giving the phantoms a common inherited interface
 
 template<class PHANTOM>
 void generate_primaries(PHANTOM const& phantom, G4Event* event) {
