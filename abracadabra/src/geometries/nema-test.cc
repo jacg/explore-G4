@@ -66,6 +66,24 @@ TEST_CASE("NEMA4 phantom generate vertex", "[nema4][generator]") {
   CHECK(z_max == Approx(z_offset + length / 2));
 }
 
+TEST_CASE("NEMA5 phantom geometry", "[nema5][geometry]") {
+
+  auto N_sleeves = GENERATE(1,2,3,4,5);
+
+  auto phantom  = nema_5_phantom(N_sleeves);
+  auto geometry = phantom.geometry();
+
+  // Verify the number of volumes that make up the geometry
+  auto non_sleeves = 2; // source and envelope
+  CHECK(std::distance(begin(geometry), end(geometry)) == N_sleeves + non_sleeves);
+
+  // for (const auto volume : geometry) {
+  //   std::cout << volume -> GetName() << std::endl;
+  // }
+
+}
+
+
 TEST_CASE("NEMA7 phantom geometry", "[nema7][geometry]") {
 
   using std::setw;
