@@ -57,7 +57,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd, G4double length, un
   layer("Steel_0"     , steel ,   1.5 * mm);
   layer("Inner_vacuum", vacuum,  25   * mm);
   layer("Steel_1"     , steel ,   1.5 * mm);
-  layer("LXe"         , LXe   ,  40   * mm); auto xenon_l = log_out;
+  layer("LXe"         , LXe   ,  20   * mm); auto xenon_l = log_out;
   layer("Quartz"      , Quartz,  30   * mm); auto quartz  = log_out;
   layer("Outer_vacuum", vacuum, 200   * mm);
   layer("Steel_2"     , steel ,   5   * mm);
