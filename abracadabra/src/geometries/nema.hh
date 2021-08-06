@@ -50,6 +50,19 @@ private:
   G4double half_length = 700 * mm / 2;
 };
 
+// ===== NEMA NU-2 2018 Section 5: Sensitivity =============================================
+
+class nema_5_phantom {
+public:
+  nema_5_phantom(unsigned N): number_of_sleeves{N} {}
+  G4PVPlacement* geometry() const;
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex() const;
+private:
+  const unsigned number_of_sleeves;
+  const G4double half_length = 700 * mm / 2;
+};
+
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
 
 class nema_7_phantom {
