@@ -107,7 +107,6 @@ build_nema_7_phantom& build_nema_7_phantom::sphereR(G4double radius, G4double ac
   return *this;
 };
 
-
 nema_7_phantom build_nema_7_phantom::build() {
 
   // We care about the relative, not absolute, volumes: ignore factors of pi
@@ -288,6 +287,7 @@ std::optional<size_t> nema_7_phantom::in_which_region(G4ThreeVector& position) c
   return {};
 
 }
+
 std::tuple<G4double, G4double, G4double> nema_7_phantom::sub_volumes() const {
   // All volumes scaled down by a factor of pi
   auto pi = 180 * deg;
