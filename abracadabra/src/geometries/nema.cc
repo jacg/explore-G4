@@ -113,7 +113,7 @@ G4PVPlacement* nema_5_phantom::geometry() const {
   const auto env_half_l = 1.1 * half_length;
   const auto env_half_w = 1.1 * (inner_radii[inner_radii.size() - 1] + dr);
 
-  auto envelope = volume<G4Box> ("Envelope", air  , env_half_l, env_half_w, env_half_w);
+  auto envelope = volume<G4Box> ("Envelope", air  , env_half_w, env_half_w, env_half_l);
   auto source   = volume<G4Tubs>("Source"  , water, 0.0, source_r, half_length, 0.0, 360*deg);
   place(source).in(envelope).now();
 
