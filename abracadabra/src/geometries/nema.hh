@@ -59,8 +59,8 @@ public:
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
 private:
-  const unsigned number_of_sleeves;
-  const G4double half_length = 700 * mm / 2;
+  unsigned number_of_sleeves;
+  G4double half_length = 700 * mm / 2;
 };
 
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
