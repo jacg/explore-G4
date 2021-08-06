@@ -359,9 +359,9 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_7" ? phantom = nema_7() :
-    p == "nema_3" ? phantom = nema_3() :
+    p == "nema_3" ? phantom = nema_3()                   :
     p == "nema_4" ? phantom = nema_4(messenger.z_offset) :
+    p == "nema_7" ? phantom = nema_7()                   :
     throw "Unrecoginzed phantom " + p;
   };
 
