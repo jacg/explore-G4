@@ -18,7 +18,7 @@ void generate_primaries(PHANTOM const& phantom, G4Event* event) {
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
-// ===== Section 3: Spatial Resolution =======================================================
+// ===== NEMA NU-2 2018 Section 3: Spatial Resolution ======================================
 
 // This is the most boring phantom of the lot: the geometry consists of 6
 // pointlike sources, and there are no materials around them that are supposed
@@ -34,7 +34,7 @@ private:
   std::vector<G4ThreeVector> vertices;
 };
 
-// ===== Section 4: Scatter Fraction, Count Losses, and Randoms ============================
+// ===== NEMA NU-2 2018 Section 4: Scatter Fraction, Count Losses, and Randoms =============
 
 // Also used as the source in sections 6, 8, and as the source of noise in section 7
 
