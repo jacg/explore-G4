@@ -291,9 +291,8 @@ int main(int argc, char** argv) {
     return nema_3_phantom{fov_length};
   };
 
-  auto nema_4 = [](auto z_offset) {
-    return nema_4_phantom(z_offset);
-  };
+  auto nema_4 = [](auto z_offset)  { return nema_4_phantom(z_offset);  };
+  auto nema_5 = [](auto n_sleeves) { return nema_5_phantom(n_sleeves); };
 
   auto nema_7 = []() {
     return build_nema_7_phantom{}
@@ -316,7 +315,8 @@ int main(int argc, char** argv) {
   // Can choose phantom in macros with `/abracadabra/phantom <choice>`
   // The nema_3 phantom's length is determined by `/abracadabra/cylinder_length` in mm
 
-  using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom, nema_7_phantom>;
+  using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom,
+                                           nema_5_phantom, nema_7_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -334,6 +334,7 @@ int main(int argc, char** argv) {
   auto set_phantom = [&](G4String p) {
     p == "nema_3" ? phantom = nema_3()                   :
     p == "nema_4" ? phantom = nema_4(messenger.z_offset) :
+    p == "nema_5" ? phantom = nema_5(3)                  :
     p == "nema_7" ? phantom = nema_7()                   :
     throw "Unrecoginzed phantom " + p;
   };
@@ -359,7 +360,7 @@ int main(int argc, char** argv) {
     return
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
-      g == "both"     ? combine_geometries(phantom_geometry(), detector()) :
+      g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
       throw "Unrecoginzed geometry " + g;
   };
 
@@ -394,7 +395,9 @@ int main(int argc, char** argv) {
      // NEMA7 phantom parts (Source_N also used by NEMA3)
      "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
      // NEMA4
-     "Cylinder", "Line_source"}};
+     "Cylinder", "Line_source",
+     // NEMA5
+     "Source", "Sleeves"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;
