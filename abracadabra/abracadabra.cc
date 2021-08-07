@@ -79,6 +79,7 @@ private:
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
+    // TODO use kebab or snake case uniformly throughout
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
