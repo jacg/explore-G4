@@ -94,6 +94,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
     messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
     messenger -> DeclareProperty("waveform-length", waveform_length, "Maximum number of entries in waveform");
+    messenger -> DeclareProperty("nema5_sleeves"  , nema5_sleeves  , "Number of sleeves in NEMA5 phantom");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -110,6 +111,7 @@ struct abracadabra_messenger {
   unsigned imas_version = 1;
   bool vac_pre_lxe = false;
   size_t waveform_length = 10;
+  size_t nema5_sleeves = 1;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -332,10 +334,10 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_3" ? phantom = nema_3()                   :
-    p == "nema_4" ? phantom = nema_4(messenger.z_offset) :
-    p == "nema_5" ? phantom = nema_5(3)                  :
-    p == "nema_7" ? phantom = nema_7()                   :
+    p == "nema_3" ? phantom = nema_3()                        :
+    p == "nema_4" ? phantom = nema_4(messenger.z_offset)      :
+    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves) :
+    p == "nema_7" ? phantom = nema_7()                        :
     throw "Unrecoginzed phantom " + p;
   };
 
