@@ -102,28 +102,23 @@ G4ThreeVector nema_4_phantom::generate_vertex() const {
 // ===== Section 5: Sensitivity =============================================================
 
 G4PVPlacement* nema_5_phantom::geometry() const {
-
   auto air   = material("G4_AIR");
   auto water = material("G4_WATER");
   auto metal = material("G4_STAINLESS-STEEL");
 
-  const auto inner_radii = n4::scale_by(mm, {3.9, 7.0, 10.2, 13.4, 16.6});
-  const auto dr       =   2.5 * mm;
-  const auto source_r =   1.0 * mm;
+  const auto inner_radius = 3.9 * mm / 2;
+  const auto dr_increment = 2.5 * mm / 2;
+  const auto dr = dr_increment * number_of_sleeves;
   const auto env_half_l = 1.1 * half_length;
-  const auto env_half_w = 1.1 * (inner_radii[inner_radii.size() - 1] + dr);
+  const auto env_half_w = 1.1 * (inner_radius + dr);
 
+  auto source   = volume<G4Tubs>("Source"  , water, 0.0, inner_radius     , half_length, 0.0, 360*deg);
+  auto sleeves  = volume<G4Tubs>("Sleeves" , metal, 0.0, inner_radius + dr, half_length, 0.0, 360*deg);
   auto envelope = volume<G4Box> ("Envelope", air  , env_half_w, env_half_w, env_half_l);
-  auto source   = volume<G4Tubs>("Source"  , water, 0.0, source_r, half_length, 0.0, 360*deg);
-  place(source).in(envelope).now();
 
-  for (const auto [layer, r] : enumerate(inner_radii)) {
-    auto sleeve = volume<G4Tubs>("Sleeve", metal, r, r+dr, half_length, 0.0, 360*deg);
-    place(sleeve).in(envelope).copy_no(layer).now();
-    if (layer == this -> number_of_sleeves - 1) { break; }
-  }
-
-  return place(envelope).now();
+  place(source) .in(sleeves) .now();
+  place(sleeves).in(envelope).now();
+  return place(envelope)     .now();
 }
 
 G4ThreeVector nema_5_phantom::generate_vertex() const {
