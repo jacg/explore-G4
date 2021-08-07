@@ -5,7 +5,8 @@
 # Select detector geometry, generators and phantom here
 
 /abracadabra/geometry both
-/abracadabra/phantom nema_7
+/abracadabra/phantom nema_5
+/abracadabra/nema5_sleeves 1
 /abracadabra/detector imas
 /abracadabra/imas_version 1
 /abracadabra/cylinder_length 1000
