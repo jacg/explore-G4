@@ -79,6 +79,7 @@ private:
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
+    // TODO use kebab or snake case uniformly throughout
     messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
@@ -94,6 +95,7 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
     messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
     messenger -> DeclareProperty("waveform-length", waveform_length, "Maximum number of entries in waveform");
+    messenger -> DeclareProperty("nema5_sleeves"  , nema5_sleeves  , "Number of sleeves in NEMA5 phantom");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -110,6 +112,7 @@ struct abracadabra_messenger {
   unsigned imas_version = 1;
   bool vac_pre_lxe = false;
   size_t waveform_length = 10;
+  size_t nema5_sleeves = 1;
 private:
   unique_ptr<G4GenericMessenger> messenger;
 };
@@ -207,33 +210,6 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
-auto combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVolume* detector) {
-  auto detector_envelope = detector -> GetLogicalVolume();
-  auto phantom_envelope  =  phantom -> GetLogicalVolume();
-  auto phantom_contents = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume(); // TODO Can we avoid this?
-
-  // Check whether phantom envelope fits inside detector envelope, with margin.
-  auto& pbox = dynamic_cast<G4Box&>(* phantom_envelope -> GetSolid());
-  auto& dbox = dynamic_cast<G4Box&>(*detector_envelope -> GetSolid());
-  auto expand = false;
-  auto make_space = [&expand](auto p, auto d) {
-    auto space_needed = std::max(p * 1.1, d);
-    if (space_needed > d) { expand = true; }
-    return space_needed;
-  };
-  auto x = make_space(pbox.GetXHalfLength(), dbox.GetXHalfLength());
-  auto y = make_space(pbox.GetYHalfLength(), dbox.GetYHalfLength());
-  auto z = make_space(pbox.GetZHalfLength(), dbox.GetZHalfLength());
-  // Expand detector envelope if needed
-  if (expand) {
-    auto new_box = new G4Box(detector_envelope->GetName(), x, y, z);
-    detector_envelope -> SetSolid(new_box);
-  }
-
-  n4::place(phantom_contents).in(detector_envelope).now();
-  return detector;
-};
-
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
 
@@ -318,9 +294,8 @@ int main(int argc, char** argv) {
     return nema_3_phantom{fov_length};
   };
 
-  auto nema_4 = [](auto z_offset) {
-    return nema_4_phantom(z_offset);
-  };
+  auto nema_4 = [](auto z_offset)  { return nema_4_phantom(z_offset);  };
+  auto nema_5 = [](auto n_sleeves) { return nema_5_phantom(n_sleeves); };
 
   auto nema_7 = []() {
     return build_nema_7_phantom{}
@@ -343,7 +318,8 @@ int main(int argc, char** argv) {
   // Can choose phantom in macros with `/abracadabra/phantom <choice>`
   // The nema_3 phantom's length is determined by `/abracadabra/cylinder_length` in mm
 
-  using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom, nema_7_phantom>;
+  using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom,
+                                           nema_5_phantom, nema_7_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -359,9 +335,10 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_7" ? phantom = nema_7() :
-    p == "nema_3" ? phantom = nema_3() :
-    p == "nema_4" ? phantom = nema_4(messenger.z_offset) :
+    p == "nema_3" ? phantom = nema_3()                        :
+    p == "nema_4" ? phantom = nema_4(messenger.z_offset)      :
+    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves) :
+    p == "nema_7" ? phantom = nema_7()                        :
     throw "Unrecoginzed phantom " + p;
   };
 
@@ -386,7 +363,7 @@ int main(int argc, char** argv) {
     return
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
-      g == "both"     ? combine_geometries(phantom_geometry(), detector()) :
+      g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
       throw "Unrecoginzed geometry " + g;
   };
 
@@ -421,7 +398,9 @@ int main(int argc, char** argv) {
      // NEMA7 phantom parts (Source_N also used by NEMA3)
      "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
      // NEMA4
-     "Cylinder", "Line_source"}};
+     "Cylinder", "Line_source",
+     // NEMA5
+     "Source", "Sleeves"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t previous_event = 666;

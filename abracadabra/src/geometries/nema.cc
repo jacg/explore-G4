@@ -99,6 +99,33 @@ G4ThreeVector nema_4_phantom::generate_vertex() const {
   return {0, y_offset, z};
 }
 
+// ===== Section 5: Sensitivity =============================================================
+
+G4PVPlacement* nema_5_phantom::geometry() const {
+  auto air   = material("G4_AIR");
+  auto water = material("G4_WATER");
+  auto metal = material("G4_STAINLESS-STEEL");
+
+  const auto inner_radius = 3.9 * mm / 2;
+  const auto dr_increment = 2.5 * mm / 2;
+  const auto dr = dr_increment * number_of_sleeves;
+  const auto env_half_l = 1.1 * half_length;
+  const auto env_half_w = 1.1 * (inner_radius + dr);
+
+  auto source   = volume<G4Tubs>("Source"  , water, 0.0, inner_radius     , half_length, 0.0, 360*deg);
+  auto sleeves  = volume<G4Tubs>("Sleeves" , metal, 0.0, inner_radius + dr, half_length, 0.0, 360*deg);
+  auto envelope = volume<G4Box> ("Envelope", air  , env_half_w, env_half_w, env_half_l);
+
+  place(source) .in(sleeves) .now();
+  place(sleeves).in(envelope).now();
+  return place(envelope)     .now();
+}
+
+G4ThreeVector nema_5_phantom::generate_vertex() const {
+  auto z = uniform(-half_length, half_length);
+  return {0, 0, z};
+}
+
 
 // ===== Section 7: Image Qualitiy, Accuracy of Corrections ==================================
 
@@ -106,7 +133,6 @@ build_nema_7_phantom& build_nema_7_phantom::sphereR(G4double radius, G4double ac
   spheres.emplace_back(radius, activity);
   return *this;
 };
-
 
 nema_7_phantom build_nema_7_phantom::build() {
 
@@ -288,6 +314,7 @@ std::optional<size_t> nema_7_phantom::in_which_region(G4ThreeVector& position) c
   return {};
 
 }
+
 std::tuple<G4double, G4double, G4double> nema_7_phantom::sub_volumes() const {
   // All volumes scaled down by a factor of pi
   auto pi = 180 * deg;

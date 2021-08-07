@@ -140,8 +140,15 @@
 /vis/geometry/set/colour     Lung         0  1  0  0 .2
 /vis/geometry/set/visibility Lung         0 true
 
-/vis/geometry/set/colour     Line_source  0  1  0  0 .2
+/vis/geometry/set/colour     Line_source  0  1  0  0  1
 /vis/geometry/set/visibility Line_source  0 true
+
+/vis/geometry/set/colour     Source       0  1  0  0  1
+/vis/geometry/set/visibility Source       0 true
+
+/vis/geometry/set/colour     Sleeves      0 .3 .3  1 .4
+/vis/geometry/set/visibility Sleeves      0 true
+
 
 # "Envelope" is transparent blue to represent water
 /vis/viewer/set/style surface

@@ -9,6 +9,7 @@
 #include <G4SystemOfUnits.hh>
 #include <vector>
 
+// TODO consider giving the phantoms a common inherited interface
 
 template<class PHANTOM>
 void generate_primaries(PHANTOM const& phantom, G4Event* event) {
@@ -17,7 +18,7 @@ void generate_primaries(PHANTOM const& phantom, G4Event* event) {
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
-// ===== Section 3: Spatial Resolution =======================================================
+// ===== NEMA NU-2 2018 Section 3: Spatial Resolution ======================================
 
 // This is the most boring phantom of the lot: the geometry consists of 6
 // pointlike sources, and there are no materials around them that are supposed
@@ -33,7 +34,7 @@ private:
   std::vector<G4ThreeVector> vertices;
 };
 
-// ===== Section 4: Scatter Fraction, Count Losses, and Randoms ============================
+// ===== NEMA NU-2 2018 Section 4: Scatter Fraction, Count Losses, and Randoms =============
 
 // Also used as the source in sections 6, 8, and as the source of noise in section 7
 
@@ -46,6 +47,19 @@ public:
 private:
   G4double z_offset    =   0;
   G4double y_offset    = -45 * mm;
+  G4double half_length = 700 * mm / 2;
+};
+
+// ===== NEMA NU-2 2018 Section 5: Sensitivity =============================================
+
+class nema_5_phantom {
+public:
+  nema_5_phantom(unsigned N): number_of_sleeves{N} {}
+  G4PVPlacement* geometry() const;
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex() const;
+private:
+  unsigned number_of_sleeves;
   G4double half_length = 700 * mm / 2;
 };
 
