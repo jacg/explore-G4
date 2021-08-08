@@ -87,7 +87,8 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
     messenger -> DeclareProperty("print"     , print     , "Print live event information");
-    messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4 for NEMA4, for now");
+    messenger -> DeclareProperty("y_offset"  , y_offset  , "Used in NEMA5, for now");
+    messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4, for now");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
@@ -103,6 +104,7 @@ struct abracadabra_messenger {
   bool     spin       = true;
   G4int    spin_speed = 10;
   bool     print      = false;
+  G4double y_offset   = 0;
   G4double z_offset   = 0;
   G4double xenon_thickness =  40 * mm;
   G4double cylinder_length =  15 * mm;
@@ -291,8 +293,8 @@ int main(int argc, char** argv) {
     return nema_3_phantom{fov_length};
   };
 
-  auto nema_4 = [](auto z_offset)  { return nema_4_phantom(z_offset);  };
-  auto nema_5 = [](auto n_sleeves) { return nema_5_phantom(n_sleeves); };
+  auto nema_4 = [](auto z_offset)                 { return nema_4_phantom(           z_offset); };
+  auto nema_5 = [](auto n_sleeves, auto y_offset) { return nema_5_phantom(n_sleeves, y_offset); };
 
   auto nema_7 = []() {
     return build_nema_7_phantom{}
@@ -332,10 +334,10 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_3" ? phantom = nema_3()                        :
-    p == "nema_4" ? phantom = nema_4(messenger.z_offset)      :
-    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves) :
-    p == "nema_7" ? phantom = nema_7()                        :
+    p == "nema_3" ? phantom = nema_3()                                            :
+    p == "nema_4" ? phantom = nema_4(                         messenger.z_offset) :
+    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
+    p == "nema_7" ? phantom = nema_7()                                            :
     throw "Unrecoginzed phantom " + p;
   };
 

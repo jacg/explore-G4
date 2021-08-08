@@ -75,8 +75,9 @@ TEST_CASE("NEMA5 phantom geometry", "[nema5][geometry]") {
   auto N_sleeves = GENERATE(1,2,3,4,5);
   auto r = r0 + N_sleeves * dr;
   auto vol_sleeves = CLHEP::pi * (r * r /*- r0 * r0*/) * l / cm3;
+  auto y_offset = 0;
 
-  auto phantom  = nema_5_phantom(N_sleeves);
+  auto phantom  = nema_5_phantom(N_sleeves, y_offset);
   auto geometry = phantom.geometry();
 
   // for (const auto volume : geometry) {

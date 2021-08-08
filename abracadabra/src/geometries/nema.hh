@@ -54,13 +54,14 @@ private:
 
 class nema_5_phantom {
 public:
-  nema_5_phantom(unsigned N): number_of_sleeves{N} {}
+  nema_5_phantom(unsigned N, G4double dy): number_of_sleeves{N}, y_offset{dy} {}
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
 private:
   unsigned number_of_sleeves;
   G4double half_length = 700 * mm / 2;
+  G4double y_offset    =   0;
 };
 
 // ===== NEMA NU-2 2018 Section 7: Image Qualitiy, Accuracy of Corrections ==================
