@@ -93,7 +93,6 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
     messenger -> DeclareProperty("clear_pre_lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
-    messenger -> DeclareProperty("waveform_length", waveform_length, "Maximum number of entries in waveform"); // TODO obsolete?
     messenger -> DeclareProperty("nema5_sleeves"  , nema5_sleeves  , "Number of sleeves in NEMA5 phantom");
   }
   size_t offset = 0;
@@ -110,7 +109,6 @@ struct abracadabra_messenger {
   G4double cylinder_radius = 200 * mm;
   unsigned imas_version = 1;
   bool vac_pre_lxe = false;
-  size_t waveform_length = 10;
   size_t nema5_sleeves = 1;
 private:
   unique_ptr<G4GenericMessenger> messenger;
