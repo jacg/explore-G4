@@ -79,8 +79,7 @@ private:
 struct abracadabra_messenger {
   abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
     // TODO units, ranges etc.
-    // TODO use kebab or snake case uniformly throughout
-    messenger -> DeclareProperty("event-number-offset", offset, "Starting value for event ids");
+    messenger -> DeclareProperty("event_number_offset", offset, "Starting value for event ids");
     messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
     messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
     messenger -> DeclareProperty("detector"  , detector  , "Detector to be instantiated");
@@ -88,13 +87,13 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
     messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
     messenger -> DeclareProperty("print"     , print     , "Print live event information");
-    messenger -> DeclareProperty("z-offset"  , z_offset  , "Used in NEMA4 for NEMA4, for now");
+    messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4 for NEMA4, for now");
     messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
     messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
     messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
     messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
-    messenger -> DeclareProperty("clear-pre-lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
-    messenger -> DeclareProperty("waveform-length", waveform_length, "Maximum number of entries in waveform");
+    messenger -> DeclareProperty("clear_pre_lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
+    messenger -> DeclareProperty("waveform_length", waveform_length, "Maximum number of entries in waveform"); // TODO obsolete?
     messenger -> DeclareProperty("nema5_sleeves"  , nema5_sleeves  , "Number of sleeves in NEMA5 phantom");
   }
   size_t offset = 0;

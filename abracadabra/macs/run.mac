@@ -1,5 +1,5 @@
 /abracadabra/outfile "nema5-window-dz=1m-LXe=20mm-sleeves=1-1.h5"
-/abracadabra/event-number-offset 40000
+/abracadabra/event_number_offset 40000
 
 /random/setSeeds 123456 987654
 
@@ -12,6 +12,6 @@
 /tracking/verbose 0
 
 /abracadabra/print true
-#/abracadabra/waveform-length 10
+#/abracadabra/waveform_length 10
 
 /run/beamOn 100
