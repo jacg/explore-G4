@@ -118,7 +118,12 @@ void use_our_optical_physics(G4RunManager* run_manager, G4int verbosity) {
 G4VPhysicalVolume* combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVolume* detector) {
   auto detector_envelope = detector -> GetLogicalVolume();
   auto phantom_envelope  =  phantom -> GetLogicalVolume();
-  auto phantom_contents = phantom_envelope -> GetDaughter(0) -> GetLogicalVolume(); // TODO Can we avoid this?
+
+  // TODO: not general enough: only uses translation ignores other transformations
+  // TODO Can we avoid extracting logical and use physical/placement directly ?
+  auto phantom_physical = phantom_envelope -> GetDaughter(0);
+  auto phantom_logical  = phantom_physical -> GetLogicalVolume();
+  auto phantom_translation = phantom_physical -> GetTranslation();
 
   // Check whether phantom envelope fits inside detector envelope, with margin.
   auto& pbox = dynamic_cast<G4Box&>(* phantom_envelope -> GetSolid());
@@ -138,7 +143,7 @@ G4VPhysicalVolume* combine_geometries(G4VPhysicalVolume* phantom, G4VPhysicalVol
     detector_envelope -> SetSolid(new_box);
   }
 
-  n4::place(phantom_contents).in(detector_envelope).now();
+  n4::place(phantom_logical).in(detector_envelope).at(phantom_translation).now();
   return detector;
 };
 
