@@ -1,21 +1,3 @@
-build: cmake
-	#!/usr/bin/env sh
-	cd abracadabra/build && make -j
-
-cmake:
-	#!/usr/bin/env sh
-	if ! [ -d abracadabra/build ]; then
-		mkdir abracadabra/build
-		cd    abracadabra/build
-		cmake ..
-	fi
-
-# Test with ctest
-ctest: build
-	#!/usr/bin/env sh
-	cd abracadabra/build
-	ctest
-
 # Test with hand-written loop: more informative and colourful than ctest
 test: build
 	#!/usr/bin/env bash
@@ -42,6 +24,23 @@ test: build
 		printf "\\033[0m"
 	fi
 
+build: cmake
+	#!/usr/bin/env sh
+	cd abracadabra/build && make -j
+
+cmake:
+	#!/usr/bin/env sh
+	if ! [ -d abracadabra/build ]; then
+		mkdir abracadabra/build
+		cd    abracadabra/build
+		cmake ..
+	fi
+
+# Test with ctest
+ctest: build
+	#!/usr/bin/env sh
+	cd abracadabra/build
+	ctest
 
 list-tests: build
 	#!/usr/bin/env sh
