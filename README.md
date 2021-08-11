@@ -3,7 +3,7 @@
 ```shell
 just     # (build, if necessary, and) run the tests
 just run # (build, if necessary, and) run the default model in batch mode
-just interact # (build ... and) run the default model in interactive mode
+just interact # (build ... and) load the default model in interactive mode
 just interact nema7-model      # load nema7-model in interactive mode
 just run nema7-model nema7-run # load nema7-model and run nema7-run in batch mode
 just list-models  # list available first arguments for `just run/interact`

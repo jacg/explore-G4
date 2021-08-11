@@ -36,18 +36,19 @@ interact model='model': build
 	cd abracadabra/build
 	./abracadabra macs/{{model}}.mac
 
-# Show available model macro files
+# List available model configurations
 list-models:
 	#!/usr/bin/env sh
 	cd abracadabra/macs
 	ls -1 *model.mac | sed 's/.mac//g'
 
-# Show available run macro files
+# List available run configurations
 list-runs:
 	#!/usr/bin/env sh
 	cd abracadabra/macs
 	ls -1 *run.mac | sed 's/.mac//g'
 
+# List available model and run configurations
 list-macros: list-models list-runs
 
 build: cmake
