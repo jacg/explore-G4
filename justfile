@@ -24,6 +24,32 @@ test: build
 		printf "\\033[0m"
 	fi
 
+# Load <model> and run <run> in batch mode
+run model='model' run='run': build
+	#!/usr/bin/env sh
+	cd abracadabra/build
+	./abracadabra macs/{{model}}.mac macs/{{run}}.mac
+
+# Load <model> in interactive mode
+interact model='model': build
+	#!/usr/bin/env sh
+	cd abracadabra/build
+	./abracadabra macs/{{model}}.mac
+
+# Show available model macro files
+list-models:
+	#!/usr/bin/env sh
+	cd abracadabra/macs
+	ls -1 *model.mac | sed 's/.mac//g'
+
+# Show available run macro files
+list-runs:
+	#!/usr/bin/env sh
+	cd abracadabra/macs
+	ls -1 *run.mac | sed 's/.mac//g'
+
+list-macros: list-models list-runs
+
 build: cmake
 	#!/usr/bin/env sh
 	cd abracadabra/build && make -j
