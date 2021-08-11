@@ -1,6 +1,14 @@
-build:
+build: cmake
 	#!/usr/bin/env zsh
 	cd abracadabra/build && make -j
+
+cmake:
+	#!/usr/bin/env zsh
+	if ! [ -d abracadabra/build ]; then
+		mkdir abracadabra/build
+		cd    abracadabra/build
+		cmake ..
+	fi
 
 # Test with ctest
 ctest: build
