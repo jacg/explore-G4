@@ -34,6 +34,7 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
     pkgs.highfive
     pkgs.hdfview
     pkgs.just
+    pkgs.zsh
     # For graphics hardware matching on non-NixOS
     pkgs.libGL
     (linux nixGL.nixGLDefault)
