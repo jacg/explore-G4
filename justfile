@@ -25,12 +25,8 @@ test: build
 	while read testname
 	do
 		if ! ./tests-trial "$testname"; then
-			echo -e "\\033[91m THIS ONE FAILED with $?\\033[0m"
 			FAILED=$FAILED"$testname"\\n
-		else
-			echo -e "\\033[32m THIS ONE PASSED\\033[0m"
 		fi
-		echo "================================"
 	done
 	if ! [ -z "$FAILED" ]; then
 		echo -e "\\033[91m OVERALL: ==================== FAIL ====================\\033[0m"
