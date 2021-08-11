@@ -16,7 +16,7 @@ ctest: build
 	cd abracadabra/build
 	ctest
 
-# Test with hand-written loop: more colourful than ctest
+# Test with hand-written loop: more informative and colourful than ctest
 test: build
 	#!/usr/bin/env zsh
 	cd abracadabra/build
