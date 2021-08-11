@@ -1,11 +1,11 @@
 # Test with hand-written loop: more informative and colourful than ctest
-test: build
+test *FLAGS: build
 	#!/usr/bin/env bash
 	cd abracadabra/build
 	FAILED=
 	while read -r testname
 	do
-		if ! ./tests-trial "$testname"; then
+		if ! ./tests-trial {{FLAGS}} "$testname"; then
 			FAILED=$FAILED"$testname"\\n
 		fi
 	done < <(./tests-trial --list-test-names-only)
