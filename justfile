@@ -28,6 +28,9 @@ build: cmake
 	#!/usr/bin/env sh
 	cd abracadabra/build && make -j
 
+clean:
+	rm abracadabra/build -rf
+
 cmake:
 	#!/usr/bin/env sh
 	if ! [ -d abracadabra/build ]; then
