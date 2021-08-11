@@ -25,6 +25,6 @@ jobs:
       - name: Install dependencies via Nix
         run: nix-shell --argstr py ${{ matrix.py }}
       - name: Build
-        run: nix-shell --argstr py ${{ matrix.py }} --run "mkdir -p abracadabra/build && cd abracadabra/build && cmake .. && make -j4"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just build"
       - name: Run tests
-        run: nix-shell --argstr py ${{ matrix.py }} --run "cd abracadabra/build && ctest"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just ctest"
