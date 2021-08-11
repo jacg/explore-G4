@@ -27,4 +27,4 @@ jobs:
       - name: Build
         run: nix-shell --argstr py ${{ matrix.py }} --run "just build"
       - name: Run tests
-        run: nix-shell --argstr py ${{ matrix.py }} --run "just ctest"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just test"
