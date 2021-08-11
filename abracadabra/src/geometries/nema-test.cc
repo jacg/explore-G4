@@ -266,7 +266,7 @@ TEST_CASE("generate 511 keV gammas", "[generate][511][gamma]") {
   }
 
   // Verify expected properties
-  CHECK(vertex.GetPosition() == where);
+  CHECK(vertex.GetPosition() == where * 2);
   CHECK(vertex.GetT0()       == when);
   CHECK(particles.size() == 2);
   CHECK(particles[0]->GetMomentum() +
