@@ -15,7 +15,7 @@ TEST_CASE("IMAS demonstrator geometry", "[imas][geometry]") {
   using std::setw; using std::make_tuple;
 
   auto [version, n_elements] = GENERATE(make_tuple(1,  99206),
-                                        make_tuple(2, 107226));
+                                        make_tuple(2, 1072260));
   bool vacuum_before_xenon;
   G4double xenon_thickness;
 
