@@ -13,6 +13,9 @@ just run nema7-model nema7-run # load nema7-model and run nema7-run in batch mod
 just list-models  # list available first arguments for `just run/interact`
 just list-runs    # list available second arguments for `just run`
 just -l  # list all recipes
+just test <pattern>         # Run selected tests
+just test <pattern> <flags> # Run selected tests with extra catch2 flags
+just test-all       <flags> # Run      all tests with extra catch2 flags
 ```
 
 # Caveats
