@@ -26,8 +26,8 @@
 
 // visible = true
 TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
-  n4::sensitive_detector sensitive{"ignoreme", {}, {}};
-  auto& whole    = *sipm_hamamatsu_blue(true, &sensitive);
+  auto sensitive = new n4::sensitive_detector{"ignoreme", {}, {}};
+  auto& whole    = *sipm_hamamatsu_blue(true, sensitive);
   auto& active_p = *whole.GetDaughter(0);
   CHECK(active_p.GetName() == "fake_active");
   auto& active_l = *active_p.GetLogicalVolume();
@@ -47,8 +47,8 @@ TEST_CASE("Hamamatsu blue", "[geometry][hamamatsu][blue]") {
 
 // visible = false
 TEST_CASE("Hamamatsu blue invisible", "[geometry][hamamatsu][blue]") {
-  n4::sensitive_detector sensitive{"ignoreme", {}, {}};
-  auto& whole  = *sipm_hamamatsu_blue(false, &sensitive);
+  auto sensitive = new n4::sensitive_detector{"ignoreme", {}, {}};
+  auto& whole  = *sipm_hamamatsu_blue(false, sensitive);
   auto& active = *whole.GetDaughter(1)->GetLogicalVolume();
   // Verify the number of sub-volumes: 1 active region, 1 infinitesimal volume
   // for attaching SD in front of skin surface (G4 10.7 bug?)
@@ -112,7 +112,7 @@ TEST_CASE("hamamatsu app", "[app]") {
     return fwd.process_hits(step);
   };
   // An SD connected to `writer` and `detected`
-  n4::sensitive_detector sensitive{"testing", process_hits, fwd.END_OF_EVENT};
+  auto sensitive = new n4::sensitive_detector{"testing", process_hits, fwd.END_OF_EVENT};
   // ----- Key points in the test geometry and generator -----------------------
   std::vector<std::tuple<double, double>> xys;
   for (int x=-35; x<35; x+=7) {
@@ -121,7 +121,7 @@ TEST_CASE("hamamatsu app", "[app]") {
   // ----- Geometry ------------------------------------------------------------
   n4::geometry::construct_fn tiles = [&sensitive, &xys]() {
     auto air = nain4::material("G4_AIR");
-    auto sipm = sipm_hamamatsu_blue(true, &sensitive);
+    auto sipm = sipm_hamamatsu_blue(true, sensitive);
     auto world = nain4::volume<G4Box>("world", air, 40*mm, 40*mm, 40*mm);
     for (auto [x,y] : xys) { nain4::place(sipm).in(world).at(x*mm, y*mm, 30*mm).now(); }
     return nain4::place(world).now();
