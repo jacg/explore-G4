@@ -7,8 +7,6 @@ jobs:
   build-and-test:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
-    env:
-      TERM: xterm-256color
     strategy:
       fail-fast: false
       matrix:
@@ -29,4 +27,4 @@ jobs:
       - name: Build
         run: nix-shell --argstr py ${{ matrix.py }} --run "just build"
       - name: Run tests
-        run: nix-shell --argstr py ${{ matrix.py }} --run "just test --use-colour=yes"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just test-all --use-colour=yes"
