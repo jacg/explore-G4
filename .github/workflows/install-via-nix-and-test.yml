@@ -7,6 +7,8 @@ jobs:
   build-and-test:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
+    env:
+      TERM: xterm-256color
     strategy:
       fail-fast: false
       matrix:
@@ -25,6 +27,6 @@ jobs:
       - name: Install dependencies via Nix
         run: nix-shell --argstr py ${{ matrix.py }}
       - name: Build
-        run: nix-shell --argstr py ${{ matrix.py }} --run "mkdir -p abracadabra/build && cd abracadabra/build && cmake .. && make -j4"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just build"
       - name: Run tests
-        run: nix-shell --argstr py ${{ matrix.py }} --run "cd abracadabra/build && ctest"
+        run: nix-shell --argstr py ${{ matrix.py }} --run "just test"

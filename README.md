@@ -1,11 +1,14 @@
 # TLDR
 
 ```shell
-mkcd abracadabra/build
-cmake ..
-make -j8
-./tests-trial --list-test-names-only | while read testname; do ./tests-trial $testname; done
-./abracadabra
+just     # (build, if necessary, and) run the tests
+just run # (build, if necessary, and) run the default model in batch mode
+just interact # (build ... and) load the default model in interactive mode
+just interact nema7-model      # load nema7-model in interactive mode
+just run nema7-model nema7-run # load nema7-model and run nema7-run in batch mode
+just list-models  # list available first arguments for `just run/interact`
+just list-runs    # list available second arguments for `just run`
+just -l  # list all recipes
 ```
 
 # Caveats
