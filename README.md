@@ -1,3 +1,7 @@
+[![Install and Test](https://github.com/jacg/explore-G4/actions/workflows/install-via-nix-and-test.yml/badge.svg)](https://github.com/jacg/explore-G4/actions/workflows/install-via-nix-and-test.yml)
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+
+
 # TLDR
 
 ```shell
