@@ -24,6 +24,8 @@ test: build
 		printf "\\033[0m"
 	fi
 
+# TODO Add mechanism for overriding setting in macros, on the `just` CLI
+
 # Load <model> and run <run> in batch mode
 run model='model' run='run': build
 	#!/usr/bin/env sh
