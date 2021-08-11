@@ -1,5 +1,8 @@
 # Test with hand-written loop: more informative and colourful than ctest
 test *FLAGS: build
+# Need to run each test in a separate process, otherwise the monolithic and
+# persistent Geant4 Run and Kernel managers will make things go wrong.
+
 	#!/usr/bin/env bash
 	cd abracadabra/build
 	FAILED=
