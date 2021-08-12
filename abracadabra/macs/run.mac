@@ -1,4 +1,4 @@
-/abracadabra/outfile "nema5-window-dz=1m-LXe=20mm-sleeves=1-1.h5"
+/abracadabra/outfile "nema3-quartz-dz=1m-LXe=20mm-4.h5"
 /abracadabra/event_number_offset 40000
 
 /random/setSeeds 123456 987654
