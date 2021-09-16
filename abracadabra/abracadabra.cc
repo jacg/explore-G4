@@ -8,12 +8,14 @@
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 
+#include <G4Navigator.hh>
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
+#include <G4VPhysicalVolume.hh>
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
 #include <G4GenericMessenger.hh>
@@ -32,6 +34,17 @@ using std::unique_ptr;
 using std::cout;
 using std::endl;
 using std::setw;
+
+// ----- WIP: attenuation map of geometry ---------------------------------------------------
+#include <G4TransportationManager.hh>
+unique_ptr<G4Navigator> get_navigator() {
+  auto navigator = make_unique<G4Navigator>();
+  G4VPhysicalVolume* world = G4TransportationManager::GetTransportationManager()
+    -> GetNavigatorForTracking()
+    -> GetWorldVolume();
+  navigator -> SetWorldVolume(world);
+  return navigator;
+}
 
 // ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
@@ -499,6 +512,18 @@ int main(int argc, char** argv) {
     -> set ((new n4::run_action) -> end(write_string_tables))
   );
 
+  // ----- WIP: attenuation map construction -----------------------------------------------
+  run_manager -> Initialize();
+  auto navigator = get_navigator();
+  auto touchable = make_unique<G4TouchableHistory>();
+  for (auto x=0.0; x<100.0; ++x) {
+    G4ThreeVector pos{x, 0.0, 0.0};
+    navigator -> LocateGlobalPointAndUpdateTouchable(pos, touchable.get(), false);
+    auto material = touchable -> GetVolume() -> GetLogicalVolume() -> GetMaterial();
+    auto density = material -> GetDensity();
+    cout << "Density: " << density / (kg / m3) << endl;
+  }
+  return EXIT_SUCCESS;
 
 
   // ----- second phase --------------------------------------------------------------------
@@ -508,6 +533,7 @@ int main(int argc, char** argv) {
   // by the run manager, so they should not be deleted by us.
 }
 
+// ================ Utility for spinning the visualized geometry ==========================
 void UI_interactive::spin() {
   if (messenger.spin) {
     // ----- spin the viewport ------------------------------------------------------------
