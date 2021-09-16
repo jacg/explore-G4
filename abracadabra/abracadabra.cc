@@ -7,15 +7,14 @@
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
+#include "geometries/inspect.hh"
 
-#include <G4Navigator.hh>
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
-#include <G4VPhysicalVolume.hh>
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
 #include <G4GenericMessenger.hh>
@@ -34,17 +33,6 @@ using std::unique_ptr;
 using std::cout;
 using std::endl;
 using std::setw;
-
-// ----- WIP: attenuation map of geometry ---------------------------------------------------
-#include <G4TransportationManager.hh>
-unique_ptr<G4Navigator> get_navigator() {
-  auto navigator = make_unique<G4Navigator>();
-  G4VPhysicalVolume* world = G4TransportationManager::GetTransportationManager()
-    -> GetNavigatorForTracking()
-    -> GetWorldVolume();
-  navigator -> SetWorldVolume(world);
-  return navigator;
-}
 
 // ----- map/set helpers --------------------------------------------------------------------
 template<class M, class K>
