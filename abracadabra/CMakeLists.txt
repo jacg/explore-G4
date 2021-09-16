@@ -24,6 +24,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/nema.hh
   src/geometries/sipm.hh
   src/geometries/samples.hh
+  src/geometries/inspect.hh
   src/materials/LXe.hh
   src/random/random.hh
   src/utils/enumerate.hh
@@ -36,6 +37,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/nema.cc
   src/geometries/sipm.cc
   src/geometries/samples.cc
+  src/geometries/inspect.cc
   src/materials/LXe.cc
   src/random/random.cc
   src/io/hdf5.cc
