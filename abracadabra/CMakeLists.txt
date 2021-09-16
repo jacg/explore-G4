@@ -48,6 +48,7 @@ set(ABRACADABRA_TESTS
   src/geometries/imas-test.cc
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
+  src/geometries/inspect-test.cc
   test/trivial-full-app-test.cc
   src/materials/LXe-test.cc
   test/nema-phantom-generator-test.cc
