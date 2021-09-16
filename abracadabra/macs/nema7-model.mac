@@ -7,8 +7,8 @@
 /abracadabra/geometry both
 /abracadabra/phantom nema_7
 /abracadabra/detector imas
-/abracadabra/imas_version 1
 /abracadabra/cylinder_length 1000
 
 #/abracadabra/clear_pre_lxe true
 #/abracadabra/xenon_thickness 50
+/abracadabra/quartz_thickness 0

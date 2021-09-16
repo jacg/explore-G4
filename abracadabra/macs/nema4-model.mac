@@ -7,7 +7,6 @@
 /abracadabra/geometry phantom
 /abracadabra/phantom nema_4
 /abracadabra/detector imas
-/abracadabra/imas_version 1
 /abracadabra/cylinder_length 1000
 
 # When used as source of noise for NEMA 7
@@ -15,3 +14,4 @@
 
 /abracadabra/clear_pre_lxe false
 #/abracadabra/xenon_thickness 50
+/abracadabra/quartz_thickness  0

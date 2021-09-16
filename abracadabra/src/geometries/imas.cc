@@ -27,7 +27,7 @@ using std::optional;
 
 G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
                                  G4double length,
-                                 unsigned version,
+                                 G4double drQtz,
                                  G4double drLXe,
                                  bool vacuum_before_xenon) {
   // ----- Materials --------------------------------------------------------------
@@ -48,7 +48,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
   G4VPhysicalVolume* phy_prv = nullptr; // Physical volume directly inside log_out
   auto radius = 0.0;
   auto layer = [=, &radius, &log_out, &phy_prv](auto& name, auto material, auto dr) {
-    if (name == "Quartz" && version == 1) { return; } // Skip quartz layer in version 1
+    if (name == "Quartz" && drQtz == 0) { return; }
     radius += dr;
     auto log_new = volume<G4Tubs>(name, material, 0.0, radius, length/2, 0.0, twopi);
     if (log_out) { phy_prv = place(log_out).in(log_new).now(); }
@@ -61,7 +61,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
   layer("Inner_vacuum", vacuum,  25   * mm);
   layer("Steel_1"     , steel ,   1.5 * mm);
   layer("LXe"         , LXe   , drLXe * mm); auto xenon_l = log_out;
-  layer("Quartz"      , Quartz,  30   * mm); auto quartz  = log_out;
+  layer("Quartz"      , Quartz, drQtz * mm); auto quartz  = log_out;
   layer("Outer_vacuum", vacuum, 200   * mm);
   layer("Steel_2"     , steel ,   5   * mm);
 
@@ -70,9 +70,9 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
     line_cylinder_with_tiles(layer, sipm_hamamatsu_blue(true, sd), 1 * mm, radius);
   };
 
-  // Two versions: SiPMs either in 1. xenon; 2. vacuum outside quartz
-  if (version == 2) { place_sipms_in(quartz ); }
-  else              { place_sipms_in(xenon_l); }
+  // If Quartz layer missing, place sipms directly in LXe
+  if (drQtz > 0) { place_sipms_in(quartz ); }
+  else           { place_sipms_in(xenon_l); }
 
   auto env_length = 1.1 * length / 2;
   auto env_width  = 1.1 * radius;

@@ -89,12 +89,12 @@ struct abracadabra_messenger {
     messenger -> DeclareProperty("print"     , print     , "Print live event information");
     messenger -> DeclareProperty("y_offset"  , y_offset  , "Used in NEMA5, for now");
     messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4, for now");
-    messenger -> DeclareProperty("xenon_thickness", xenon_thickness, "Thickness of LXe layer");
-    messenger -> DeclareProperty("cylinder_length", cylinder_length, "Length of cylinder");
-    messenger -> DeclareProperty("cylinder_radius", cylinder_radius, "Radius of cylinder");
-    messenger -> DeclareProperty("imas_version"   , imas_version   , "Version of detector design");
-    messenger -> DeclareProperty("clear_pre_lxe"  , vac_pre_lxe    , "Remove obstacles before LXe");
-    messenger -> DeclareProperty("nema5_sleeves"  , nema5_sleeves  , "Number of sleeves in NEMA5 phantom");
+    messenger -> DeclareProperty("xenon_thickness" , xenon_thickness,  "Thickness of LXe layer (mm)");
+    messenger -> DeclareProperty("quartz_thickness", quartz_thickness, "Thickness of quartz layer (mm)");
+    messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");
+    messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
+    messenger -> DeclareProperty("clear_pre_lxe"   , vac_pre_lxe    ,  "Remove obstacles before LXe");
+    messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
   }
   size_t offset = 0;
   G4String outfile    = "default-out.h5";
@@ -106,10 +106,10 @@ struct abracadabra_messenger {
   bool     print      = false;
   G4double y_offset   = 0;
   G4double z_offset   = 0;
-  G4double xenon_thickness =  40 * mm;
-  G4double cylinder_length =  15 * mm;
-  G4double cylinder_radius = 200 * mm;
-  unsigned imas_version = 1;
+  G4double quartz_thickness =   0; // mm
+  G4double xenon_thickness  =  40; // mm
+  G4double cylinder_length  =  15; // mm
+  G4double cylinder_radius  = 200; // mm
   bool vac_pre_lxe = false;
   size_t nema5_sleeves = 1;
 private:
@@ -344,14 +344,14 @@ int main(int argc, char** argv) {
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
-    auto dr_LXe  = messenger.xenon_thickness * mm;
-    auto length  = messenger.cylinder_length * mm;
-    auto radius  = messenger.cylinder_radius * mm;
-    auto version = messenger.imas_version;
-    auto clear   = messenger.vac_pre_lxe;
+    auto dr_LXe = messenger.xenon_thickness  * mm;
+    auto dr_Qtz = messenger.quartz_thickness * mm;
+    auto length = messenger.cylinder_length  * mm;
+    auto radius = messenger.cylinder_radius  * mm;
+    auto clear  = messenger.vac_pre_lxe;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, version, dr_LXe, clear)      :
+      d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       throw "Unrecoginzed detector " + d;
