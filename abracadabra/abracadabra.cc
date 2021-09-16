@@ -501,16 +501,13 @@ int main(int argc, char** argv) {
   );
 
   // ----- WIP: attenuation map construction -----------------------------------------------
-  run_manager -> Initialize();
-  auto navigator = get_navigator();
-  auto touchable = make_unique<G4TouchableHistory>();
+  world_geometry_inspector inspect{run_manager.get()};
   for (auto x=0.0; x<100.0; ++x) {
-    G4ThreeVector pos{x, 0.0, 0.0};
-    navigator -> LocateGlobalPointAndUpdateTouchable(pos, touchable.get(), false);
-    auto material = touchable -> GetVolume() -> GetLogicalVolume() -> GetMaterial();
-    auto density = material -> GetDensity();
-    cout << "Density: " << density / (kg / m3) << endl;
+    G4ThreeVector point{x, 0.0, 0.0};
+    auto density = inspect.density_at(point);
+    std::cout << "Density: " << density / (kg / m3) << std::endl;
   }
+
   return EXIT_SUCCESS;
 
 
