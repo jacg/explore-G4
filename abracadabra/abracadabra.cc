@@ -502,11 +502,8 @@ int main(int argc, char** argv) {
 
   // ----- WIP: attenuation map construction -----------------------------------------------
   world_geometry_inspector inspect{run_manager.get()};
-  for (auto x=0.0; x<100.0; ++x) {
-    G4ThreeVector point{x, 0.0, 0.0};
-    auto density = inspect.material_at(point) -> GetDensity();
-    std::cout << "Density: " << density / (kg / m3) << std::endl;
-  }
+  attenuation_map({300.0, 300.0, 300.0}, {30, 30, 30}, "attenuation-map.raw", inspect);
+
 
   return EXIT_SUCCESS;
 
