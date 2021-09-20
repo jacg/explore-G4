@@ -57,6 +57,7 @@ set(ABRACADABRA_TESTS
 )
 
 find_package(HighFive REQUIRED)
+find_package(Poco REQUIRED COMPONENTS Foundation)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
@@ -69,7 +70,15 @@ set(ALL_TEST_SOURCES
 
 # TODO including headers in add_executable apparently makes them show up in IDEs
 add_executable(tests-trial ${ALL_TEST_SOURCES})
-target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4 hdf5 HighFive)
+target_link_libraries(
+  tests-trial
+  PUBLIC
+  Catch2::Catch2
+  ${Geant4_LIBRARIES}
+  Nain4
+  hdf5
+  HighFive
+  PocoFoundation)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests-trial)
@@ -103,7 +112,13 @@ add_executable(abracadabra
   ${ABRACADABRA_SOURCES}
   ${ABRACADABRA_HEADERS}
 )
-target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4 hdf5 HighFive)
+target_link_libraries(
+  abracadabra
+  ${Geant4_LIBRARIES}
+  Nain4
+  hdf5
+  HighFive
+  PocoFoundation)
 target_include_directories(
   abracadabra PUBLIC
   ${ABRACADABRA_HEADERS}
