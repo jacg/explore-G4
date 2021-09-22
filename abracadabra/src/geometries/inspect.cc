@@ -1,4 +1,3 @@
-#include <G4RunManager.hh>
 #include <geometries/inspect.hh>
 
 #include <G4SystemOfUnits.hh>
@@ -36,7 +35,7 @@ G4VPhysicalVolume const* world_geometry_inspector::volume_at(const G4ThreeVector
 void attenuation_map(std::tuple<float, float, float> fov_full_size,
                      std::tuple<unsigned short, unsigned short, unsigned short> n_voxels,
                      std::string filename,
-                     G4RunManager* run_manager) {
+                     world_geometry_inspector* inspect) {
   auto [DX, DY, DZ] = fov_full_size;
   auto [nx, ny, nz] = n_voxels;
   auto dx = DX/nx;
@@ -47,7 +46,7 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   if (!out.good()) {
     throw "Failed to open attenuation image file: " + filename;
   }
-  std::cout << "Writing attenuation map to: " << filename << std::endl;
+  std::cout << "Calculating attenuation map." << std::endl;
 
   Poco::BinaryWriter write{out, Poco::BinaryWriter::BIG_ENDIAN_BYTE_ORDER};
   write << nx << ny << nz << DX << DY << DZ;
@@ -55,7 +54,6 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   std::vector<float> image;
   image.reserve(nx * ny * nz);
 
-  run_manager -> Initialize();
   auto navigator = std::make_unique<G4Navigator>();
   auto world = G4TransportationManager::GetTransportationManager()
     -> GetNavigatorForTracking()
@@ -64,15 +62,13 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   auto touchable = std::make_unique<G4TouchableHistory>();
 
   auto start = std::chrono::steady_clock::now();
-  bool relative_search;
   for (auto iz=0; iz<nz; ++iz) {
     for (auto iy=0; iy<ny; ++iy) {
       for (auto ix=0; ix<nx; ++ix) {
         auto x = (dx-DX) / 2 + ix * dx;
         auto y = (dy-DY) / 2 + iy * dy;
         auto z = (dz-DZ) / 2 + iz * dz;
-        navigator -> LocateGlobalPointAndUpdateTouchable({x,y,z}, touchable.get(), relative_search=true);
-        auto density = touchable -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetDensity() / (kg/m3);
+        auto density = inspect -> material_at({x,y,z}) -> GetDensity() / (kg/m3);
         write << static_cast<float>(density);
       }
     }
@@ -83,4 +79,5 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   std::cout << "Done" << std::endl;
   auto seconds = elapsed_seconds.count();
   std::cout << "Took " << seconds << " (" << (nx * ny * nz) / seconds << " pixels per second)\n";
+  std::cout << "Wrote attenuation map to: " << filename << std::endl;
 }
