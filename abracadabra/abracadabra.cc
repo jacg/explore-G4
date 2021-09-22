@@ -501,10 +501,9 @@ int main(int argc, char** argv) {
   );
 
   // ----- WIP: attenuation map construction -----------------------------------------------
-  world_geometry_inspector inspect{run_manager.get()};
-  attenuation_map({300.0, 300.0, 300.0}, {30, 30, 30}, "attenuation-map.raw", inspect);
-
-
+  //world_geometry_inspector inspect{run_manager.get()};
+  auto N = 150;
+  attenuation_map({300.0, 300.0, 300.0}, {N,N,N}, "attenuation-map.raw", run_manager.get());
   return EXIT_SUCCESS;
 
 

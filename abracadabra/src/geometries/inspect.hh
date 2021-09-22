@@ -20,4 +20,4 @@ private:
 void attenuation_map(std::tuple<float, float, float> fov_full_size,
                      std::tuple<unsigned short, unsigned short, unsigned short> n_voxels,
                      std::string filename,
-                     world_geometry_inspector& inspect);
+                     G4RunManager* run_manager);
