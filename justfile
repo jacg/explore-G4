@@ -81,7 +81,7 @@ list-macros: list-models list-runs
 
 build: cmake
 	#!/usr/bin/env sh
-	cd abracadabra/build && make -j
+	cd abracadabra/build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make -j
 
 clean:
 	rm abracadabra/build -rf
