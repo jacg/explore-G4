@@ -22,7 +22,6 @@ world_geometry_inspector::world_geometry_inspector(G4RunManager* run_manager)
   navigator -> SetWorldVolume(world);
 }
 
-
 G4Material const * world_geometry_inspector::material_at(const G4ThreeVector& point) const {
   return volume_at(point) -> GetLogicalVolume() -> GetMaterial();
 }
@@ -51,9 +50,6 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   Poco::BinaryWriter write{out, Poco::BinaryWriter::BIG_ENDIAN_BYTE_ORDER};
   write << nx << ny << nz << DX << DY << DZ;
 
-  std::vector<float> image;
-  image.reserve(nx * ny * nz);
-
   auto navigator = std::make_unique<G4Navigator>();
   auto world = G4TransportationManager::GetTransportationManager()
     -> GetNavigatorForTracking()
@@ -73,7 +69,6 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
       }
     }
   }
-  //write << image;
   auto stop = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = stop - start;
   std::cout << "Done" << std::endl;
