@@ -13,12 +13,10 @@ public:
   world_geometry_inspector(G4RunManager*);
   G4VPhysicalVolume const* volume_at(const G4ThreeVector&)   const;
   G4Material        const* material_at(const G4ThreeVector&) const;
+  using f = float; using u = unsigned short;
+  void attenuation_map(std::tuple<f,f,f>, std::tuple<u,u,u>, std::string);
+
 private:
   std::unique_ptr<G4Navigator>        navigator;
   std::unique_ptr<G4TouchableHistory> touchable;
 };
-
-void attenuation_map(std::tuple<float, float, float> fov_full_size,
-                     std::tuple<unsigned short, unsigned short, unsigned short> n_voxels,
-                     std::string filename,
-                     world_geometry_inspector* inspect);

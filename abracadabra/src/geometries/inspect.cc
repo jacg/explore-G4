@@ -11,7 +11,11 @@
 
 #include <chrono>
 
-world_geometry_inspector::world_geometry_inspector(G4RunManager* run_manager)
+using WGI = world_geometry_inspector;
+using f   = float;
+using u   = unsigned short;
+
+WGI::world_geometry_inspector(G4RunManager* run_manager)
   : navigator{std::make_unique<G4Navigator>()}
   , touchable{std::make_unique<G4TouchableHistory>()}
 {
@@ -22,19 +26,16 @@ world_geometry_inspector::world_geometry_inspector(G4RunManager* run_manager)
   navigator -> SetWorldVolume(world);
 }
 
-G4Material const * world_geometry_inspector::material_at(const G4ThreeVector& point) const {
+G4Material const * WGI::material_at(const G4ThreeVector& point) const {
   return volume_at(point) -> GetLogicalVolume() -> GetMaterial();
 }
 
-G4VPhysicalVolume const* world_geometry_inspector::volume_at(const G4ThreeVector& point) const {
+G4VPhysicalVolume const* WGI::volume_at(const G4ThreeVector& point) const {
   navigator -> LocateGlobalPointAndUpdateTouchable(point, touchable.get(), false);
   return touchable -> GetVolume();
 }
 
-void attenuation_map(std::tuple<float, float, float> fov_full_size,
-                     std::tuple<unsigned short, unsigned short, unsigned short> n_voxels,
-                     std::string filename,
-                     world_geometry_inspector* inspect) {
+void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_voxels, std::string filename) {
   auto [DX, DY, DZ] = fov_full_size;
   auto [nx, ny, nz] = n_voxels;
   auto dx = DX/nx;
@@ -50,13 +51,6 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
   Poco::BinaryWriter write{out, Poco::BinaryWriter::BIG_ENDIAN_BYTE_ORDER};
   write << nx << ny << nz << DX << DY << DZ;
 
-  auto navigator = std::make_unique<G4Navigator>();
-  auto world = G4TransportationManager::GetTransportationManager()
-    -> GetNavigatorForTracking()
-    -> GetWorldVolume();
-  navigator -> SetWorldVolume(world);
-  auto touchable = std::make_unique<G4TouchableHistory>();
-
   auto start = std::chrono::steady_clock::now();
   for (auto iz=0; iz<nz; ++iz) {
     for (auto iy=0; iy<ny; ++iy) {
@@ -64,7 +58,7 @@ void attenuation_map(std::tuple<float, float, float> fov_full_size,
         auto x = (dx-DX) / 2 + ix * dx;
         auto y = (dy-DY) / 2 + iy * dy;
         auto z = (dz-DZ) / 2 + iz * dz;
-        auto density = inspect -> material_at({x,y,z}) -> GetDensity() / (kg/m3);
+        auto density = material_at({x,y,z}) -> GetDensity() / (kg/m3);
         write << static_cast<float>(density);
       }
     }

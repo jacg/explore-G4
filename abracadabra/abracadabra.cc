@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
   // ----- WIP: attenuation map construction -----------------------------------------------
   auto inspect = make_unique<world_geometry_inspector>(run_manager.get());
   auto N = 150;
-  attenuation_map({300.0, 300.0, 300.0}, {N,N,N}, "attenuation-map.raw", inspect.get());
+  inspect -> attenuation_map({300.0, 300.0, 300.0}, {N,N,N}, "attenuation-map.raw");
   return EXIT_SUCCESS;
 
 
