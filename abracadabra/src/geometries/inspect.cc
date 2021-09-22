@@ -13,6 +13,7 @@
 
 world_geometry_inspector::world_geometry_inspector(G4RunManager* run_manager)
   : navigator{std::make_unique<G4Navigator>()}
+  , touchable{std::make_unique<G4TouchableHistory>()}
 {
   run_manager -> Initialize(); // ensure that geometry is closed
   auto world = G4TransportationManager::GetTransportationManager()
@@ -27,7 +28,6 @@ G4Material const * world_geometry_inspector::material_at(const G4ThreeVector& po
 }
 
 G4VPhysicalVolume const* world_geometry_inspector::volume_at(const G4ThreeVector& point) const {
-  auto touchable = std::make_unique<G4TouchableHistory>();
   navigator -> LocateGlobalPointAndUpdateTouchable(point, touchable.get(), false);
   return touchable -> GetVolume();
 }

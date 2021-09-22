@@ -14,7 +14,8 @@ public:
   G4VPhysicalVolume const* volume_at(const G4ThreeVector&)   const;
   G4Material        const* material_at(const G4ThreeVector&) const;
 private:
-  std::unique_ptr<G4Navigator> navigator;
+  std::unique_ptr<G4Navigator>        navigator;
+  std::unique_ptr<G4TouchableHistory> touchable;
 };
 
 void attenuation_map(std::tuple<float, float, float> fov_full_size,
