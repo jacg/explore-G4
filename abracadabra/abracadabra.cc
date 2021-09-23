@@ -9,6 +9,8 @@
 #include "geometries/sipm.hh"
 #include "geometries/inspect.hh"
 #include "messengers/abracadabra.hh"
+#include "messengers/generator.hh"
+#include "utils/map_set.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -33,10 +35,6 @@ using std::unique_ptr;
 using std::cout;
 using std::endl;
 using std::setw;
-
-// ----- map/set helpers --------------------------------------------------------------------
-template<class M, class K>
-bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 
 #include <set>
 using times_set = std::multiset<double>;
@@ -74,39 +72,6 @@ public:
 private:
   std::map<T, size_t> ids;
   std::vector<T> items;
-};
-
-// --------------------------------------------------------------------------------------------
-struct generator_messenger : G4UImessenger {
-  generator_messenger(std::map<G4String, n4::generator::function>& choices)
-    : dir{new G4UIdirectory     ("/generator/")}
-    , cmd{new G4UIcmdWithAString("/generator/choose", this)}
-    , generate{[] (auto) { throw "No generator has been chosen"; }}
-    , choices{choices}
-  {
-    auto default_ = "phantom";
-    dir -> SetGuidance("TODO blah blah blah");
-    cmd -> SetGuidance("choice of primary generator");
-    cmd -> SetParameterName("choose", /*omittable*/ false);
-    cmd -> SetDefaultValue(default_);
-    cmd -> SetCandidates(""); // TODO get these from the generator map
-    cmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
-    generate = choices[default_];
-  }
-
-  void SetNewValue(G4UIcommand* command, G4String choice) {
-    if (command == cmd.get()) {
-      // TODO use proper exceptions
-      if (!contains(choices, choice)) { throw "Unrecoginzed generator " + choice; }
-      generate = choices[choice];
-    }
-  }
-  n4::generator::function generator() { return generate; }
-private:
-  unique_ptr<G4UIdirectory> dir;
-  unique_ptr<G4UIcmdWithAString> cmd;
-  n4::generator::function generate;
-  std::map<G4String, n4::generator::function>& choices;
 };
 
 // =============================================================================================
