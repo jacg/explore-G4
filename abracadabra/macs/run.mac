@@ -13,4 +13,9 @@
 
 /abracadabra/print true
 
+/attenuation_map/filename     attenuation-map.raw
+/attenuation_map/full_widths  100 200 300
+/attenuation_map/n_voxels     101 201 301
+#/attenuation_map/generate
+
 /run/beamOn 100

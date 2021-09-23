@@ -46,7 +46,10 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
   if (!out.good()) {
     throw "Failed to open attenuation image file: " + filename;
   }
-  std::cout << "Calculating attenuation map." << std::endl;
+  std::cout
+    << "Calculating attenuation map with "
+    << nx << " x " << ny << " x " << nz << " voxels across "
+    << DX << " x " << DY << " x " << DZ << " mm" << std::endl;
 
   Poco::BinaryWriter write{out, Poco::BinaryWriter::BIG_ENDIAN_BYTE_ORDER};
   write << nx << ny << nz << DX << DY << DZ;

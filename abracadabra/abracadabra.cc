@@ -7,8 +7,8 @@
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
-#include "geometries/inspect.hh"
 #include "messengers/abracadabra.hh"
+#include "messengers/attenuation_map.hh"
 #include "messengers/generator.hh"
 #include "utils/map_set.hh"
 
@@ -424,14 +424,8 @@ int main(int argc, char** argv) {
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> end(write_string_tables))
   );
-
-  // ----- WIP: attenuation map construction -----------------------------------------------
-  auto inspect = make_unique<world_geometry_inspector>(run_manager.get());
-  auto N = 150;
-  inspect -> attenuation_map({300.0, 300.0, 300.0}, {N,N,N}, "attenuation-map.raw");
-  return EXIT_SUCCESS;
-
-
+  // ----- Construct attenuation map if requested ------------------------------------------
+  attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
   // ----- second phase --------------------------------------------------------------------
   ui -> run();
 
