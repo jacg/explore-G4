@@ -26,6 +26,7 @@ set(ABRACADABRA_HEADERS
   src/geometries/samples.hh
   src/geometries/inspect.hh
   src/materials/LXe.hh
+  src/messengers/abracadabra.hh
   src/random/random.hh
   src/utils/enumerate.hh
   src/utils/interpolate.hh
@@ -38,6 +39,7 @@ set(ABRACADABRA_SOURCES
   src/geometries/sipm.cc
   src/geometries/samples.cc
   src/geometries/inspect.cc
+  src/messengers/abracadabra.cc
   src/materials/LXe.cc
   src/random/random.cc
   src/io/hdf5.cc
