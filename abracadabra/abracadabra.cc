@@ -7,6 +7,10 @@
 #include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
+#include "messengers/abracadabra.hh"
+#include "messengers/attenuation_map.hh"
+#include "messengers/generator.hh"
+#include "utils/map_set.hh"
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
@@ -16,7 +20,6 @@
 #include <G4UImanager.hh>
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
-#include <G4GenericMessenger.hh>
 
 #include <G4OpticalPhoton.hh>
 #include <G4Gamma.hh>
@@ -32,10 +35,6 @@ using std::unique_ptr;
 using std::cout;
 using std::endl;
 using std::setw;
-
-// ----- map/set helpers --------------------------------------------------------------------
-template<class M, class K>
-bool contains(M const& map, K const& key) { return map.find(key) != end(map); }
 
 #include <set>
 using times_set = std::multiset<double>;
@@ -73,79 +72,6 @@ public:
 private:
   std::map<T, size_t> ids;
   std::vector<T> items;
-};
-
-// ----- Choices which can be made in configuration files -----------------------------------
-struct abracadabra_messenger {
-  abracadabra_messenger() : messenger{new G4GenericMessenger{this, "/abracadabra/", "It's maaaaagic!"}} {
-    // TODO units, ranges etc.
-    messenger -> DeclareProperty("event_number_offset", offset, "Starting value for event ids");
-    messenger -> DeclareProperty("outfile"   , outfile   , "file to which hdf5 tables well be written");
-    messenger -> DeclareProperty("geometry"  , geometry  , "Geometry to be instantiated");
-    messenger -> DeclareProperty("detector"  , detector  , "Detector to be instantiated");
-    messenger -> DeclareProperty("phantom"   , phantom   , "Phantom to be used");
-    messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
-    messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
-    messenger -> DeclareProperty("print"     , print     , "Print live event information");
-    messenger -> DeclareProperty("y_offset"  , y_offset  , "Used in NEMA5, for now");
-    messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4, for now");
-    messenger -> DeclareProperty("xenon_thickness" , xenon_thickness,  "Thickness of LXe layer (mm)");
-    messenger -> DeclareProperty("quartz_thickness", quartz_thickness, "Thickness of quartz layer (mm)");
-    messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");
-    messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
-    messenger -> DeclareProperty("clear_pre_lxe"   , vac_pre_lxe    ,  "Remove obstacles before LXe");
-    messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
-  }
-  size_t offset = 0;
-  G4String outfile    = "default-out.h5";
-  G4String geometry   = "both";
-  G4String detector   = "imas";
-  G4String phantom    = "nema_7";
-  bool     spin       = true;
-  G4int    spin_speed = 10;
-  bool     print      = false;
-  G4double y_offset   = 0;
-  G4double z_offset   = 0;
-  G4double quartz_thickness =   0; // mm
-  G4double xenon_thickness  =  40; // mm
-  G4double cylinder_length  =  15; // mm
-  G4double cylinder_radius  = 200; // mm
-  bool vac_pre_lxe = false;
-  size_t nema5_sleeves = 1;
-private:
-  unique_ptr<G4GenericMessenger> messenger;
-};
-// --------------------------------------------------------------------------------------------
-struct generator_messenger : G4UImessenger {
-  generator_messenger(std::map<G4String, n4::generator::function>& choices)
-    : dir{new G4UIdirectory     ("/generator/")}
-    , cmd{new G4UIcmdWithAString("/generator/choose", this)}
-    , generate{[] (auto) { throw "No generator has been chosen"; }}
-    , choices{choices}
-  {
-    auto default_ = "phantom";
-    dir -> SetGuidance("TODO blah blah blah");
-    cmd -> SetGuidance("choice of primary generator");
-    cmd -> SetParameterName("choose", /*omittable*/ false);
-    cmd -> SetDefaultValue(default_);
-    cmd -> SetCandidates(""); // TODO get these from the generator map
-    cmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
-    generate = choices[default_];
-  }
-
-  void SetNewValue(G4UIcommand* command, G4String choice) {
-    if (command == cmd.get()) {
-      // TODO use proper exceptions
-      if (!contains(choices, choice)) { throw "Unrecoginzed generator " + choice; }
-      generate = choices[choice];
-    }
-  }
-  n4::generator::function generator() { return generate; }
-private:
-  unique_ptr<G4UIdirectory> dir;
-  unique_ptr<G4UIcmdWithAString> cmd;
-  n4::generator::function generate;
-  std::map<G4String, n4::generator::function>& choices;
 };
 
 // =============================================================================================
@@ -498,9 +424,8 @@ int main(int argc, char** argv) {
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> end(write_string_tables))
   );
-
-
-
+  // ----- Construct attenuation map if requested ------------------------------------------
+  attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
   // ----- second phase --------------------------------------------------------------------
   ui -> run();
 
@@ -508,6 +433,7 @@ int main(int argc, char** argv) {
   // by the run manager, so they should not be deleted by us.
 }
 
+// ================ Utility for spinning the visualized geometry ==========================
 void UI_interactive::spin() {
   if (messenger.spin) {
     // ----- spin the viewport ------------------------------------------------------------

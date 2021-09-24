@@ -24,10 +24,15 @@ set(ABRACADABRA_HEADERS
   src/geometries/nema.hh
   src/geometries/sipm.hh
   src/geometries/samples.hh
+  src/geometries/inspect.hh
   src/materials/LXe.hh
+  src/messengers/abracadabra.hh
+  src/messengers/attenuation_map.hh
+  src/messengers/generator.hh
   src/random/random.hh
   src/utils/enumerate.hh
   src/utils/interpolate.hh
+  src/utils/map_set.hh
   src/io/hdf5.hh
 )
 
@@ -36,6 +41,10 @@ set(ABRACADABRA_SOURCES
   src/geometries/nema.cc
   src/geometries/sipm.cc
   src/geometries/samples.cc
+  src/geometries/inspect.cc
+  src/messengers/abracadabra.cc
+  src/messengers/attenuation_map.cc
+  src/messengers/generator.cc
   src/materials/LXe.cc
   src/random/random.cc
   src/io/hdf5.cc
@@ -46,6 +55,7 @@ set(ABRACADABRA_TESTS
   src/geometries/imas-test.cc
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
+  src/geometries/inspect-test.cc
   test/trivial-full-app-test.cc
   src/materials/LXe-test.cc
   test/nema-phantom-generator-test.cc
@@ -54,6 +64,7 @@ set(ABRACADABRA_TESTS
 )
 
 find_package(HighFive REQUIRED)
+find_package(Poco REQUIRED COMPONENTS Foundation)
 
 # ----- Use Catch2 as C++ testing framework ---------------------------------
 find_package(Catch2 REQUIRED)
@@ -66,7 +77,15 @@ set(ALL_TEST_SOURCES
 
 # TODO including headers in add_executable apparently makes them show up in IDEs
 add_executable(tests-trial ${ALL_TEST_SOURCES})
-target_link_libraries(tests-trial PUBLIC Catch2::Catch2 ${Geant4_LIBRARIES} Nain4 hdf5 HighFive)
+target_link_libraries(
+  tests-trial
+  PUBLIC
+  Catch2::Catch2
+  ${Geant4_LIBRARIES}
+  Nain4
+  hdf5
+  HighFive
+  PocoFoundation)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests-trial)
@@ -100,7 +119,13 @@ add_executable(abracadabra
   ${ABRACADABRA_SOURCES}
   ${ABRACADABRA_HEADERS}
 )
-target_link_libraries(abracadabra ${Geant4_LIBRARIES} Nain4 hdf5 HighFive)
+target_link_libraries(
+  abracadabra
+  ${Geant4_LIBRARIES}
+  Nain4
+  hdf5
+  HighFive
+  PocoFoundation)
 target_include_directories(
   abracadabra PUBLIC
   ${ABRACADABRA_HEADERS}

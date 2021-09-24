@@ -182,7 +182,7 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto pi = 180 * deg;
 
   auto z_offset = half_length - to_end; // NEMA requires shperes at 7cm from phantom end
-  auto env_half_length = 1.1 * half_length + abs(z_offset);
+  auto env_half_length = 1.5 * half_length + abs(z_offset);
   auto env_half_width  = 1.1 * top_r;
 
   auto vol_envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
