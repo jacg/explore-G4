@@ -9,7 +9,9 @@
 #include <G4SystemOfUnits.hh>
 #include <vector>
 
-// TODO consider giving the phantoms a common inherited interface
+// TODO consider giving the phantoms a common inherited interface. This is more
+// complicated than it looks, because build_nema_7_phantom::build implicitly
+// relies on nema_7_phantom not having any virtual methods.
 
 template<class PHANTOM>
 void generate_primaries(PHANTOM const& phantom, G4Event* event) {
