@@ -28,12 +28,12 @@ using nain4::volume;
 // ===== Section 3: Spatial Resolution =======================================================
 
 nema_3_phantom::nema_3_phantom(G4double fov_length)
-  : vertices{{0,  1*cm, 0},
-             {0, 10*cm, 0},
-             {0, 20*cm, 0},
-             {0,  1*cm, fov_length * 3 / 8},
-             {0, 10*cm, fov_length * 3 / 8},
-             {0, 20*cm, fov_length * 3 / 8}}
+  : sources{{0,  1*cm, 0},
+            {0, 10*cm, 0},
+            {0, 20*cm, 0},
+            {0,  1*cm, fov_length * 3 / 8},
+            {0, 10*cm, fov_length * 3 / 8},
+            {0, 20*cm, fov_length * 3 / 8}}
 {}
 
 G4PVPlacement* nema_3_phantom::geometry() const {
@@ -42,7 +42,7 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
   // Find extent of bounding box to deduce envelope size.
   G4double x_max = 0, y_max = 0, z_max = 0;
-  for (auto p: vertices) {
+  for (auto p: sources) {
     x_max = std::max(x_max, std::abs(p.getX()));
     y_max = std::max(y_max, std::abs(p.getY()));
     z_max = std::max(z_max, std::abs(p.getZ()));
@@ -61,7 +61,7 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
   // Indicate positions of point sources with finite spheres
   auto marker_radius = 10 * mm;
-  for (auto [count, position]: enumerate(vertices)) {
+  for (auto [count, position]: enumerate(sources)) {
     std::string name = "Source_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, air, marker_radius);
     place(ball).in(container).at(position).now();

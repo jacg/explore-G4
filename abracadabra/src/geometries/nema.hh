@@ -30,10 +30,10 @@ class nema_3_phantom {
 public:
   nema_3_phantom(G4double fov_length);
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
-  G4ThreeVector generate_vertex()         const { return vertices[fair_die(6)] ; }
+  G4ThreeVector generate_vertex()         const { return sources[fair_die(6)] ; }
   G4PVPlacement* geometry()               const;
 private:
-  std::vector<G4ThreeVector> vertices;
+  std::vector<G4ThreeVector> sources;
 };
 
 // ===== NEMA NU-2 2018 Section 4: Scatter Fraction, Count Losses, and Randoms =============
