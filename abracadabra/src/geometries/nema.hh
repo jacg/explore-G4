@@ -20,6 +20,24 @@ void generate_primaries(PHANTOM const& phantom, G4Event* event) {
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
 
+// ===== Asymmetric, cheap to simulate phantom for basic sanity checking ===================
+
+// Should give clear attenuation maps and matching reconstructed images
+// + 3 spheres
+// + one on each axis, on the POSITIVE side
+// + different position on each axis: x=4, y=8, z=12 cm
+// + primaries from centres of spheres, for reconstruction from very few events
+class sanity_check_phantom {
+public:
+  sanity_check_phantom();
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex()         const;
+  G4PVPlacement* geometry()               const;
+private:
+  using d = G4double;
+  std::vector<std::tuple<d,d,d>> sources;
+};
+
 // ===== NEMA NU-2 2018 Section 3: Spatial Resolution ======================================
 
 // This is the most boring phantom of the lot: the geometry consists of 6
