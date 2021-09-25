@@ -25,15 +25,38 @@ using nain4::material;
 using nain4::place;
 using nain4::volume;
 
+// ===== Asymmetric, cheap to simulate phantom for basic sanity checking ===================
+sanity_check_phantom::sanity_check_phantom()
+  : sources{{{4*cm, 0   , 0     },
+             {0   , 8*cm, 0     },
+             {0   , 0   , 12*cm}}}
+{}
+
+G4PVPlacement* sanity_check_phantom::geometry() const {
+  auto air   = material("G4_AIR");
+  auto water = material("G4_WATER");
+  auto envelope = volume<G4Box>("Envelope", air  , 15*cm, 15*cm, 15*cm);
+  auto sphere   = volume<G4Orb>("Sphere"  , water,  1*cm);
+  for (auto [x,y,z] : sources) {
+    place(sphere).in(envelope).at(x,y,z).now();
+  }
+  return place(envelope).now();
+}
+
+G4ThreeVector sanity_check_phantom::generate_vertex() const {
+  auto [x,y,z] = sources[fair_die(3)];
+  return {x,y,z};
+}
+
 // ===== Section 3: Spatial Resolution =======================================================
 
 nema_3_phantom::nema_3_phantom(G4double fov_length)
-  : vertices{{0,  1*cm, 0},
-             {0, 10*cm, 0},
-             {0, 20*cm, 0},
-             {0,  1*cm, fov_length * 3 / 8},
-             {0, 10*cm, fov_length * 3 / 8},
-             {0, 20*cm, fov_length * 3 / 8}}
+  : sources{{0,  1*cm, 0},
+            {0, 10*cm, 0},
+            {0, 20*cm, 0},
+            {0,  1*cm, fov_length * 3 / 8},
+            {0, 10*cm, fov_length * 3 / 8},
+            {0, 20*cm, fov_length * 3 / 8}}
 {}
 
 G4PVPlacement* nema_3_phantom::geometry() const {
@@ -42,7 +65,7 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
   // Find extent of bounding box to deduce envelope size.
   G4double x_max = 0, y_max = 0, z_max = 0;
-  for (auto p: vertices) {
+  for (auto p: sources) {
     x_max = std::max(x_max, std::abs(p.getX()));
     y_max = std::max(y_max, std::abs(p.getY()));
     z_max = std::max(z_max, std::abs(p.getZ()));
@@ -61,7 +84,7 @@ G4PVPlacement* nema_3_phantom::geometry() const {
 
   // Indicate positions of point sources with finite spheres
   auto marker_radius = 10 * mm;
-  for (auto [count, position]: enumerate(vertices)) {
+  for (auto [count, position]: enumerate(sources)) {
     std::string name = "Source_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, air, marker_radius);
     place(ball).in(container).at(position).now();

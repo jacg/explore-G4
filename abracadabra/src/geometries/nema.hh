@@ -9,7 +9,9 @@
 #include <G4SystemOfUnits.hh>
 #include <vector>
 
-// TODO consider giving the phantoms a common inherited interface
+// TODO consider giving the phantoms a common inherited interface. This is more
+// complicated than it looks, because build_nema_7_phantom::build implicitly
+// relies on nema_7_phantom not having any virtual methods.
 
 template<class PHANTOM>
 void generate_primaries(PHANTOM const& phantom, G4Event* event) {
@@ -17,6 +19,24 @@ void generate_primaries(PHANTOM const& phantom, G4Event* event) {
   G4double time = 0;
   generate_back_to_back_511_keV_gammas(event, position, time);
 }
+
+// ===== Asymmetric, cheap to simulate phantom for basic sanity checking ===================
+
+// Should give clear attenuation maps and matching reconstructed images
+// + 3 spheres
+// + one on each axis, on the POSITIVE side
+// + different position on each axis: x=4, y=8, z=12 cm
+// + primaries from centres of spheres, for reconstruction from very few events
+class sanity_check_phantom {
+public:
+  sanity_check_phantom();
+  void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
+  G4ThreeVector generate_vertex()         const;
+  G4PVPlacement* geometry()               const;
+private:
+  using d = G4double;
+  std::vector<std::tuple<d,d,d>> sources;
+};
 
 // ===== NEMA NU-2 2018 Section 3: Spatial Resolution ======================================
 
@@ -28,10 +48,10 @@ class nema_3_phantom {
 public:
   nema_3_phantom(G4double fov_length);
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
-  G4ThreeVector generate_vertex()         const { return vertices[fair_die(6)] ; }
+  G4ThreeVector generate_vertex()         const { return sources[fair_die(6)] ; }
   G4PVPlacement* geometry()               const;
 private:
-  std::vector<G4ThreeVector> vertices;
+  std::vector<G4ThreeVector> sources;
 };
 
 // ===== NEMA NU-2 2018 Section 4: Scatter Fraction, Count Losses, and Randoms =============

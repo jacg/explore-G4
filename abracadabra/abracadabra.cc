@@ -214,6 +214,7 @@ int main(int argc, char** argv) {
 
   // ----- Available phantoms -----------------------------------------------------------
 
+  auto sanity = [] { return sanity_check_phantom(); };
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
@@ -244,7 +245,8 @@ int main(int argc, char** argv) {
   // The nema_3 phantom's length is determined by `/abracadabra/cylinder_length` in mm
 
   using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom,
-                                           nema_5_phantom, nema_7_phantom>;
+                                           nema_5_phantom, nema_7_phantom,
+                                           sanity_check_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -264,6 +266,7 @@ int main(int argc, char** argv) {
     p == "nema_4" ? phantom = nema_4(                         messenger.z_offset) :
     p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
     p == "nema_7" ? phantom = nema_7()                                            :
+    p == "sanity" ? phantom = sanity()                                            :
     throw "Unrecoginzed phantom " + p;
   };
 
