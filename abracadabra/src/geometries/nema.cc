@@ -125,24 +125,19 @@ G4ThreeVector nema_4_phantom::generate_vertex() const {
 // ===== Section 5: Sensitivity =============================================================
 
 G4PVPlacement* nema_5_phantom::geometry() const {
-  auto air   = material("G4_AIR");
-  auto water = material("G4_WATER");
-  auto metal = material("G4_STAINLESS-STEEL");
+  auto air    = material("G4_AIR");
+  auto vacuum = material("G4_Galactic");
 
   const auto inner_radius = 3.9 * mm / 2;
-  const auto dr_increment = 2.5 * mm / 2;
-  const auto dr = dr_increment * number_of_sleeves;
-  const auto env_half_x = 1.1 * (inner_radius + dr);
-  const auto env_half_y = 1.1 * (inner_radius + dr) + y_offset;
-  const auto env_half_z = 1.1 *  half_length;
+  const auto env_half_x = 1.1 * inner_radius;
+  const auto env_half_y = 1.1 * inner_radius + y_offset;
+  const auto env_half_z = 1.1 * half_length;
 
-  auto source   = volume<G4Tubs>("Source"  , water, 0.0, inner_radius     , half_length, 0.0, 360*deg);
-  auto sleeves  = volume<G4Tubs>("Sleeves" , metal, 0.0, inner_radius + dr, half_length, 0.0, 360*deg);
-  auto envelope = volume<G4Box> ("Envelope", air  , env_half_x, env_half_y, env_half_z);
+  auto source   = volume<G4Tubs>("Source"  , vacuum, 0.0, inner_radius, half_length, 0.0, 360*deg);
+  auto envelope = volume<G4Box> ("Envelope", air   , env_half_x, env_half_y, env_half_z);
 
-  place(source) .in(sleeves)                    .now();
-  place(sleeves).in(envelope).at(0, y_offset, 0).now(); // TODO explicit mm on offset, also in nema4
-  return place(envelope)                        .now();
+  place(source).in(envelope).now();
+  return     place(envelope).now();
 }
 
 G4ThreeVector nema_5_phantom::generate_vertex() const {

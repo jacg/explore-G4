@@ -67,58 +67,6 @@ TEST_CASE("NEMA4 phantom generate vertex", "[nema4][generator]") {
   CHECK(z_max == Approx(z_offset + length / 2));
 }
 
-TEST_CASE("NEMA5 phantom geometry", "[nema5][geometry]") {
-
-  auto r0 =   3.9 * mm / 2;
-  auto dr =   2.5 * mm / 2;
-  auto l  = 700   * mm;
-  auto N_sleeves = GENERATE(1,2,3,4,5);
-  auto r = r0 + N_sleeves * dr;
-  auto vol_sleeves = CLHEP::pi * (r * r /*- r0 * r0*/) * l / cm3;
-  auto y_offset = 0;
-
-  auto phantom  = nema_5_phantom(N_sleeves, y_offset);
-  auto geometry = phantom.geometry();
-
-  // for (const auto volume : geometry) {
-  //   std::cout << volume -> GetName() << std::endl;
-  // }
-
-  // --- Check the volume and density of the sleeves ------------------------------
-  auto found_sleeves = false;
-
-  auto check_sleeves = [&](auto& geometry) {
-    for (auto v: geometry) {
-      auto name = v->GetName();
-      if (name == "Sleeves") {
-        found_sleeves = true;
-        auto volume  = v -> GetLogicalVolume() -> GetSolid() -> GetCubicVolume() / cm3;
-        auto density = v -> GetLogicalVolume() -> GetMaterial() -> GetDensity()  / (g / cm3);
-        CHECK(volume  == Approx(vol_sleeves));
-        CHECK(density == Approx(8));
-      }
-    }
-    CHECK(found_sleeves);
-  };
-
-  // First check the phantom geometry in isolation
-  check_sleeves(geometry);
-
-  // Now check in the combined phantom + detector geometry
-  auto sd = nullptr;
-  auto length = 10*mm;
-  auto version = 1;
-  auto drLXe = 20*mm;
-  auto vacuum_before_xenon = false;
-  auto detector = imas_demonstrator(sd, length, version, drLXe, vacuum_before_xenon);
-  auto combied_geometry = n4::combine_geometries(phantom.geometry(), detector);
-  found_sleeves = false;
-
-  check_sleeves(combied_geometry);
-
-}
-
-
 TEST_CASE("NEMA7 phantom geometry", "[nema7][geometry]") {
 
   using std::setw;
