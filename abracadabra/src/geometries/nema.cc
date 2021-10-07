@@ -11,7 +11,6 @@
 #include <G4MultiUnion.hh>
 #include <G4UnionSolid.hh>
 
-#include <G4RandomDirection.hh>
 #include <G4PVPlacement.hh>
 
 #include <G4SystemOfUnits.hh>
@@ -253,15 +252,6 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   place(vol_body).in(vol_envelope).at(0,  corner_c_y, -z_offset).now();
   place(vol_lung).in(vol_body)    .at(0, -corner_c_y,  0       ).now();
   return place(vol_envelope).now();
-}
-
-void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position, G4double time) {
-  auto gamma = nain4::find_particle("gamma");
-  auto p = 511*keV * G4RandomDirection();
-  auto vertex =      new G4PrimaryVertex(position, time);
-  vertex->SetPrimary(new G4PrimaryParticle(gamma,  p.x(),  p.y(),  p.z()));
-  vertex->SetPrimary(new G4PrimaryParticle(gamma, -p.x(), -p.y(), -p.z()));
-  event -> AddPrimaryVertex(vertex);
 }
 
 G4ThreeVector nema_7_phantom::generate_vertex_in_body() const {
