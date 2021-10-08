@@ -421,7 +421,8 @@ int main(int argc, char** argv) {
     }
   };
 
-  n4::event_action::action_t write_primary_generator = [&](auto event) {
+  // Event action that writes the primary vertex of the event to HDF5
+  n4::event_action::action_t write_primary_vertex = [&](auto event) {
     using std::setw;
     auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
@@ -465,7 +466,7 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
-    -> set ((new n4::event_action) -> begin(write_primary_generator))
+    -> set ((new n4::event_action) -> begin(write_primary_vertex))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
