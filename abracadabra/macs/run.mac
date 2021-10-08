@@ -11,11 +11,11 @@
 /event/verbose 0
 /tracking/verbose 0
 
-/abracadabra/print true
+/abracadabra/verbosity 0
 
-/attenuation_map/filename     attenuation-map.raw
-/attenuation_map/full_widths  100 200 300
-/attenuation_map/n_voxels     101 201 301
+/attenuation_map/filename     attenuation-map-derenzo.raw
+/attenuation_map/full_widths  220 220 200
+/attenuation_map/n_voxels     21 21 21
 #/attenuation_map/generate
 
-/run/beamOn 100
+/run/beamOn 1000000

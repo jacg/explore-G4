@@ -14,7 +14,7 @@ struct abracadabra_messenger {
   G4String phantom    = "nema_7";
   bool     spin       = true;
   G4int    spin_speed = 10;
-  bool     print      = false;
+  G4int    verbosity  = 1;
   G4double y_offset   = 0;
   G4double z_offset   = 0;
   G4double quartz_thickness =   0; // mm

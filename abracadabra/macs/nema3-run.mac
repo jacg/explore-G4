@@ -17,6 +17,6 @@
 /event/verbose 0
 /tracking/verbose 0
 
-#/abracadabra/print true
+/abracadabra/verbosity 1
 
 /run/beamOn 5000
