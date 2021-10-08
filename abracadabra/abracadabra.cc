@@ -5,6 +5,7 @@
 
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
+#include "geometries/jaszczak.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 #include "messengers/abracadabra.hh"
@@ -248,7 +249,8 @@ int main(int argc, char** argv) {
 
   // ----- Available phantoms -----------------------------------------------------------
 
-  auto sanity = [] { return sanity_check_phantom(); };
+  auto sanity   = [] { return sanity_check_phantom(); };
+  auto jaszczak = [] { return jaszczak_phantom(); };
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
@@ -280,7 +282,8 @@ int main(int argc, char** argv) {
 
   using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom,
                                            nema_5_phantom, nema_7_phantom,
-                                           sanity_check_phantom>;
+                                           sanity_check_phantom,
+                                           jaszczak_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -296,11 +299,12 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_3" ? phantom = nema_3()                                            :
-    p == "nema_4" ? phantom = nema_4(                         messenger.z_offset) :
-    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
-    p == "nema_7" ? phantom = nema_7()                                            :
-    p == "sanity" ? phantom = sanity()                                            :
+    p == "nema_3"   ? phantom = nema_3()                                            :
+    p == "nema_4"   ? phantom = nema_4(                         messenger.z_offset) :
+    p == "nema_5"   ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
+    p == "nema_7"   ? phantom = nema_7()                                            :
+    p == "sanity"   ? phantom = sanity()                                            :
+    p == "jaszczak" ? phantom = jaszczak()                                          :
     throw "Unrecoginzed phantom " + p;
   };
 

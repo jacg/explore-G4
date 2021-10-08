@@ -14,13 +14,18 @@ public:
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
+
 protected:
   D height_cylinder = 186 * mm;
-  D radius_cylinder = 216 * mm;
+  D radius_cylinder = 216 * mm / 2;
   std::vector<D> radii_rods    = n4::scale_by(mm/2, {9.5, 12.7, 15.9, 19.1, 25.4, 31.8});
   std::vector<D> radii_spheres = n4::scale_by(mm/2, {3.2,  4.8,  6.4,  7.9,  9.5, 11.1});
-  D height_rods    =  88 * mm;
-  D height_spheres = 127 * mm;
+  D height_rods    =  88   * mm;
+  D height_spheres = 127   * mm;
+  D gap            =  14.4 * mm; // Width of corridors between groups of rods
+  D margin         =   0.1 * mm;
+private:
+  void rod_sector(unsigned long n, G4double r, G4LogicalVolume* cylinder, G4Material*) const;
 };
 
 // ----- Builder ----------------------------------------------------------------------
