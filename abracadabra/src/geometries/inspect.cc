@@ -2,6 +2,7 @@
 
 #include <G4SystemOfUnits.hh>
 #include <G4TransportationManager.hh>
+#include <G4UnitsTable.hh>
 
 #include <Poco/ByteOrder.h>
 #include <Poco/BinaryWriter.h>
@@ -70,6 +71,9 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
   std::chrono::duration<double> elapsed_seconds = stop - start;
   std::cout << "Done" << std::endl;
   auto seconds = elapsed_seconds.count();
-  std::cout << "Took " << seconds << " (" << (nx * ny * nz) / seconds << " pixels per second)\n";
+  auto pps = (nx * ny * nz) / (seconds * s);
+  std::cout << "Took " << seconds << " seconds"
+            << " (Time per pixel: " << G4BestUnit(1/pps, "Time")
+            << ", rate: " << G4BestUnit(pps, "Frequency") << ")\n";
   std::cout << "Wrote attenuation map to: " << filename << std::endl;
 }
