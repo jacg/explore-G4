@@ -247,10 +247,11 @@ int main(int argc, char** argv) {
   auto sd = new n4::sensitive_detector{"Writing_detector", store_hits, write_hits};
   //auto sd = nullptr; // If you only want to visualize geometry
 
+  // ----- Some phantoms' generators require access to run manager, which won't be created until later
+  unique_ptr<G4RunManager> run_manager{};
   // ----- Available phantoms -----------------------------------------------------------
-
-  auto sanity   = [] { return sanity_check_phantom(); };
-  auto jaszczak = [] { return jaszczak_phantom(); };
+  auto sanity   = [            ] { return sanity_check_phantom(); };
+  auto jaszczak = [&run_manager] { return jaszczak_phantom(run_manager); };
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
@@ -460,7 +461,7 @@ int main(int argc, char** argv) {
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
-  auto run_manager = unique_ptr<G4RunManager> {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
+  run_manager = unique_ptr<G4RunManager> {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // ----- Geometry (run_manager takes ownership) -----------------------------------------
   run_manager -> SetUserInitialization(new n4::geometry{[&write_sensor_database, geometry]() -> G4VPhysicalVolume* {
