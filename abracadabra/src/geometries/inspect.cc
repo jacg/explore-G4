@@ -18,6 +18,7 @@ WGI::world_geometry_inspector(G4RunManager* run_manager)
   : navigator{std::make_unique<G4Navigator>()}
   , touchable{std::make_unique<G4TouchableHistory>()}
 {
+  if (! run_manager) { throw "Cannot construct inspector without run manager"; }
   run_manager -> Initialize(); // ensure that geometry is closed
   auto world = G4TransportationManager::GetTransportationManager()
     -> GetNavigatorForTracking()

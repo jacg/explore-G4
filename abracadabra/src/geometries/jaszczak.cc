@@ -68,4 +68,14 @@ void jaszczak_phantom::rod_sector(unsigned long n, G4double r,
   }
 }
 
-G4ThreeVector jaszczak_phantom::generate_vertex() const { return {}; }
+G4ThreeVector jaszczak_phantom::generate_vertex() const {
+
+  return {};
+}
+
+world_geometry_inspector* jaszczak_phantom::inspector() {
+  if (! inspector_) {
+    inspector_.reset(new world_geometry_inspector{run_manager -> get()});
+  }
+  return inspector_.get();
+}

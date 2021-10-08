@@ -2,6 +2,7 @@
 #define geometries_jaszczak_hh
 
 #include "geometries/generate_primaries.hh"
+#include "geometries/inspect.hh"
 
 #include "nain4.hh"
 
@@ -29,11 +30,15 @@ protected:
   D margin         =   0.1 * mm;
 private:
   void rod_sector(unsigned long n, G4double r, G4LogicalVolume* cylinder, G4Material*) const;
+
+
   std::unique_ptr<G4RunManager>* run_manager; // Store as pointer rather than
                                               // reference, to avoid implicit
                                               // deletion of copy constructor,
                                               // which is needed use in
                                               // std::variant
+  std::unique_ptr<world_geometry_inspector> inspector_{};
+  world_geometry_inspector* inspector();
 };
 
 // ----- Builder ----------------------------------------------------------------------
