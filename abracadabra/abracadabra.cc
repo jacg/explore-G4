@@ -25,6 +25,8 @@
 #include <G4Gamma.hh>
 #include <Randomize.hh>
 
+#include <functional>
+#include <csignal>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -35,6 +37,11 @@ using std::unique_ptr;
 using std::cout;
 using std::endl;
 using std::setw;
+
+namespace report_progress {
+  std::function<void(int)> report_event_number;
+  void signal_handler(int signal) { report_event_number(signal); }
+}
 
 #include <set>
 using times_set = std::multiset<double>;
@@ -140,6 +147,13 @@ int main(int argc, char** argv) {
 
   abracadabra_messenger messenger;
   auto current_event = [&]() { return n4::event_number() + messenger.offset; };
+
+
+  report_progress::report_event_number = [&](int) {
+    cout << "Processing event number " << n4::event_number() << endl;
+  };
+  std::signal(SIGUSR1, report_progress::signal_handler);
+
 
   // ----- collecting arrival times of optical photons in sensors ----------------------------
   std::map<size_t, times_set> times;
