@@ -1,5 +1,5 @@
-/abracadabra/outfile "nema5-dz=1m-LXe=30mm-noQrz-4.h5"
-/abracadabra/event_number_offset 40000
+/abracadabra/outfile "jaszczak-dz=1m-LXe=30mm-noQrz-4.h5"
+/abracadabra/event_number_offset 1000000
 
 /random/setSeeds 123456 987654
 
@@ -13,9 +13,9 @@
 
 /abracadabra/verbosity 0
 
-/attenuation_map/filename     attenuation-map-derenzo.raw
+/attenuation_map/filename     attenuation-map-jaszczak.raw
 /attenuation_map/full_widths  220 220 200
-/attenuation_map/n_voxels     21 21 21
+/attenuation_map/n_voxels     151 151 151
 #/attenuation_map/generate
 
 /run/beamOn 1000000
