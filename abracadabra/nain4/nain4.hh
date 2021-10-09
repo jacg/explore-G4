@@ -32,6 +32,8 @@
 #include <tuple>
 #include <optional>
 
+#define FATAL(description) G4Exception((__FILE__ + (":" + std::to_string(__LINE__))).c_str(), "666", FatalException, description)
+
 namespace nain4 {
 
 using std::make_optional;

@@ -1,6 +1,8 @@
 #include <geometries/inspect.hh>
 #include "io/raw_image.hh"
 
+#include "nain4.hh"
+
 #include <G4SystemOfUnits.hh>
 #include <G4TransportationManager.hh>
 #include <G4UnitsTable.hh>
@@ -18,7 +20,7 @@ WGI::world_geometry_inspector(G4RunManager* run_manager)
   : navigator{std::make_unique<G4Navigator>()}
   , touchable{std::make_unique<G4TouchableHistory>()}
 {
-  if (! run_manager) { throw "Cannot construct inspector without run manager"; }
+  if (! run_manager) { FATAL("Cannot construct inspector without run manager"); }
   run_manager -> Initialize(); // ensure that geometry is closed
   auto world = G4TransportationManager::GetTransportationManager()
     -> GetNavigatorForTracking()
@@ -43,9 +45,7 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
   auto dz = DZ/nz;
 
   std::ofstream out{filename, std::ios::out | std::ios::binary};
-  if (!out.good()) {
-    throw "Failed to open attenuation image file: " + filename;
-  }
+  if (!out.good()) { FATAL(("Failed to open attenuation image file: " + filename).c_str()); }
   std::cout
     << "Calculating attenuation map with "
     << nx << " x " << ny << " x " << nz << " voxels across "

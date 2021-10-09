@@ -90,7 +90,7 @@ private:
 
 // =============================================================================================
 // ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
-void stop_if_failed(G4int status) { if (status != 0) { throw "up"; } }
+void stop_if_failed(G4int status) { if (status != 0) { FATAL("A messenger failed"); } }
 
 struct UI {
   static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
@@ -131,10 +131,7 @@ struct UI_batch : public UI {
 };
 
 UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
-  if (argc  < 2) {
-    std::cerr << "A model macro file must be provided" << std::endl;
-    throw "A model macro file must be provided";
-  }
+  if (argc  < 2) { FATAL("A model macro file must be provided"); }
   if (argc == 2) { return new UI_interactive(argc, argv, messenger); }
   else           { return new UI_batch      (argc, argv, messenger); }
 }
@@ -306,7 +303,7 @@ int main(int argc, char** argv) {
     p == "nema_7"   ? phantom = nema_7()                                            :
     p == "sanity"   ? phantom = sanity()                                            :
     p == "jaszczak" ? phantom = jaszczak()                                          :
-    throw "Unrecoginzed phantom " + p;
+    (throw (FATAL(("Unrecoginzed phantom: " + p).c_str()), "see note 1 at the end"));
   };
 
   // ----- Available detector geometries -------------------------------------------------
@@ -322,7 +319,7 @@ int main(int argc, char** argv) {
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
-      throw "Unrecoginzed detector " + d;
+      (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
   };
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
@@ -331,7 +328,7 @@ int main(int argc, char** argv) {
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
       g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
-      throw "Unrecoginzed geometry " + g;
+      (throw (FATAL(("Unrecoginzed geometry: " + g).c_str()), "see note 1 at the end"));
   };
 
   // ----- A choice of generators ---------------------------------------------------------
@@ -513,3 +510,22 @@ void UI_interactive::spin() {
                            {   0,   0, 500}});
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Note 1
+//
+// + G4 forces you to use its G4Exception function, whose return type is void.
+//
+// + C++'s ternary operator treats throw expressions as a special case.
+//
+// + Hiding the throw expression inside G4Exception, disables this special
+//   treatment, which results in a type mismatch between the void and whatever
+//   values are present in the rest of the ternary operator
+//
+// + So we go through the following convolutions to satisfy the type system:
+//
+//   1. use throw at the top-level
+//   2. use G4Exception in the argument to throw
+//   3. but throw does not accept void
+//   4. so use comma operator to give acceptable overall expression type (c-string)
+//   5. but the actual value of the string doesn't matter, just its type.
