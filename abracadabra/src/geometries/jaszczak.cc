@@ -1,4 +1,5 @@
 #include "geometries/jaszczak.hh"
+#include "random/random.hh"
 #include "utils/enumerate.hh"
 
 #include "nain4.hh"
@@ -29,7 +30,7 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
   auto cylinder = volume<G4Tubs>("Cylinder", water, 0.0, radius_cylinder, height_cylinder/2, 0.0, twopi);
   auto envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
 
-  for (const auto [n, r] : enumerate(radii_spheres)) {
+  for (const auto [n, r] : enumerate(radii_rods)) {
     rod_sector(n, r, cylinder, pmma);
   }
   // TODO spheres
@@ -69,11 +70,19 @@ void jaszczak_phantom::rod_sector(unsigned long n, G4double r,
 }
 
 G4ThreeVector jaszczak_phantom::generate_vertex() const {
-
-  return {};
+  for (;;) {
+    auto z = uniform(-height_cylinder/2, height_cylinder/2);
+    auto [x,y] = random_on_disc(radius_cylinder);
+    G4ThreeVector point{x,y,z};
+    auto name = inspector() -> volume_at(point) -> GetName();
+    if (name.rfind("Cylinder", 0) == 0) { // starts with
+      return point;
+    }
+    //std::cout << "Rejecting " << name << " at " << point << std::endl;
+  }
 }
 
-world_geometry_inspector* jaszczak_phantom::inspector() {
+world_geometry_inspector* jaszczak_phantom::inspector() const {
   if (! inspector_) {
     inspector_.reset(new world_geometry_inspector{run_manager -> get()});
   }
