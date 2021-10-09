@@ -10,7 +10,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("phantom"   , phantom   , "Phantom to be used");
   messenger -> DeclareProperty("spin_view" , spin      , "Spin geometry view");
   messenger -> DeclareProperty("spin_speed", spin_speed, "Spin geometry speed");
-  messenger -> DeclareProperty("print"     , print     , "Print live event information");
+  messenger -> DeclareProperty("verbosity" , verbosity , "Print live event information");
   messenger -> DeclareProperty("y_offset"  , y_offset  , "Used in NEMA5, for now");
   messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4, for now");
   messenger -> DeclareProperty("xenon_thickness" , xenon_thickness,  "Thickness of LXe layer (mm)");

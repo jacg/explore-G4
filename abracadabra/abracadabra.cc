@@ -358,11 +358,11 @@ int main(int argc, char** argv) {
       auto  volume_id =  volume_names.id( volume_name);
       writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
 
-      if (!messenger.print) return;
+      if (messenger.verbosity < 2) return;
 
       if (event_id != header_last_printed) {
-        cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited" << endl;
-        cout << endl;
+        cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
+             << endl;
         header_last_printed = event_id;
         track_1_printed_this_event = false;
       }
@@ -396,13 +396,16 @@ int main(int argc, char** argv) {
     auto [ x, y, z] = std::make_tuple(pos.x(), pos.y(), pos.z());
     auto [px,py,pz] = std::make_tuple(mom.x(), mom.y(), mom.z());
     writer -> write_primary(event_id, x,y,z, px,py,pz);
-    cout << std::setprecision(1) << std::fixed;
-    cout << setw(9) << event_id;
-    if (!messenger.print) { cout << endl; return; }
-    cout << " -----------------  "
+    if (messenger.verbosity < 1) { return; }
+    if (messenger.verbosity < 2) {
+      cout << std::setprecision(1) << std::fixed;
+      cout << setw(9) << event_id << endl;
+      return;
+    }
+    cout << endl << setw(9) << event_id << " -------  "
          << setw(7) <<  x << setw(7) <<  y << setw(7) <<  z << "     "
          << setw(7) << px << setw(7) << py << setw(7) << pz
-         << "  ----------------------" << std::endl;
+         << "  --------------------------------" << endl;
   };
 
   n4::run_action::action_t write_string_tables = [&](auto) {
