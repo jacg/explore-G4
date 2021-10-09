@@ -241,7 +241,7 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto vol_body = new G4LogicalVolume(body_solid, water, "Body");
 
   // Build and place spheres
-  for (auto [count, sphere]: enumerate(spheres)) {
+  for (const auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Source_" + std::to_string(count);
     auto ball  = volume<G4Orb>(name, water, sphere.radius);
     auto position = sphere_position(count) + G4ThreeVector{0, -corner_c_y, z_offset};

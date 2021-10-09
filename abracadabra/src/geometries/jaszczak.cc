@@ -4,8 +4,9 @@
 
 #include "nain4.hh"
 
-#include <G4Tubs.hh>
 #include <G4Box.hh>
+#include <G4Orb.hh>
+#include <G4Tubs.hh>
 
 
 using nain4::material;
@@ -30,11 +31,20 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
   auto cylinder = volume<G4Tubs>("Cylinder", water, 0.0, radius_cylinder, height_cylinder/2, 0.0, twopi);
   auto envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
 
-  for (const auto [n, r] : enumerate(radii_rods)) {
-    rod_sector(n, r, cylinder, pmma);
+  // Rods
+  for (const auto [n, r] : enumerate(radii_rods)) { rod_sector(n, r, cylinder, pmma); }
+
+  // Spheres
+  for (const auto [n, r] : enumerate(radii_spheres)) {
+    auto name = "Sphere_" + std::to_string(n);
+    auto ball = volume<G4Orb>(name, pmma, r);
+    auto angle = (60 * deg) * n;
+    auto x = radius_cylinder / 2 * cos(angle);
+    auto y = radius_cylinder / 2 * sin(angle);
+    auto z = height_spheres - (height_cylinder / 2);
+    place(ball).in(cylinder).at(x,y,z).now();
   }
-  // TODO spheres
-  // TODO orientation of whole
+
   place(cylinder).in(envelope).now();
   return place(envelope).now();
 }
