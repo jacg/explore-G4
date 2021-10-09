@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
 
   // ----- Where to write output from sensitive detectors ------------------------------------
   unique_ptr<hdf5_io> writer;
-  auto  open_writer = [&writer, &messenger]() { writer.reset(new hdf5_io{messenger.outfile});};
+  auto open_writer = [&writer, &messenger]() { writer.reset(new hdf5_io{messenger.outfile});};
 
   // ----- Extract sensor positions from geometry and write to hdf5 --------------------------
   auto write_sensor_database = [&writer, &open_writer](auto geometry) {

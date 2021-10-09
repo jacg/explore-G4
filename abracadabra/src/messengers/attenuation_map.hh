@@ -17,7 +17,7 @@ struct attenuation_map_messenger : G4UImessenger {
   using d = G4double;
   using u = unsigned;
   std::tuple<d,d,d> full_widths() const { auto w = full_widths_; return {w.x(), w.y(), w.z()}; }
-    std::tuple<u,u,u> n_voxels   () const { auto n = n_voxels_   ; return {n.x(), n.y(), n.z()}; }
+  std::tuple<u,u,u> n_voxels   () const { auto n = n_voxels_   ; return {n.x(), n.y(), n.z()}; }
 private:
   std::unique_ptr<G4UIdirectory>           dir;
   std::unique_ptr<G4UIcmdWithAString>      cmd_filename;
