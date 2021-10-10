@@ -1,7 +1,6 @@
 #include "geometries/imas.hh"
-#include "nain4.hh"
-
 #include "geometries/nema.hh"
+#include "nain4.hh"
 
 #include <G4VSolid.hh>
 #include <G4SystemOfUnits.hh>
