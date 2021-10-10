@@ -26,6 +26,7 @@
 #include <Randomize.hh>
 
 #include <functional>
+#include <chrono>
 #include <csignal>
 #include <memory>
 #include <ostream>
@@ -39,8 +40,13 @@ using std::endl;
 using std::setw;
 
 namespace report_progress {
-  std::function<void(int)> report_event_number;
+  G4int n_events_requested = 0;
+  std::chrono::steady_clock::time_point events_start;
+  std::function<void(int)> report_event_number = [] (int) {
+    cout << "No user signal event handler has been set so far" << endl;
+  };
   void signal_handler(int signal) { report_event_number(signal); }
+
 }
 
 #include <set>
@@ -150,7 +156,21 @@ int main(int argc, char** argv) {
 
 
   report_progress::report_event_number = [&](int) {
-    cout << "Processing event number " << n4::event_number() << endl;
+    auto n = n4::event_number();
+    auto N = report_progress::n_events_requested;
+    auto fraction = static_cast<float>(n) / N;
+    auto now = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = now - report_progress::events_start;
+    auto seconds = elapsed_seconds.count();
+    auto eta = static_cast<unsigned>(seconds / fraction - seconds);
+    auto eta_hours   =  eta / 3600;
+    auto eta_minutes = (eta % 3600) / 60;
+    auto eta_seconds =  eta %   60;
+
+    cout << "Processing event number " << n << " / " << N
+         << std::setprecision(1) << std::fixed << " ("  << 100 * fraction << " %)"
+         << " after " << seconds << " s. ETA: "
+         << eta_hours << "h " << eta_minutes << "m " << eta_seconds << "s\n";
   };
   std::signal(SIGUSR1, report_progress::signal_handler);
 
@@ -427,6 +447,11 @@ int main(int argc, char** argv) {
     writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
   };
 
+  n4::run_action::action_t start_counting_events = [&](auto run) {
+    report_progress::events_start = std::chrono::steady_clock::now();
+    report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -442,7 +467,8 @@ int main(int argc, char** argv) {
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
     -> set ((new n4::event_action) -> begin(write_primary_generator))
     -> set  (new n4::stepping_action{write_vertex})
-    -> set ((new n4::run_action) -> end(write_string_tables))
+    -> set ((new n4::run_action) -> begin(start_counting_events)
+                                 -> end  (write_string_tables))
   );
   // ----- Construct attenuation map if requested ------------------------------------------
   attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
