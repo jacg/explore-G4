@@ -34,6 +34,7 @@ set(ABRACADABRA_HEADERS
   src/utils/interpolate.hh
   src/utils/map_set.hh
   src/io/hdf5.hh
+  src/io/raw_image.hh
 )
 
 set(ABRACADABRA_SOURCES
@@ -48,6 +49,7 @@ set(ABRACADABRA_SOURCES
   src/materials/LXe.cc
   src/random/random.cc
   src/io/hdf5.cc
+  src/io/raw_image.cc
 )
 
 set(ABRACADABRA_TESTS
@@ -56,6 +58,7 @@ set(ABRACADABRA_TESTS
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
   src/geometries/inspect-test.cc
+  src/io/raw_image-test.cc
   test/trivial-full-app-test.cc
   src/materials/LXe-test.cc
   test/nema-phantom-generator-test.cc

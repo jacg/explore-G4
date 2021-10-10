@@ -1,11 +1,9 @@
 #include <geometries/inspect.hh>
+#include "io/raw_image.hh"
 
 #include <G4SystemOfUnits.hh>
 #include <G4TransportationManager.hh>
 #include <G4UnitsTable.hh>
-
-#include <Poco/ByteOrder.h>
-#include <Poco/BinaryWriter.h>
 
 #include <iostream>
 #include <fstream>
@@ -52,8 +50,8 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
     << nx << " x " << ny << " x " << nz << " voxels across "
     << DX << " x " << DY << " x " << DZ << " mm" << std::endl;
 
-  Poco::BinaryWriter write{out, Poco::BinaryWriter::BIG_ENDIAN_BYTE_ORDER};
-  write << nx << ny << nz << DX << DY << DZ;
+  std::vector<float> pixels;
+  pixels.reserve(nx * ny * nz);
 
   auto start = std::chrono::steady_clock::now();
   for (auto iz=0; iz<nz; ++iz) {
@@ -63,7 +61,7 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
         auto y = (dy-DY) / 2 + iy * dy;
         auto z = (dz-DZ) / 2 + iz * dz;
         auto density = material_at({x,y,z}) -> GetDensity() / (kg/m3);
-        write << static_cast<float>(density);
+        pixels.push_back(static_cast<float>(density));
       }
     }
   }
@@ -75,5 +73,7 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
   std::cout << "Took " << seconds << " seconds"
             << " (Time per pixel: " << G4BestUnit(1/pps, "Time")
             << ", rate: " << G4BestUnit(pps, "Frequency") << ")\n";
+
+  raw_image{n_voxels, fov_full_size, std::move(pixels)}.write(filename);
   std::cout << "Wrote attenuation map to: " << filename << std::endl;
 }
