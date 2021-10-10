@@ -1,3 +1,6 @@
+#ifndef geometries_inspect_hh
+#define geometries_inspect_hh
+
 #include <G4Navigator.hh>
 #include <G4RunManager.hh>
 #include <G4ThreeVector.hh>
@@ -20,3 +23,5 @@ private:
   std::unique_ptr<G4Navigator>        navigator;
   std::unique_ptr<G4TouchableHistory> touchable;
 };
+
+#endif
