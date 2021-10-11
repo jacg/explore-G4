@@ -1,9 +1,9 @@
 #ifndef geometries_nema_hh
 #define geometries_nema_hh
 
+#include "geometries/generate_primaries.hh"
 #include "random/random.hh"
 
-#include <G4Event.hh>
 #include <G4PVPlacement.hh>
 
 #include <G4SystemOfUnits.hh>
@@ -12,13 +12,6 @@
 // TODO consider giving the phantoms a common inherited interface. This is more
 // complicated than it looks, because build_nema_7_phantom::build implicitly
 // relies on nema_7_phantom not having any virtual methods.
-
-template<class PHANTOM>
-void generate_primaries(PHANTOM const& phantom, G4Event* event) {
-  auto position = phantom.generate_vertex();
-  G4double time = 0;
-  generate_back_to_back_511_keV_gammas(event, position, time);
-}
 
 // ===== Asymmetric, cheap to simulate phantom for basic sanity checking ===================
 
@@ -120,7 +113,6 @@ protected:
   biased_choice pick_region{{}};
   biased_choice pick_sub_region{{}};
 
-protected:
   std::tuple<G4double, G4double, G4double> sub_volumes() const;
 };
 
@@ -141,8 +133,5 @@ public:
   nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------
-
-// TODO this needs to live elsewhere
-void generate_back_to_back_511_keV_gammas(G4Event* event, G4ThreeVector position, G4double time);
 
 #endif

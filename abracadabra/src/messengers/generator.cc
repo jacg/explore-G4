@@ -1,10 +1,12 @@
 #include "messengers/generator.hh"
 #include "utils/map_set.hh"
 
+#include "nain4.hh"
+
 generator_messenger::generator_messenger(std::map<G4String, n4::generator::function>& choices)
   : dir{new G4UIdirectory     {"/generator/"}}
   , cmd{new G4UIcmdWithAString{"/generator/choose", this}}
-  , generate{[] (auto) { throw "No generator has been chosen"; }}
+  , generate{[] (auto) { FATAL("No generator has been chosen"); }}
   , choices{choices}
 {
   auto default_ = "phantom";
@@ -21,7 +23,7 @@ generator_messenger::generator_messenger(std::map<G4String, n4::generator::funct
 void generator_messenger::SetNewValue(G4UIcommand* command, G4String choice) {
   if (command == cmd.get()) {
     // TODO use proper exceptions
-    if (!contains(choices, choice)) { throw "Unrecoginzed generator " + choice; }
+    if (!contains(choices, choice)) { FATAL(("Unrecoginzed generator " + choice).c_str()); }
     generate = choices[choice];
   }
 }

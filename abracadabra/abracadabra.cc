@@ -5,6 +5,7 @@
 
 #include "geometries/imas.hh"
 #include "geometries/nema.hh"
+#include "geometries/jaszczak.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 #include "messengers/abracadabra.hh"
@@ -89,7 +90,7 @@ private:
 
 // =============================================================================================
 // ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
-void stop_if_failed(G4int status) { if (status != 0) { throw "up"; } }
+void stop_if_failed(G4int status) { if (status != 0) { FATAL("A messenger failed"); } }
 
 struct UI {
   static UI* make(int argc, char** argv, abracadabra_messenger&); // Polymorphic constructor
@@ -130,10 +131,7 @@ struct UI_batch : public UI {
 };
 
 UI* UI::make(int argc, char** argv, abracadabra_messenger& messenger) {
-  if (argc  < 2) {
-    std::cerr << "A model macro file must be provided" << std::endl;
-    throw "A model macro file must be provided";
-  }
+  if (argc  < 2) { FATAL("A model macro file must be provided"); }
   if (argc == 2) { return new UI_interactive(argc, argv, messenger); }
   else           { return new UI_batch      (argc, argv, messenger); }
 }
@@ -246,9 +244,11 @@ int main(int argc, char** argv) {
   auto sd = new n4::sensitive_detector{"Writing_detector", store_hits, write_hits};
   //auto sd = nullptr; // If you only want to visualize geometry
 
+  // ----- Some phantoms' generators require access to run manager, which won't be created until later
+  unique_ptr<G4RunManager> run_manager{};
   // ----- Available phantoms -----------------------------------------------------------
-
-  auto sanity = [] { return sanity_check_phantom(); };
+  auto sanity   = [            ] { return sanity_check_phantom(); };
+  auto jaszczak = [&run_manager] { return jaszczak_phantom(run_manager); };
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
@@ -280,7 +280,8 @@ int main(int argc, char** argv) {
 
   using polymorphic_phantom = std::variant<nema_3_phantom, nema_4_phantom,
                                            nema_5_phantom, nema_7_phantom,
-                                           sanity_check_phantom>;
+                                           sanity_check_phantom,
+                                           jaszczak_phantom>;
 
   // A variable containing the phantom is needed early on, because it is
   // captured by various lambdas. Need to construct the variant with type that
@@ -296,12 +297,13 @@ int main(int argc, char** argv) {
 
   // Choose phantom in config file via `/abracadabra/phantom`
   auto set_phantom = [&](G4String p) {
-    p == "nema_3" ? phantom = nema_3()                                            :
-    p == "nema_4" ? phantom = nema_4(                         messenger.z_offset) :
-    p == "nema_5" ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
-    p == "nema_7" ? phantom = nema_7()                                            :
-    p == "sanity" ? phantom = sanity()                                            :
-    throw "Unrecoginzed phantom " + p;
+    p == "nema_3"   ? phantom = nema_3()                                            :
+    p == "nema_4"   ? phantom = nema_4(                         messenger.z_offset) :
+    p == "nema_5"   ? phantom = nema_5(messenger.nema5_sleeves, messenger.y_offset) :
+    p == "nema_7"   ? phantom = nema_7()                                            :
+    p == "sanity"   ? phantom = sanity()                                            :
+    p == "jaszczak" ? phantom = jaszczak()                                          :
+    (throw (FATAL(("Unrecoginzed phantom: " + p).c_str()), "see note 1 at the end"));
   };
 
   // ----- Available detector geometries -------------------------------------------------
@@ -317,7 +319,7 @@ int main(int argc, char** argv) {
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
-      throw "Unrecoginzed detector " + d;
+      (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
   };
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
@@ -326,7 +328,7 @@ int main(int argc, char** argv) {
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
       g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
-      throw "Unrecoginzed geometry " + g;
+      (throw (FATAL(("Unrecoginzed geometry: " + g).c_str()), "see note 1 at the end"));
   };
 
   // ----- A choice of generators ---------------------------------------------------------
@@ -421,7 +423,8 @@ int main(int argc, char** argv) {
     }
   };
 
-  n4::event_action::action_t write_primary_generator = [&](auto event) {
+  // Event action that writes the primary vertex of the event to HDF5
+  n4::event_action::action_t write_primary_vertex = [&](auto event) {
     using std::setw;
     auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
@@ -455,7 +458,7 @@ int main(int argc, char** argv) {
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
-  auto run_manager = unique_ptr<G4RunManager> {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
+  run_manager = unique_ptr<G4RunManager> {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
   // ----- Geometry (run_manager takes ownership) -----------------------------------------
   run_manager -> SetUserInitialization(new n4::geometry{[&write_sensor_database, geometry]() -> G4VPhysicalVolume* {
@@ -465,7 +468,7 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
-    -> set ((new n4::event_action) -> begin(write_primary_generator))
+    -> set ((new n4::event_action) -> begin(write_primary_vertex))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
@@ -507,3 +510,22 @@ void UI_interactive::spin() {
                            {   0,   0, 500}});
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Note 1
+//
+// + G4 forces you to use its G4Exception function, whose return type is void.
+//
+// + C++'s ternary operator treats throw expressions as a special case.
+//
+// + Hiding the throw expression inside G4Exception, disables this special
+//   treatment, which results in a type mismatch between the void and whatever
+//   values are present in the rest of the ternary operator
+//
+// + So we go through the following convolutions to satisfy the type system:
+//
+//   1. use throw at the top-level
+//   2. use G4Exception in the argument to throw
+//   3. but throw does not accept void
+//   4. so use comma operator to give acceptable overall expression type (c-string)
+//   5. but the actual value of the string doesn't matter, just its type.

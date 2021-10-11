@@ -84,7 +84,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
 
 auto box_dimensions(G4LogicalVolume* tile) {
   auto box = dynamic_cast<G4Box*>(tile -> GetSolid());
-  if (!tile) { throw "SiPM should be a G4Box"; }
+  if (!tile) { FATAL("SiPM should be a G4Box"); }
   auto dx = box -> GetXHalfLength() * 2;
   auto dy = box -> GetYHalfLength() * 2;
   auto dz = box -> GetZHalfLength() * 2;
@@ -114,13 +114,13 @@ void line_cylinder_with_tiles(G4LogicalVolume* cylinder, G4LogicalVolume* tile, 
 
   // Cylinder dimensions
   auto tub = dynamic_cast<G4Tubs*>(cylinder -> GetSolid());
-  if (!tub) { throw "Cylinder should be a G4Tubs"; }
+  if (!tub) { FATAL("Cylinder should be a G4Tubs"); }
   auto length  = tub -> GetDz() * 2;
   auto outer_r = r.value_or(tub->GetRMax());
 
   // Tile dimensions
   auto [dx, dy, dz] = box_dimensions(tile);
-  if (dx != dy) { throw "The tile should have equal x and y dimensions"; }
+  if (dx != dy) { FATAL("The tile should have equal x and y dimensions"); }
 
   // Tile positions
   auto z   =   axial_positioning(gap, length, dx);
