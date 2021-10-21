@@ -258,7 +258,7 @@ G4ThreeVector nema_7_phantom::generate_vertex_in_body() const {
   auto corner_c_x = top_r - corner_r; // TODO avoid copy-paste from geometry()
   auto corner_c_y = corner_c_x / 2;
 
-  auto z = uniform(0, 2*half_length) - 7*cm;
+  auto z = uniform(-2*half_length, 0) + 7*cm;
   auto region = pick_sub_region();
 
   if (region == 0) { // top
