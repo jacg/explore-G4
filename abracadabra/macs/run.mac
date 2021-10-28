@@ -1,4 +1,4 @@
-/abracadabra/outfile "nema7-dz=1m-LXe=40mm-noQrz-5.h5"
+/abracadabra/outfile "sanity-dz=1m-LXe=40mm-noQrz-6.h5"
 /abracadabra/event_number_offset 1000000
 
 /random/setSeeds 123456 987654
@@ -13,8 +13,8 @@
 
 /abracadabra/verbosity 0
 
-/attenuation_map/filename     nema7-density-map.raw
-/attenuation_map/full_widths  220 220 200
+/attenuation_map/filename     sanity-density-map.raw
+/attenuation_map/full_widths  300 300 300
 /attenuation_map/n_voxels     151 151 151
 #/attenuation_map/generate
 
