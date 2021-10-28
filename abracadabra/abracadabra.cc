@@ -228,8 +228,7 @@ int main(int argc, char** argv) {
     for (auto& [sensor_id, ts] : times) {
       std::vector<float> tvec;
       for (auto t : ts) {
-        t -= trigger_time;
-        if (t > acquisition_widow) { break; }
+        if (t - trigger_time > acquisition_widow) { break; }
         tvec.push_back(t);
       }
       if ( ! tvec.empty()) {
