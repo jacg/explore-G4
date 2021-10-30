@@ -455,6 +455,12 @@ int main(int argc, char** argv) {
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
   };
 
+  // ----- Eliminate secondaries (in stacking action)  -------------------------------------
+  n4::stacking_action::classify_t kill_secondaries = [](auto track) {
+    auto kill = track -> GetParentID() > 0;
+    return kill > 0 ? G4ClassificationOfNewTrack::fKill : G4ClassificationOfNewTrack::fUrgent;
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -472,6 +478,7 @@ int main(int argc, char** argv) {
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
+    -> set ((new n4::stacking_action) -> classify(kill_secondaries))
   );
   // ----- Construct attenuation map if requested ------------------------------------------
   attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
