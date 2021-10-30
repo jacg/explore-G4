@@ -12,6 +12,6 @@
 # When used as source of noise for NEMA 7
 /abracadabra/z_offset 450
 
-/abracadabra/clear_pre_lxe false
+/abracadabra/steel_is_vacuum false
 #/abracadabra/xenon_thickness 50
 /abracadabra/quartz_thickness  0

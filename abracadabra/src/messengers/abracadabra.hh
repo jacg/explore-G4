@@ -21,7 +21,7 @@ struct abracadabra_messenger {
   G4double xenon_thickness  =  40; // mm
   G4double cylinder_length  =  15; // mm
   G4double cylinder_radius  = 200; // mm
-  bool vac_pre_lxe = false;
+  bool steel_is_vacuum = false;
   bool no_secondaries = false;
   size_t nema5_sleeves = 1;
 private:

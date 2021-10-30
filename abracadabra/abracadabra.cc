@@ -228,8 +228,7 @@ int main(int argc, char** argv) {
     for (auto& [sensor_id, ts] : times) {
       std::vector<float> tvec;
       for (auto t : ts) {
-        t -= trigger_time;
-        if (t > acquisition_widow) { break; }
+        if (t - trigger_time > acquisition_widow) { break; }
         tvec.push_back(t);
       }
       if ( ! tvec.empty()) {
@@ -313,7 +312,7 @@ int main(int argc, char** argv) {
     auto dr_Qtz = messenger.quartz_thickness * mm;
     auto length = messenger.cylinder_length  * mm;
     auto radius = messenger.cylinder_radius  * mm;
-    auto clear  = messenger.vac_pre_lxe;
+    auto clear  = messenger.steel_is_vacuum;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :

@@ -238,12 +238,12 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   auto union2     = new G4UnionSolid("union2", union1  , corner, no_rot, { corner_c_x,          0  , 0});
   auto body_solid = new G4UnionSolid("Body"  , union2  , base  , no_rot, {        0  , -base_half_y, 0});
 
-  auto vol_body = new G4LogicalVolume(body_solid, water, "Body");
+  auto vol_body = new G4LogicalVolume(body_solid, air, "Body");
 
   // Build and place spheres
   for (const auto [count, sphere]: enumerate(spheres)) {
     std::string name = "Source_" + std::to_string(count);
-    auto ball  = volume<G4Orb>(name, water, sphere.radius);
+    auto ball  = volume<G4Orb>(name, air, sphere.radius);
     auto position = sphere_position(count) + G4ThreeVector{0, -corner_c_y, z_offset};
     place(ball).in(vol_body).at(position).now();
   }
