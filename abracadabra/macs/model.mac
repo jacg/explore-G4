@@ -11,6 +11,6 @@
 /abracadabra/cylinder_length 1000
 /abracadabra/y_offset 0
 /abracadabra/no_secondaries false
-/abracadabra/clear_pre_lxe false
+/abracadabra/clear_pre_lxe true
 /abracadabra/quartz_thickness 0
 /abracadabra/xenon_thickness 40
