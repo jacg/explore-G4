@@ -473,13 +473,14 @@ int main(int argc, char** argv) {
   // ----- Physics list --------------------------------------------------------------------
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
-  run_manager -> SetUserInitialization((new n4::actions{generator_messenger.generator()})
+  auto actions = (new n4::actions{generator_messenger.generator()})
     -> set ((new n4::event_action) -> begin(write_primary_vertex))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
-    -> set ((new n4::stacking_action) -> classify(kill_secondaries))
-  );
+    -> set ((new n4::stacking_action) -> classify(kill_secondaries));
+
+  run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
   attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
   // ----- second phase --------------------------------------------------------------------
