@@ -19,4 +19,5 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
   messenger -> DeclareProperty("clear_pre_lxe"   , vac_pre_lxe    ,  "Remove obstacles before LXe");
   messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
+  messenger -> DeclareProperty("no_secondaries"  , no_secondaries ,  "Suppress secondaries");
 }

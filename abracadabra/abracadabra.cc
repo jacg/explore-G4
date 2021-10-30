@@ -477,8 +477,10 @@ int main(int argc, char** argv) {
     -> set ((new n4::event_action) -> begin(write_primary_vertex))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
-                                 -> end  (write_string_tables))
-    -> set ((new n4::stacking_action) -> classify(kill_secondaries));
+                                 -> end  (write_string_tables));
+  if (messenger.no_secondaries) {
+    actions -> set ((new n4::stacking_action) -> classify(kill_secondaries));
+  }
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
