@@ -22,6 +22,7 @@ struct abracadabra_messenger {
   G4double cylinder_length  =  15; // mm
   G4double cylinder_radius  = 200; // mm
   bool vac_pre_lxe = false;
+  bool no_secondaries = false;
   size_t nema5_sleeves = 1;
 private:
   std::unique_ptr<G4GenericMessenger> messenger;
