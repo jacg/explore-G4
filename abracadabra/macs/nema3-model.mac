@@ -9,6 +9,6 @@
 /abracadabra/detector imas
 /abracadabra/cylinder_length 150
 
-#/abracadabra/clear_pre_lxe true
+#/abracadabra/steel_is_vacuum true
 #/abracadabra/xenon_thickness 50
 /abracadabra/quartz_thickness 0

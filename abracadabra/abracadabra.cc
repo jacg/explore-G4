@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
     auto dr_Qtz = messenger.quartz_thickness * mm;
     auto length = messenger.cylinder_length  * mm;
     auto radius = messenger.cylinder_radius  * mm;
-    auto clear  = messenger.vac_pre_lxe;
+    auto clear  = messenger.steel_is_vacuum;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :

@@ -17,7 +17,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("quartz_thickness", quartz_thickness, "Thickness of quartz layer (mm)");
   messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");
   messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
-  messenger -> DeclareProperty("clear_pre_lxe"   , vac_pre_lxe    ,  "Remove obstacles before LXe");
+  messenger -> DeclareProperty("steel_is_vacuum" , steel_is_vacuum,  "Replace steel with vacuum in IMAS");
   messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
   messenger -> DeclareProperty("no_secondaries"  , no_secondaries ,  "Suppress secondaries");
 }

@@ -29,7 +29,7 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
                                  G4double length,
                                  G4double drQtz,
                                  G4double drLXe,
-                                 bool vacuum_before_xenon) {
+                                 bool steel_is_vacuum) {
   // ----- Materials --------------------------------------------------------------
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
@@ -38,9 +38,8 @@ G4PVPlacement* imas_demonstrator(n4::sensitive_detector* sd,
   auto LXe     = LXe_with_properties();
 
   // For trials where we want a cleaner signal in the Xenon
-  if (vacuum_before_xenon) {
+  if (steel_is_vacuum) {
     steel = vacuum;
-    air   = vacuum;
   }
 
   // ----- Utility for wrapping smaller cylinder inside a larger one --------------
