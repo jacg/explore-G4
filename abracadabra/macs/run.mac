@@ -1,4 +1,4 @@
-/abracadabra/outfile "nema7-dz=1m-LXe=40mm-noQrz-6.h5"
+/abracadabra/outfile "nema7-dz=1m-LXe=30mm-noQrz-6.h5"
 /abracadabra/event_number_offset 1000000
 
 /random/setSeeds 123456 987654
