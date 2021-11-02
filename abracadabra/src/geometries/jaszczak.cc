@@ -28,7 +28,7 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
   auto env_half_length = height_cylinder * 1.1;
   auto env_half_width  = radius_cylinder * 1.1;
 
-  auto cylinder = volume<G4Tubs>("Cylinder", water, 0.0, radius_cylinder, height_cylinder/2, 0.0, twopi);
+  auto cylinder = volume<G4Tubs>("Cylinder", air, 0.0, radius_cylinder, height_cylinder/2, 0.0, twopi);
   auto envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
 
   // Rods
