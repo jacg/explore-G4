@@ -49,12 +49,11 @@ namespace report_progress {
     cout << "No user signal event handler has been set so far" << endl;
   };
   void signal_handler(int signal) { report_event_number(signal); }
-
-  void print_vertex(size_t event_id, size_t& header_last_printed, bool& track_1_printed_this_event,
-                    G4int parent, G4int id, G4String const& process_name,
+  void print_vertex(size_t event_id, G4int id, G4int parent,
                     G4double x, G4double y, G4double z, G4double r,
                     G4double moved, G4double pre_KE, G4double pst_KE, G4double dep_E,
-                    G4String const& volume_name) {
+                    G4String const& process_name, G4String const& volume_name,
+                    size_t& header_last_printed, bool& track_1_printed_this_event) {
     if (event_id != header_last_printed) {
       cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
            << endl;
@@ -407,34 +406,62 @@ int main(int argc, char** argv) {
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
+
     auto pst_pt = step -> GetPostStepPoint();
+    auto pre_pt = step -> GetPreStepPoint();
+
     auto track = step -> GetTrack();
+    auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+    auto pre_volume_name =        pre_pt -> GetPhysicalVolume()     -> GetName();
+
+    // ----- Standard criterion -----------------------------------------------------------------------
+    // Only record vertices (not transport) of gammas
     auto particle = track -> GetParticleDefinition();
-    if (particle == G4Gamma::Definition()) {
-      auto id = track -> GetTrackID();
-      auto pre_pt = step -> GetPreStepPoint();
-      auto event_id = current_event();
-      auto parent = track -> GetParentID();
-      auto pos = pst_pt -> GetPosition();
-      auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
-      auto moved = step -> GetDeltaPosition().mag();
-      auto dep_E = step -> GetTotalEnergyDeposit() / keV;
-      auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
-      auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
-      auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
-      auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+    if (particle != G4Gamma::Definition() || process_name == "---->") return;
+    auto& volume_name = pre_volume_name;
 
-      if (process_name == "---->") return;
-      auto t = pst_pt -> GetGlobalTime();
-      auto process_id = process_names.id(process_name);
-      auto  volume_id =  volume_names.id( volume_name);
-      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
+    // // ----- Magic LXe criterion -------------------------------------------------------------------------
+    // // 1. Immediately stop any particle that reaches LXe.
+    // // 2. Record only (a) gammas (b) which have reached LXe
+    // auto pst_physvol     = pst_pt -> GetPhysicalVolume();
+    // auto pst_volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
+    // // Stop as soon as LXe reached
+    // if (pst_volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
+    // // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
+    // if (pst_volume_name != "LXe" || process_name != "---->" ) return;
+    // auto& volume_name = pst_volume_name;
 
-      if (messenger.verbosity < 2) return;
-      report_progress::print_vertex(event_id, header_last_printed, track_1_printed_this_event,
-                                    parent, id, process_name, x,y,z,r,
-                                    moved, pre_KE, pst_KE, dep_E, volume_name);
-    }
+    // ----- common ---------------------------------------------------------------------------------------
+
+    // Event and particle identities
+    auto event_id = current_event();
+    auto id     = track -> GetTrackID();
+    auto parent = track -> GetParentID();
+
+    // Position, motion and timing
+    auto pos = pst_pt -> GetPosition();
+    auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
+    auto t = pst_pt -> GetGlobalTime();
+    auto moved = step -> GetDeltaPosition().mag();
+
+    // Energy
+    auto pre_KE = pre_pt -> GetKineticEnergy()      / keV;
+    auto pst_KE = pst_pt -> GetKineticEnergy()      / keV;
+    auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
+
+    // Process and volume ids
+    auto  volume_id =  volume_names.id( volume_name);
+    auto process_id = process_names.id(process_name);
+
+    // Write vertex to output file
+    writer -> write_vertex(       event_id, id, parent, x,y,z,t, moved, pre_KE, pst_KE, dep_E,
+                                  process_id,   volume_id);
+
+    // Live progress report on stdout
+    if (messenger.verbosity < 2) return;
+    report_progress::print_vertex(event_id, id, parent, x,y,z,r, moved, pre_KE, pst_KE, dep_E,
+                                  process_name, volume_name,
+                                  header_last_printed, track_1_printed_this_event);
   };
 
   // Event action that writes the primary vertex of the event to HDF5
