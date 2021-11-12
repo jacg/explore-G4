@@ -66,19 +66,24 @@ namespace report_progress {
       cout << endl;
     }
 
+    #define SETW(w,v) setw(w) << v
+    #define ROUND(p,v) std::setw(p) << (int) std::round(v)
     cout << std::setprecision(1) << std::fixed;
-    cout << setw(9) << event_id
-         << setw(5) << parent << ' '
-         << setw(5) << id
-         << setw(6) << process_name
-         << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-         << setw(7) << moved << "   "
-         << setw(6) << pre_KE
-         << setw(6) << pst_KE
-         << setw(6) << dep_E
-         << setw(20) << volume_name << ' '
+    cout << SETW(9, event_id)
+         << SETW(5, parent) << ' '
+         << SETW(5, id)
+         << SETW(6, process_name)
+         << "  ("
+         << ROUND(5,x) << ROUND(5,y) << ROUND(5,z) << " :" << ROUND(4,r)
+         << ") "
+         << SETW(7, moved) << "   "
+         << SETW(6, pre_KE)
+         << SETW(6, pst_KE)
+         << SETW(6, dep_E)
+         << SETW(20, volume_name) << ' '
          << endl;
-
+    #undef ROUND
+    #undef SETW
   }
 
 }
