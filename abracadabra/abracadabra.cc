@@ -15,7 +15,9 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4String.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Types.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
@@ -47,6 +49,38 @@ namespace report_progress {
     cout << "No user signal event handler has been set so far" << endl;
   };
   void signal_handler(int signal) { report_event_number(signal); }
+
+  void print_vertex(size_t event_id, size_t& header_last_printed, bool& track_1_printed_this_event,
+                    G4int parent, G4int id, G4String const& process_name,
+                    G4double x, G4double y, G4double z, G4double r,
+                    G4double moved, G4double pre_KE, G4double pst_KE, G4double dep_E,
+                    G4String const& volume_name) {
+    if (event_id != header_last_printed) {
+      cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
+           << endl;
+      header_last_printed = event_id;
+      track_1_printed_this_event = false;
+    }
+
+    if (id == 1 && ! track_1_printed_this_event) {
+      track_1_printed_this_event = true;
+      cout << endl;
+    }
+
+    cout << std::setprecision(1) << std::fixed;
+    cout << setw(9) << event_id
+         << setw(5) << parent << ' '
+         << setw(5) << id
+         << setw(6) << process_name
+         << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
+         << setw(7) << moved << "   "
+         << setw(6) << pre_KE
+         << setw(6) << pst_KE
+         << setw(6) << dep_E
+         << setw(20) << volume_name << ' '
+         << endl;
+
+  }
 
 }
 
@@ -392,31 +426,9 @@ int main(int argc, char** argv) {
       writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
 
       if (messenger.verbosity < 2) return;
-
-      if (event_id != header_last_printed) {
-        cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
-             << endl;
-        header_last_printed = event_id;
-        track_1_printed_this_event = false;
-      }
-
-      if (id == 1 && ! track_1_printed_this_event) {
-        track_1_printed_this_event = true;
-        cout << endl;
-      }
-
-      cout << std::setprecision(1) << std::fixed;
-      cout << setw(9) << event_id
-           << setw(5) << parent << ' '
-           << setw(5) << id
-           << setw(6) << process_name
-           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-           << setw(7) << moved << "   "
-           << setw(6) << pre_KE
-           << setw(6) << pst_KE
-           << setw(6) << dep_E
-           << setw(20) << volume_name << ' '
-           << endl;
+      report_progress::print_vertex(event_id, header_last_printed, track_1_printed_this_event,
+                                    parent, id, process_name, x,y,z,r,
+                                    moved, pre_KE, pst_KE, dep_E, volume_name);
     }
   };
 
