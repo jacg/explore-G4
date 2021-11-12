@@ -366,7 +366,6 @@ int main(int argc, char** argv) {
      "Source", "Sleeves"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
-    static size_t previous_event = 666;
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
     auto pst_pt = step -> GetPostStepPoint();
@@ -376,7 +375,6 @@ int main(int argc, char** argv) {
       auto id = track -> GetTrackID();
       auto pre_pt = step -> GetPreStepPoint();
       auto event_id = current_event();
-      previous_event = event_id;
       auto parent = track -> GetParentID();
       auto pos = pst_pt -> GetPosition();
       auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
