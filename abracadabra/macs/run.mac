@@ -1,4 +1,4 @@
-/abracadabra/outfile "jaszczak-udlx-cold-spheres-nosteel-dz=1m-LXe=30mm-noQrz-6.h5"
+/abracadabra/outfile "nema7-vacuum-dz=1m-LXe=30mm-noQrz-6.h5"
 
 /abracadabra/event_number_offset 1000000
 
@@ -14,8 +14,8 @@
 
 /abracadabra/verbosity 0
 
-/attenuation_map/filename     jaszczak-density-map.raw
-/attenuation_map/full_widths  220 220 200
+/attenuation_map/filename     nema7-empty-density-map.raw
+/attenuation_map/full_widths  800 800 1100
 /attenuation_map/n_voxels     151 151 151
 #/attenuation_map/generate
 

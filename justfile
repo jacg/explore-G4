@@ -64,6 +64,12 @@ interact-debug model='model': build
 	cd abracadabra/build
 	gdb --args ./abracadabra macs/{{model}}.mac
 
+# Run in batch mode with explicit macro files
+batch model run: build
+	#!/usr/bin/env sh
+	cd abracadabra/build
+	./abracadabra {{model}} {{run}}
+
 # List available model configurations
 list-models:
 	#!/usr/bin/env sh

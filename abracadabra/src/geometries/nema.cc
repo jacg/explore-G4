@@ -197,9 +197,10 @@ G4PVPlacement* nema_7_phantom::geometry() const {
   // TODO the walls of the phantoms, sources, etc. are not modelled at all yet
   auto nist = G4NistManager::Instance();
   nist -> BuildMaterialWithNewDensity("NEMA7_LUNG", "G4_POLYSTYRENE", 0.3 * g / mL);
-  auto lung  = material("NEMA7_LUNG");
-  auto air   = material("G4_AIR");
-  auto water = material("G4_WATER"); // The radioactive source is floating around in water
+  auto vacuum = material("G4_Galactic");
+  auto lung  = vacuum; //material("NEMA7_LUNG");
+  auto air   = vacuum; //material("G4_AIR");
+  auto water = vacuum; //material("G4_WATER"); // The radioactive source is floating around in water
 
   auto pi = 180 * deg;
 
