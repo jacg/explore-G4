@@ -21,10 +21,16 @@ jaszczak_phantom build_jaszczak_phantom::build() {
 
 
 G4PVPlacement* jaszczak_phantom::geometry() const {
-  auto vacuum = material("G4_Galactic");
-  auto air    = vacuum;
-  auto water  = vacuum;
-  auto pmma   = vacuum;
+  auto air   = material("G4_AIR");
+  auto water = material("G4_WATER"); // The radioactive source is floating around in water
+  auto pmma  = material("G4_PLEXIGLASS");
+
+  if (evacuate) {
+    auto vacuum = material("G4_Galactic");
+    air   = vacuum;
+    water = vacuum;
+    pmma  = vacuum;
+  }
 
   auto env_half_length = height_cylinder * 1.1;
   auto env_half_width  = radius_cylinder * 1.1;

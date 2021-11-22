@@ -281,7 +281,11 @@ int main(int argc, char** argv) {
   unique_ptr<G4RunManager> run_manager{};
   // ----- Available phantoms -----------------------------------------------------------
   auto sanity   = [            ] { return sanity_check_phantom(); };
-  auto jaszczak = [&run_manager] { return jaszczak_phantom(run_manager); };
+
+  auto jaszczak = [&run_manager, &messenger] {
+    return jaszczak_phantom(run_manager, messenger.vacuum_phantom);
+  };
+
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
