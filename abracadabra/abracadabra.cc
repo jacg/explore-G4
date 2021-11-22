@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
   auto nema_4 = [](auto z_offset)                 { return nema_4_phantom(           z_offset); };
   auto nema_5 = [](auto n_sleeves, auto y_offset) { return nema_5_phantom(n_sleeves, y_offset); };
 
-  auto nema_7 = []() {
+  auto nema_7 = [&messenger]() {
     return build_nema_7_phantom{}
       .activity(1)
       .length(180*mm)
@@ -308,6 +308,7 @@ int main(int argc, char** argv) {
       .sphereD(22*mm, 4)
       .sphereD(28*mm, 4)
       .sphereD(37*mm, 4)
+      .vacuum_body(messenger.vacuum_phantom)
       .build();
   };
 
