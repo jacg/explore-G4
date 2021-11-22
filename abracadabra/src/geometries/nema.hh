@@ -7,6 +7,7 @@
 #include <G4PVPlacement.hh>
 
 #include <G4SystemOfUnits.hh>
+#include <G4Types.hh>
 #include <vector>
 
 // TODO consider giving the phantoms a common inherited interface. This is more
@@ -110,6 +111,7 @@ protected:
   G4double   lung_r    =  25.0*mm;
   G4double half_length =  90.0*mm;
   G4double to_end      =  70.0*mm; // NEMA requires spheres at 7cm from phantom end
+  G4bool evacuate      = false;    // Replace all materials in body with vacuum
   biased_choice pick_region{{}};
   biased_choice pick_sub_region{{}};
 
@@ -130,6 +132,7 @@ public:
   build_nema_7_phantom& lungR  (G4double r) {  lung_r = r;    return *this; }
   build_nema_7_phantom& inner_diameter(G4double d) { return inner_radius(d/2); }
   build_nema_7_phantom& spheres_from_end(G4double l) { to_end = l; return *this; }
+  build_nema_7_phantom& vacuum_body     (G4bool v) { evacuate = v; return *this; }
   nema_7_phantom build();
 };
 // ------------------------------------------------------------------------------------

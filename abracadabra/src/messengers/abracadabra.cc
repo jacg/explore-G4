@@ -18,6 +18,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");
   messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
   messenger -> DeclareProperty("steel_is_vacuum" , steel_is_vacuum,  "Replace steel with vacuum in IMAS");
-  messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
+  messenger -> DeclareProperty("vacuum_phantom"  , vacuum_phantom ,  "Set all phantom materials to vacuum");
   messenger -> DeclareProperty("no_secondaries"  , no_secondaries ,  "Suppress secondaries");
+  messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
 }

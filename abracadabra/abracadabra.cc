@@ -15,7 +15,9 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4String.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Types.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
 #include <G4UImanager.hh>
@@ -47,6 +49,42 @@ namespace report_progress {
     cout << "No user signal event handler has been set so far" << endl;
   };
   void signal_handler(int signal) { report_event_number(signal); }
+  void print_vertex(size_t event_id, G4int id, G4int parent,
+                    G4double x, G4double y, G4double z, G4double r,
+                    G4double moved, G4double pre_KE, G4double pst_KE, G4double dep_E,
+                    G4String const& process_name, G4String const& volume_name,
+                    size_t& header_last_printed, bool& track_1_printed_this_event) {
+    if (event_id != header_last_printed) {
+      cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
+           << endl;
+      header_last_printed = event_id;
+      track_1_printed_this_event = false;
+    }
+
+    if (id == 1 && ! track_1_printed_this_event) {
+      track_1_printed_this_event = true;
+      cout << endl;
+    }
+
+    #define SETW(w,v) setw(w) << v
+    #define ROUND(p,v) std::setw(p) << (int) std::round(v)
+    cout << std::setprecision(1) << std::fixed;
+    cout << SETW(9, event_id)
+         << SETW(5, parent) << ' '
+         << SETW(5, id)
+         << SETW(6, process_name)
+         << "  ("
+         << ROUND(5,x) << ROUND(5,y) << ROUND(5,z) << " :" << ROUND(4,r)
+         << ") "
+         << SETW(7, moved) << "   "
+         << SETW(6, pre_KE)
+         << SETW(6, pst_KE)
+         << SETW(6, dep_E)
+         << SETW(20, volume_name) << ' '
+         << endl;
+    #undef ROUND
+    #undef SETW
+  }
 
 }
 
@@ -247,7 +285,11 @@ int main(int argc, char** argv) {
   unique_ptr<G4RunManager> run_manager{};
   // ----- Available phantoms -----------------------------------------------------------
   auto sanity   = [            ] { return sanity_check_phantom(); };
-  auto jaszczak = [&run_manager] { return jaszczak_phantom(run_manager); };
+
+  auto jaszczak = [&run_manager, &messenger] {
+    return jaszczak_phantom(run_manager, messenger.vacuum_phantom);
+  };
+
   auto nema_3 = [&messenger]() {
     auto fov_length = messenger.cylinder_length * mm;
     return nema_3_phantom{fov_length};
@@ -256,7 +298,7 @@ int main(int argc, char** argv) {
   auto nema_4 = [](auto z_offset)                 { return nema_4_phantom(           z_offset); };
   auto nema_5 = [](auto n_sleeves, auto y_offset) { return nema_5_phantom(n_sleeves, y_offset); };
 
-  auto nema_7 = []() {
+  auto nema_7 = [&messenger]() {
     return build_nema_7_phantom{}
       .activity(1)
       .length(180*mm)
@@ -270,6 +312,7 @@ int main(int argc, char** argv) {
       .sphereD(22*mm, 4)
       .sphereD(28*mm, 4)
       .sphereD(37*mm, 4)
+      .vacuum_body(messenger.vacuum_phantom)
       .build();
   };
 
@@ -316,6 +359,7 @@ int main(int argc, char** argv) {
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
+      d == "magic"     ? magic_detector()                                           :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
@@ -366,60 +410,63 @@ int main(int argc, char** argv) {
      "Source", "Sleeves"}};
 
   n4::stepping_action::action_t write_vertex = [&](auto step) {
-    static size_t previous_event = 666;
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
+
     auto pst_pt = step -> GetPostStepPoint();
+    auto pre_pt = step -> GetPreStepPoint();
+
     auto track = step -> GetTrack();
-    auto particle = track -> GetParticleDefinition();
-    if (particle == G4Gamma::Definition()) {
-      auto id = track -> GetTrackID();
-      auto pre_pt = step -> GetPreStepPoint();
-      auto event_id = current_event();
-      previous_event = event_id;
-      auto parent = track -> GetParentID();
-      auto pos = pst_pt -> GetPosition();
-      auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
-      auto moved = step -> GetDeltaPosition().mag();
-      auto dep_E = step -> GetTotalEnergyDeposit() / keV;
-      auto volume_name = pre_pt -> GetPhysicalVolume() -> GetName();
-      auto pre_KE = pre_pt -> GetKineticEnergy() / keV;
-      auto pst_KE = pst_pt -> GetKineticEnergy() / keV;
-      auto process_name = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+    auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
+    G4String volume_name;
 
-      if (process_name == "---->") return;
-      auto t = pst_pt -> GetGlobalTime();
-      auto process_id = process_names.id(process_name);
-      auto  volume_id =  volume_names.id( volume_name);
-      writer -> write_vertex(event_id, id, parent, x, y, z, t, moved, pre_KE, pst_KE, dep_E, process_id, volume_id);
-
-      if (messenger.verbosity < 2) return;
-
-      if (event_id != header_last_printed) {
-        cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
-             << endl;
-        header_last_printed = event_id;
-        track_1_printed_this_event = false;
-      }
-
-      if (id == 1 && ! track_1_printed_this_event) {
-        track_1_printed_this_event = true;
-        cout << endl;
-      }
-
-      cout << std::setprecision(1) << std::fixed;
-      cout << setw(9) << event_id
-           << setw(5) << parent << ' '
-           << setw(5) << id
-           << setw(6) << process_name
-           << "  (" << std::setw(5) << (int)x << std::setw(5) << (int)y << std::setw(5) << (int)z << " :" << std::setw(4) << (int)r << ") "
-           << setw(7) << moved << "   "
-           << setw(6) << pre_KE
-           << setw(6) << pst_KE
-           << setw(6) << dep_E
-           << setw(20) << volume_name << ' '
-           << endl;
+    if (messenger.detector != "magic") {
+      // ----- Real detector ------------------------------------------------------------------------
+      // Only record vertices (not transport) of gammas
+      auto particle = track -> GetParticleDefinition();
+      if (particle != G4Gamma::Definition() || process_name == "---->") return;
+      volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
+    } else {
+      // ----- Magic LXe detector --------------------------------------------------------------------
+      // 1. Immediately stop any particle that reaches LXe.
+      // 2. Record only (a) gammas (b) which have reached LXe
+      auto pst_physvol = pst_pt -> GetPhysicalVolume();
+      volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
+      // Stop as soon as LXe reached
+      if (volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
+      // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
+      if (volume_name != "LXe" || process_name != "---->" ) return;
     }
+
+    // Event and particle identities
+    auto event_id = current_event();
+    auto id     = track -> GetTrackID();
+    auto parent = track -> GetParentID();
+
+    // Position, motion and timing
+    auto pos = pst_pt -> GetPosition();
+    auto x = pos.x(); auto y = pos.y(); auto z = pos.z(); auto r = sqrt(x*x + y*y);
+    auto t = pst_pt -> GetGlobalTime();
+    auto moved = step -> GetDeltaPosition().mag();
+
+    // Energy
+    auto pre_KE = pre_pt -> GetKineticEnergy()      / keV;
+    auto pst_KE = pst_pt -> GetKineticEnergy()      / keV;
+    auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
+
+    // Process and volume ids
+    auto  volume_id =  volume_names.id( volume_name);
+    auto process_id = process_names.id(process_name);
+
+    // Write vertex to output file
+    writer -> write_vertex(       event_id, id, parent, x,y,z,t, moved, pre_KE, pst_KE, dep_E,
+                                  process_id,   volume_id);
+
+    // Live progress report on stdout
+    if (messenger.verbosity < 2) return;
+    report_progress::print_vertex(event_id, id, parent, x,y,z,r, moved, pre_KE, pst_KE, dep_E,
+                                  process_name, volume_name,
+                                  header_last_printed, track_1_printed_this_event);
   };
 
   // Event action that writes the primary vertex of the event to HDF5

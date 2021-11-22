@@ -14,7 +14,7 @@
 class jaszczak_phantom {
   using D = G4double;
 public:
-  jaszczak_phantom(std::unique_ptr<G4RunManager>& rm) : run_manager{&rm} {}
+  jaszczak_phantom(std::unique_ptr<G4RunManager>& rm, bool evacuate) : run_manager{&rm}, evacuate{evacuate} {}
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
@@ -37,6 +37,7 @@ private:
                                               // deletion of copy constructor,
                                               // which is needed use in
                                               // std::variant
+  bool evacuate;
   mutable std::unique_ptr<world_geometry_inspector> inspector_{};
   world_geometry_inspector* inspector() const;
 };
