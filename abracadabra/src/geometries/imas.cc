@@ -147,3 +147,25 @@ void line_cylinder_with_tiles(G4LogicalVolume* cylinder, G4LogicalVolume* tile, 
     }
   }
 }
+
+
+// Idealized version of detector: a shell of LXe floating in vacuum. Used for
+// very fast simulations (3-4 orders of magnitude speedup). Achieves speed by
+// not generating or propagating any secondaries, detecting gammas as soon as
+// they enter the LXe layer. Requires corresponding magic configuration of user
+// actions, in order to be able to detect the gammas.
+G4PVPlacement* magic_detector() {
+  using CLHEP::twopi;
+  auto LXe = LXe_with_properties();
+  auto vacuum = n4::material("G4_Galactic");
+  auto half_length = 50*cm;
+  auto radius = 300*mm; auto dr = 30*mm;
+  auto env_length = half_length * 1.1;
+  auto env_width  = (radius*dr) * 1.1;
+  auto cavity   = n4::volume<G4Tubs>("Cavity", vacuum, 0.0, radius   , half_length, 0.0, twopi);
+  auto xenon    = n4::volume<G4Tubs>("LXe"   , LXe   , 0.0, radius+dr, half_length, 0.0, twopi);
+  auto envelope = n4::volume<G4Box>("Envelope", vacuum, env_width, env_width, env_length);
+  n4::place(cavity).in(xenon)   .now();
+  n4::place(xenon) .in(envelope).now();
+  return n4::place(envelope).now();
+};

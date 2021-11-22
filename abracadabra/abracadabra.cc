@@ -354,6 +354,7 @@ int main(int argc, char** argv) {
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
+      d == "magic"     ? magic_detector()                                           :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
@@ -413,24 +414,24 @@ int main(int argc, char** argv) {
     auto track = step -> GetTrack();
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
     G4String volume_name;
-    auto pst_physvol = pst_pt -> GetPhysicalVolume();
-    volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
 
-    // // ----- Standard criterion -----------------------------------------------------------------------
-    // // Only record vertices (not transport) of gammas
-    // auto particle = track -> GetParticleDefinition();
-    // if (particle != G4Gamma::Definition() || process_name == "---->") return;
-    // //volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
-
-    // ----- Magic LXe criterion -------------------------------------------------------------------------
-    // 1. Immediately stop any particle that reaches LXe.
-    // 2. Record only (a) gammas (b) which have reached LXe
-    // Stop as soon as LXe reached
-    if (volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
-    // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
-    if (volume_name != "LXe" || process_name != "---->" ) return;
-
-    // ----- common ---------------------------------------------------------------------------------------
+    if (messenger.detector != "magic") {
+      // ----- Real detector ------------------------------------------------------------------------
+      // Only record vertices (not transport) of gammas
+      auto particle = track -> GetParticleDefinition();
+      if (particle != G4Gamma::Definition() || process_name == "---->") return;
+      volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
+    } else {
+      // ----- Magic LXe detector --------------------------------------------------------------------
+      // 1. Immediately stop any particle that reaches LXe.
+      // 2. Record only (a) gammas (b) which have reached LXe
+      auto pst_physvol = pst_pt -> GetPhysicalVolume();
+      volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
+      // Stop as soon as LXe reached
+      if (volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
+      // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
+      if (volume_name != "LXe" || process_name != "---->" ) return;
+    }
 
     // Event and particle identities
     auto event_id = current_event();
