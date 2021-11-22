@@ -12,11 +12,11 @@
 /event/verbose 0
 /tracking/verbose 0
 
-/abracadabra/verbosity 0
+/abracadabra/verbosity 2
 
 /attenuation_map/filename     jaszczak-density-map.raw
 /attenuation_map/full_widths  220 220 200
 /attenuation_map/n_voxels     151 151 151
 #/attenuation_map/generate
 
-/run/beamOn 1000000
+/run/beamOn 10
