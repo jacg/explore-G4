@@ -412,24 +412,23 @@ int main(int argc, char** argv) {
 
     auto track = step -> GetTrack();
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
-    auto pre_volume_name =        pre_pt -> GetPhysicalVolume()     -> GetName();
+    G4String volume_name;
+    auto pst_physvol = pst_pt -> GetPhysicalVolume();
+    volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
 
-    // ----- Standard criterion -----------------------------------------------------------------------
-    // Only record vertices (not transport) of gammas
-    auto particle = track -> GetParticleDefinition();
-    if (particle != G4Gamma::Definition() || process_name == "---->") return;
-    auto& volume_name = pre_volume_name;
+    // // ----- Standard criterion -----------------------------------------------------------------------
+    // // Only record vertices (not transport) of gammas
+    // auto particle = track -> GetParticleDefinition();
+    // if (particle != G4Gamma::Definition() || process_name == "---->") return;
+    // //volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
 
-    // // ----- Magic LXe criterion -------------------------------------------------------------------------
-    // // 1. Immediately stop any particle that reaches LXe.
-    // // 2. Record only (a) gammas (b) which have reached LXe
-    // auto pst_physvol     = pst_pt -> GetPhysicalVolume();
-    // auto pst_volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
-    // // Stop as soon as LXe reached
-    // if (pst_volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
-    // // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
-    // if (pst_volume_name != "LXe" || process_name != "---->" ) return;
-    // auto& volume_name = pst_volume_name;
+    // ----- Magic LXe criterion -------------------------------------------------------------------------
+    // 1. Immediately stop any particle that reaches LXe.
+    // 2. Record only (a) gammas (b) which have reached LXe
+    // Stop as soon as LXe reached
+    if (volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
+    // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
+    if (volume_name != "LXe" || process_name != "---->" ) return;
 
     // ----- common ---------------------------------------------------------------------------------------
 
