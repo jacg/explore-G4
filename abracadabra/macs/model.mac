@@ -5,13 +5,14 @@
 # Select detector geometry, generators and phantom here
 
 /abracadabra/geometry both
-/abracadabra/phantom nema_7
-/abracadabra/nema5_sleeves 1
+/abracadabra/phantom jaszczak
 /abracadabra/detector imas
+
 /abracadabra/cylinder_length 1000
-/abracadabra/y_offset 0
-/abracadabra/no_secondaries false
-/abracadabra/steel_is_vacuum true
 /abracadabra/quartz_thickness 0
-/abracadabra/xenon_thickness 30
+/abracadabra/xenon_thickness 20
+
+/abracadabra/steel_is_vacuum true
 /abracadabra/vacuum_phantom true
+
+/abracadabra/no_secondaries false
