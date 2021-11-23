@@ -74,7 +74,16 @@ def run_one_job(*, n, capture_output):
     with open(filename_run, 'w') as file_run:
         file_run.write(template_run.format(run_number=n, job_dir=job_dir))
     cmd = f'just run-full-path {filename_model} {filename_run}'
-    run(cmd, shell=True, capture_output=capture_output)
+    result = run(cmd, shell=True, capture_output=capture_output)
+    if result.returncode != 0:
+        save_run_output(result, job_dir, n)
+
+
+def save_run_output(result, job_dir, n):
+    with open(job_dir / f'job-{n}.stdout', 'wb') as stdout_file:
+        stdout_file.write(result.stdout)
+    with open(job_dir / f'job-{n}.stderr', 'wb') as stderr_file:
+        stderr_file.write(result.stderr)
 
 
 # Launch jobs
