@@ -11,7 +11,7 @@ N              =  int(argv[2])
 template_run   = file_to_string(job_dir / 'run.mac')
 
 threads = []
-for n in range(1, N+1):
+for n in range(N):
     filename_model = f'{job_dir}/model.mac'
     filename_run   = f'{job_dir}/run{n}.mac'
     with open(filename_run, 'w') as file_run:
