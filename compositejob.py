@@ -17,7 +17,7 @@ for n in range(N):
     with open(filename_run, 'w') as file_run:
         file_run.write(template_run.format(run_number=n, job_dir=job_dir))
 
-    cmd = f'just batch {filename_model} {filename_run}'
+    cmd = f'just run-full-path {filename_model} {filename_run}'
     t = Thread(target=run, args=(cmd,),
                kwargs=dict(shell=True,
                            capture_output=True))
