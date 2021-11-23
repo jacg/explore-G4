@@ -10,7 +10,7 @@
 
 /abracadabra/cylinder_length 1000
 /abracadabra/quartz_thickness 0
-/abracadabra/xenon_thickness 20
+/abracadabra/xenon_thickness 40
 
 /abracadabra/steel_is_vacuum true
 /abracadabra/vacuum_phantom true
