@@ -21,6 +21,7 @@ pkgs.llvmPackages_11.stdenv.mkDerivation {
   inherit (derivation) name;
   nativeBuildInputs = derivation.nativeBuildInputs ++ [
     pkgs.clang_11
+    (pkgs.python39.withPackages (ps: [ps.docopt]))
   ];
 
   buildInputs = derivation.buildInputs ++ [
