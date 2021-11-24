@@ -40,11 +40,17 @@ test PATTERN *FLAGS: build
 
 # TODO Add mechanism for overriding setting in macros, on the `just` CLI
 
-# Load <model> and run <run> in batch mode
+# Load macs/<model>.mac and run macs/<run>.mac in batch mode
 run model='model' run='run': build
 	#!/usr/bin/env sh
 	cd abracadabra/build
 	./abracadabra macs/{{model}}.mac macs/{{run}}.mac
+
+# Like `run` but without fully explicit macro file names
+run-full-path model run: build
+	#!/usr/bin/env sh
+	cd abracadabra/build
+	./abracadabra {{model}} {{run}}
 
 # Load <model> in interactive mode
 interact model='model': build
