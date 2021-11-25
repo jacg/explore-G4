@@ -116,6 +116,12 @@ bool startswith(std::string const& text, char const * const start) {
     else                       {reject[PATTERN] += 1; continue;}        \
   }                                                                     \
 
+// TODO This currently has no automated test. Idea: once the Jaszczak FOMs are
+// written:
+// 1. Run magic detector on jaszcak
+// 2. Run imageprimaries on the output
+// 3. Use FOMs (or something related to them) to check activity distribution
+// But this approach is rather expensive. Perhaps a cheaper alternative can be found.
 G4ThreeVector jaszczak_phantom::generate_vertex() const {
   static std::map<std::string, unsigned> keep   {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
   static std::map<std::string, unsigned> reject {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
