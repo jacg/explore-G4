@@ -32,35 +32,35 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
     pmma  = vacuum;
   }
 
-  auto env_half_length = height_cylinder * 1.1;
-  auto env_half_width  = radius_cylinder * 1.1;
+  auto env_half_length = height_body * 1.1;
+  auto env_half_width  = radius_body * 1.1;
 
-  auto cylinder = volume<G4Tubs>("Cylinder", water, 0.0, radius_cylinder, height_cylinder/2, 0.0, twopi);
+  auto body     = volume<G4Tubs>("Body"    , water, 0.0, radius_body, height_body/2, 0.0, twopi);
   auto envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
 
   // Rods
-  for (const auto [n, r] : enumerate(radii_rods)) { rod_sector(n, r, cylinder, pmma); }
+  for (const auto [n, r] : enumerate(radii_rods)) { rod_sector(n, r, body, pmma); }
 
   // Spheres
   for (const auto [n, r] : enumerate(radii_spheres)) {
     auto name = "Sphere_" + std::to_string(n);
     auto ball = volume<G4Orb>(name, pmma, r);
     auto angle = (60 * deg) * n;
-    auto x = radius_cylinder / 2 * cos(angle);
-    auto y = radius_cylinder / 2 * sin(angle);
-    auto z = height_spheres - (height_cylinder / 2);
-    place(ball).in(cylinder).at(x,y,z).now();
+    auto x = radius_body / 2 * cos(angle);
+    auto y = radius_body / 2 * sin(angle);
+    auto z = height_spheres - (height_body / 2);
+    place(ball).in(body).at(x,y,z).now();
   }
 
-  place(cylinder).in(envelope).now();
+  place(body).in(envelope).now();
   return place(envelope).now();
 }
 
 
 void jaszczak_phantom::rod_sector(unsigned long n, G4double r,
-                                  G4LogicalVolume* cylinder, G4Material* material) const {
+                                  G4LogicalVolume* body, G4Material* material) const {
   auto d = 2 * r;
-  auto z = (height_rods - height_cylinder) / 2;
+  auto z = (height_rods - height_body) / 2;
   G4RotationMatrix around_z_axis{{0,0,1}, n*pi/3};
 
   // Sector displacement from centre, to accommodate gap between sectors
@@ -78,21 +78,21 @@ void jaszczak_phantom::rod_sector(unsigned long n, G4double r,
     for (auto b = 0; /*break in body*/; b+=1, did_b = true) {
       auto x = (a*Ax + b*Bx) * d + dx;
       auto y = (a*Ay + b*By) * d + dy;
-      if (sqrt(x*x + y*y) + r + margin >= radius_cylinder) { break; }
+      if (sqrt(x*x + y*y) + r + margin >= radius_body) { break; }
       auto label = std::string("Rod-") + std::to_string(n);
       auto rod = volume<G4Tubs>(label, material, 0.0, r, height_rods/2, 0.0, twopi);
-      place(rod).in(cylinder).at(x,y,z).rotate(around_z_axis).now();
+      place(rod).in(body).at(x,y,z).rotate(around_z_axis).now();
     }
   }
 }
 
 G4ThreeVector jaszczak_phantom::generate_vertex() const {
   for (;;) {
-    auto z = uniform(-height_cylinder/2, height_cylinder/2);
-    auto [x,y] = random_on_disc(radius_cylinder);
+    auto z = uniform(-height_body/2, height_body/2);
+    auto [x,y] = random_on_disc(radius_body);
     G4ThreeVector point{x,y,z};
     auto name = inspector() -> volume_at(point) -> GetName();
-    if (name.rfind("Cylinder", 0) == 0) { // starts with
+    if (name.rfind("Body", 0) == 0) { // starts with
       return point;
     }
     //std::cout << "Rejecting " << name << " at " << point << std::endl;
