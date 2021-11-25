@@ -288,9 +288,9 @@ int main(int argc, char** argv) {
 
   auto jaszczak = [&run_manager, &messenger] {
     return build_jaszczak_phantom(run_manager, messenger.vacuum_phantom)
-      .sphere_activity(2.0)
-      .  body_activity(1.0)
-      .   rod_activity(4.0)
+      .sphere_activity(messenger.jaszczak_activity_sphere)
+      .  body_activity(messenger.jaszczak_activity_body)
+      .   rod_activity(messenger.jaszczak_activity_rod)
       .build();
   };
 
