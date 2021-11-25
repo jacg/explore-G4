@@ -22,9 +22,10 @@ jaszczak_phantom build_jaszczak_phantom::build() {
   activity_sphere /= max_activity;
   activity_body   /= max_activity;
   activity_rod    /= max_activity;
-  std::cout << "sphere: " << activity_sphere << std::endl;
-  std::cout << "body  : " << activity_body   << std::endl;
-  std::cout << "rod   : " << activity_rod    << std::endl;
+  std::cout << "Relative activities of Jaszczak components:\n";
+  std::cout << "   sphere: " << activity_sphere << std::endl;
+  std::cout << "   body  : " << activity_body   << std::endl;
+  std::cout << "   rod   : " << activity_rod    << std::endl;
   return std::move(*this);
 }
 
