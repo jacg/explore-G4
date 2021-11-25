@@ -13,8 +13,9 @@
 
 class jaszczak_phantom {
   using D = G4double;
-public:
+protected:
   jaszczak_phantom(std::unique_ptr<G4RunManager>& rm, bool evacuate) : run_manager{&rm}, evacuate{evacuate} {}
+public:
   G4PVPlacement* geometry() const;
   void generate_primaries(G4Event* event) const { return ::generate_primaries(*this, event); }
   G4ThreeVector generate_vertex() const;
@@ -50,6 +51,7 @@ class build_jaszczak_phantom : public jaszczak_phantom {
   using T = build_jaszczak_phantom;
   using D = G4double;
 public:
+  build_jaszczak_phantom(std::unique_ptr<G4RunManager>& rm, bool evacuate) : jaszczak_phantom(rm, evacuate) {}
   T& sphere_height   (D h) {   height_spheres = h; return *this; }
   T&   body_height   (D h) {   height_body    = h; return *this; }
   T&    rod_height   (D h) {   height_rods    = h; return *this; }
