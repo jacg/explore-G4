@@ -25,6 +25,9 @@ struct abracadabra_messenger {
   bool vacuum_phantom  = false;
   bool no_secondaries  = false;
   size_t nema5_sleeves = 1;
+  G4double jaszczak_activity_sphere = 4.0;
+  G4double jaszczak_activity_body   = 1.0;
+  G4double jaszczak_activity_rod    = 4.0;
 private:
   std::unique_ptr<G4GenericMessenger> messenger;
 };

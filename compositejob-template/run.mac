@@ -1,0 +1,17 @@
+/abracadabra/outfile "{job_dir}/MC-40mm-{run_number:02}.h5"
+
+/abracadabra/event_number_offset {run_number}000000
+
+/random/setSeeds {run_number} 987654
+
+# Initialize kernel
+/run/initialize
+
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+/abracadabra/verbosity 0
+
+/run/beamOn 100

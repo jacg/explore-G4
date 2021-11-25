@@ -287,7 +287,11 @@ int main(int argc, char** argv) {
   auto sanity   = [            ] { return sanity_check_phantom(); };
 
   auto jaszczak = [&run_manager, &messenger] {
-    return jaszczak_phantom(run_manager, messenger.vacuum_phantom);
+    return build_jaszczak_phantom(run_manager, messenger.vacuum_phantom)
+      .sphere_activity(messenger.jaszczak_activity_sphere)
+      .  body_activity(messenger.jaszczak_activity_body)
+      .   rod_activity(messenger.jaszczak_activity_rod)
+      .build();
   };
 
   auto nema_3 = [&messenger]() {
