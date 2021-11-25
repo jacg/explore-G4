@@ -100,30 +100,17 @@ bool startswith(std::string const& text, char const * const start) {
 }
 
 
-using T = std::map<std::string, unsigned>;
+// using T = std::map<std::string, unsigned>;
+// void report(T& kept, T& rejected, std::string const& key) {
+//   auto k = (float)kept[key];
+//   auto r =    rejected[key];
+//   auto t = k + r;
+//   auto f = t ? k / t : 0;
+//   std::cout << key << ": " << k << " / " << t << " = " << f << std::endl;
+// }
 
-
-void print_map(const T& m) {
-    std::cout << "\n";
-    for (const auto& [key, value] : m) {
-        std::cout << key << " = " << value << "; ";
-    }
-    std::cout << "\n";
-}
-
-
-void report(T& kept, T& rejected, std::string const& key) {
-  auto k = (float)kept[key];
-  auto r =    rejected[key];
-  auto t = k + r;
-  auto f = t ? k / t : 0;
-  std::cout << key << ": " << k << " / " << t << " = " << f << std::endl;
-}
-
-#define DBG(stuff) std::cout << stuff << std::endl;
 #define MAYBE_GENERATE_IN(PATTERN, THRESHOLD)   \
   if (startswith(name, PATTERN)) {              \
-    std::cout << "Matched " << PATTERN << std::endl;                    \
     if (uniform() < THRESHOLD) {keep  [PATTERN] += 1; return point;}    \
     else                       {reject[PATTERN] += 1; continue;}        \
   }                                                                     \
@@ -132,17 +119,16 @@ G4ThreeVector jaszczak_phantom::generate_vertex() const {
   static std::map<std::string, unsigned> keep   {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
   static std::map<std::string, unsigned> reject {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
   for (;;) {
-    print_map(keep);
-    report(keep, reject, "Body");
-    report(keep, reject, "Sphere");
-    report(keep, reject, "Rod");
+
+    // report(keep, reject, "Body");
+    // report(keep, reject, "Sphere");
+    // report(keep, reject, "Rod");
 
     auto z = uniform(-height_body/2, height_body/2);
     auto [x,y] = random_on_disc(radius_body);
     G4ThreeVector point{x,y,z};
 
     auto name = inspector() -> volume_at(point) -> GetName();
-    DBG("NAME NAME NAME NAME NAME    " << name)
 
     MAYBE_GENERATE_IN("Body"  , activity_body)
     MAYBE_GENERATE_IN("Rod"   , activity_rod)
@@ -150,7 +136,6 @@ G4ThreeVector jaszczak_phantom::generate_vertex() const {
   }
 }
 #undef MAYBE_GENERATE_IN
-#undef DBG
 
 world_geometry_inspector* jaszczak_phantom::inspector() const {
   if (! inspector_) {
