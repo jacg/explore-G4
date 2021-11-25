@@ -8,6 +8,7 @@
 #include <G4Orb.hh>
 #include <G4Tubs.hh>
 
+#include <algorithm>
 
 using nain4::material;
 using nain4::place;
@@ -16,6 +17,14 @@ using nain4::volume;
 using CLHEP::pi; using CLHEP::twopi;
 
 jaszczak_phantom build_jaszczak_phantom::build() {
+  // Scale relative activities so that the maximum one equals 1
+  auto max_activity = std::max(activity_sphere, std::max(activity_body, activity_rod));
+  activity_sphere /= max_activity;
+  activity_body   /= max_activity;
+  activity_rod    /= max_activity;
+  std::cout << "sphere: " << activity_sphere << std::endl;
+  std::cout << "body  : " << activity_body   << std::endl;
+  std::cout << "rod   : " << activity_rod    << std::endl;
   return std::move(*this);
 }
 
@@ -86,18 +95,62 @@ void jaszczak_phantom::rod_sector(unsigned long n, G4double r,
   }
 }
 
+bool startswith(std::string const& text, char const * const start) {
+  return ! text.rfind(start, 0);
+}
+
+
+using T = std::map<std::string, unsigned>;
+
+
+void print_map(const T& m) {
+    std::cout << "\n";
+    for (const auto& [key, value] : m) {
+        std::cout << key << " = " << value << "; ";
+    }
+    std::cout << "\n";
+}
+
+
+void report(T& kept, T& rejected, std::string const& key) {
+  auto k = (float)kept[key];
+  auto r =    rejected[key];
+  auto t = k + r;
+  auto f = t ? k / t : 0;
+  std::cout << key << ": " << k << " / " << t << " = " << f << std::endl;
+}
+
+#define DBG(stuff) std::cout << stuff << std::endl;
+#define MAYBE_GENERATE_IN(PATTERN, THRESHOLD)   \
+  if (startswith(name, PATTERN)) {              \
+    std::cout << "Matched " << PATTERN << std::endl;                    \
+    if (uniform() < THRESHOLD) {keep  [PATTERN] += 1; return point;}    \
+    else                       {reject[PATTERN] += 1; continue;}        \
+  }                                                                     \
+
 G4ThreeVector jaszczak_phantom::generate_vertex() const {
+  static std::map<std::string, unsigned> keep   {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
+  static std::map<std::string, unsigned> reject {{"Body", 0}, {"Sphere", 0}, {"Rod", 0}};
   for (;;) {
+    print_map(keep);
+    report(keep, reject, "Body");
+    report(keep, reject, "Sphere");
+    report(keep, reject, "Rod");
+
     auto z = uniform(-height_body/2, height_body/2);
     auto [x,y] = random_on_disc(radius_body);
     G4ThreeVector point{x,y,z};
+
     auto name = inspector() -> volume_at(point) -> GetName();
-    if (name.rfind("Body", 0) == 0) { // starts with
-      return point;
-    }
-    //std::cout << "Rejecting " << name << " at " << point << std::endl;
+    DBG("NAME NAME NAME NAME NAME    " << name)
+
+    MAYBE_GENERATE_IN("Body"  , activity_body)
+    MAYBE_GENERATE_IN("Rod"   , activity_rod)
+    MAYBE_GENERATE_IN("Sphere", activity_sphere)
   }
 }
+#undef MAYBE_GENERATE_IN
+#undef DBG
 
 world_geometry_inspector* jaszczak_phantom::inspector() const {
   if (! inspector_) {

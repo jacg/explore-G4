@@ -29,9 +29,9 @@ protected:
   D height_spheres  = 127   * mm;
   D gap             =  14.4 * mm; // Width of corridors between groups of rods
   D margin          =   0.1 * mm;
-  D activity_body   = 1.0;
-  D activity_sphere = 4.0;
-  D activity_rod    = 1.0;
+  D activity_body   = 0.0;
+  D activity_sphere = 1.0;
+  D activity_rod    = 2.0;
 private:
   void rod_sector(unsigned long n, G4double r, G4LogicalVolume* body, G4Material*) const;
 
