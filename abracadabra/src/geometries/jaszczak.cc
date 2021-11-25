@@ -43,7 +43,7 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
 
   // Spheres
   for (const auto [n, r] : enumerate(radii_spheres)) {
-    auto name = "Sphere_" + std::to_string(n);
+    auto name = "Sphere-" + std::to_string(n);
     auto ball = volume<G4Orb>(name, pmma, r);
     auto angle = (60 * deg) * n;
     auto x = radius_body / 2 * cos(angle);
