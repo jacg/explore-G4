@@ -71,17 +71,17 @@ private:
 };
 
 template<class T>
-void hdf5_io::write(std::string const& dataset, T const& data) {
+void hdf5_io::write(std::string const& dataset_name, T const& data) {
   unsigned int n_elements = data.size();
 
   ensure_open_for_writing();
-  HighFive::Group   group      = open_for_writing -> getGroup("MC");
-  HighFive::DataSet hits_table = group.getDataSet(dataset);
+  HighFive::Group   group   = open_for_writing -> getGroup("MC");
+  HighFive::DataSet dataset = group.getDataSet(dataset_name);
 
   // Create extra space in the table and append the new data
-  auto index = hits_table.getDimensions()[0];
-  hits_table.resize({index + n_elements});
-  hits_table.select({index}, {n_elements}).write(data);
+  auto index = dataset.getDimensions()[0];
+  dataset.resize({index + n_elements});
+  dataset.select({index}, {n_elements}).write(data);
 }
 
 struct run_info_t {
