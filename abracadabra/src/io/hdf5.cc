@@ -8,12 +8,6 @@ namespace HF { using namespace HighFive; }
 
 hdf5_io::hdf5_io(std::string fname)
 : filename{fname}
-, runinfo_index{0}
-, hit_index{0}
-, waveform_index{0}
-, total_charge_index{0}
-, primary_vertex_index{0}
-, vertex_index{0}
 {}
 
 template<class T> using hdf_t = HF::AtomicType<T>;
@@ -131,35 +125,35 @@ void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<s
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
   std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};
-  write("configuration", runinfo_index, data);
+  write("configuration", data);
 }
 
 void hdf5_io::write_hit_info(u32 event_id, f16 x, f16 y, f16 z, f16 time) {
   std::vector<hit_t> data{{event_id, x, y, z, time}};
-  write("hits", hit_index, data);
+  write("hits", data);
 }
 
 void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, const std::vector<f16>& times) {
   std::vector<waveform_t> data;
   for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
-  write("waveform", waveform_index, data);
+  write("waveform", data);
 }
 
 void hdf5_io::write_total_charge(u32 event_id, u32 sensor_id, u32 charge) {
   std::vector<total_charge_t> data{{event_id, sensor_id, charge}};
-  write("total_charge", total_charge_index, data);
+  write("total_charge", data);
 }
 
 void hdf5_io::write_sensor_xyz(u32 sensor_id, f16 x, f16 y, f16 z) {
   // TODO what are the performance implications of doing this one-by-one rather
   // than as a whole vector in one go?
   std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
-  write("sensor_xyz", hit_index, data);
+  write("sensor_xyz", data);
 }
 
 void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
   std::vector<primary_vertex_t> data{{event_id, x, y, z, px, py, pz}};
-  write("primaries", primary_vertex_index, data);
+  write("primaries", data);
 }
 
 void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
@@ -174,7 +168,7 @@ void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
      pre_KE, post_KE, deposited,
      process_id, volume_id
     }};
-  write("vertices", vertex_index, data);
+  write("vertices", data);
 }
 
 std::vector<hit_t> hdf5_io::read_hit_info() {

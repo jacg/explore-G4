@@ -39,7 +39,7 @@ public:
   ~hdf5_io() { if (open_for_writing) { open_for_writing -> flush(); }}
 
   template<class T>
-  void write(std::string const& dataset, size_t& index, T const& data);
+  void write(std::string const& dataset, T const& data);
 
   void write_run_info(const char* param_key, const char* param_value);
   void write_hit_info    (u32 evt_id, f16 x, f16 y, f16 z, f16 t);
@@ -67,17 +67,11 @@ private:
   void ensure_open_for_writing();
 
   std::string filename;
-  size_t runinfo_index;
-  size_t hit_index;
-  size_t waveform_index;
-  size_t total_charge_index;
-  size_t primary_vertex_index;
-  size_t vertex_index;
   std::optional<HighFive::File> open_for_writing;
 };
 
 template<class T>
-void hdf5_io::write(std::string const& dataset, size_t& index, T const& data) {
+void hdf5_io::write(std::string const& dataset, T const& data) {
   unsigned int n_elements = data.size();
 
   ensure_open_for_writing();
@@ -85,10 +79,9 @@ void hdf5_io::write(std::string const& dataset, size_t& index, T const& data) {
   HighFive::DataSet hits_table = group.getDataSet(dataset);
 
   // Create extra space in the table and append the new data
+  auto index = hits_table.getDimensions()[0];
   hits_table.resize({index + n_elements});
   hits_table.select({index}, {n_elements}).write(data);
-
-  index += n_elements;
 }
 
 struct run_info_t {
