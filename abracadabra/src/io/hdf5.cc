@@ -92,11 +92,11 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
 }
 
 void hdf5_io::ensure_open_for_writing() {
-  if (open_for_writing) { return; }
+  if (file) { return; }
   // TODO                                                                              Why truncate?
-  open_for_writing = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+  file = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
 
-  HF::Group group = open_for_writing->createGroup("MC");
+  HF::Group group = file->createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
   // and requires chunking of the data
@@ -115,7 +115,7 @@ void hdf5_io::ensure_open_for_writing() {
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
   ensure_open_for_writing();
-  HF::Group group = open_for_writing -> getGroup("MC");
+  HF::Group group = file -> getGroup("MC");
   // create a dataset adapted to the size of `data`
   HF::DataSet dataset = group.createDataSet<std::string>(dataset_name, HF::DataSpace::From(data));
   dataset.write(data);
@@ -173,8 +173,8 @@ void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
 std::vector<hit_t> hdf5_io::read_hit_info() {
   std::vector<hit_t> hits;
   // Get the table from the file
-  HF::File file       = HF::File{filename, HF::File::ReadOnly};
-  HF::Group   group      = file.getGroup("MC");
+  HF::File the_file      = HF::File{filename, HF::File::ReadOnly};
+  HF::Group   group      = the_file.getGroup("MC");
   HF::DataSet hits_table = group.getDataSet("hits");
 
   hits_table.read(hits);
