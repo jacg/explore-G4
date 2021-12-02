@@ -164,9 +164,8 @@ public:
   static std::vector<hit_t> read_hit_info(std::string const& file_name);
 
 private:
-  void ensure_open_for_writing();
+  HighFive::File ensure_open_for_writing(std::string const& file_name);
 
-  std::string file_name;
   std::optional<HighFive::File> file;
 };
 

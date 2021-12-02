@@ -3,14 +3,15 @@
 #include <highfive/H5DataSpace.hpp>
 
 #include <cstring>
+#include <highfive/H5File.hpp>
 #include <highfive/H5Group.hpp>
 #include <iostream>
 
 namespace HF { using namespace HighFive; }
 
 hdf5_io::hdf5_io(std::string file_name)
-: file_name{file_name}
-{ ensure_open_for_writing(); }
+: file{ensure_open_for_writing(file_name)}
+{}
 
 template<class T> using hdf_t = HF::AtomicType<T>;
 
@@ -93,9 +94,8 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
   return runinfo;
 }
 
-void hdf5_io::ensure_open_for_writing() {
-  if (file) { return; }
-  file = HF::File{file_name, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+HighFive::File hdf5_io::ensure_open_for_writing(std::string const& file_name) {
+  auto new_file = HF::File{file_name, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
 
   // To create a table than can be resized it has be of UNLIMITED dimension
   // and requires chunking of the data
@@ -103,14 +103,15 @@ void hdf5_io::ensure_open_for_writing() {
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  create_dataset(file.value(), "MC", "hits"         , create_hit_type()           );
-  create_dataset(file.value(), "MC", "configuration", create_runinfo_type()       );
-  create_dataset(file.value(), "MC", "waveform"     , create_waveform_type()      );
-  create_dataset(file.value(), "MC", "total_charge" , create_total_charge_type()  );
-  create_dataset(file.value(), "MC", "sensor_xyz"   , create_sensor_xyz_type()    );
-  create_dataset(file.value(), "MC", "primaries"    , create_primary_vertex_type());
-  create_dataset(file.value(), "MC", "vertices"     , create_vertex_type()        );
+  create_dataset(new_file, "MC", "hits"         , create_hit_type()           );
+  create_dataset(new_file, "MC", "configuration", create_runinfo_type()       );
+  create_dataset(new_file, "MC", "waveform"     , create_waveform_type()      );
+  create_dataset(new_file, "MC", "total_charge" , create_total_charge_type()  );
+  create_dataset(new_file, "MC", "sensor_xyz"   , create_sensor_xyz_type()    );
+  create_dataset(new_file, "MC", "primaries"    , create_primary_vertex_type());
+  create_dataset(new_file, "MC", "vertices"     , create_vertex_type()        );
 
+  return new_file;
 }
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
