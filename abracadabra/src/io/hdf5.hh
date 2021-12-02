@@ -160,7 +160,8 @@ public:
     if (file) { file->flush(); }
   }
 
-  std::vector<hit_t> read_hit_info();
+  // NOTE Only used in one test, so far
+  static std::vector<hit_t> read_hit_info(std::string const& file_name);
 
 private:
   void ensure_open_for_writing();

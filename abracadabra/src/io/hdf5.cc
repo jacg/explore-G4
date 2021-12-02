@@ -170,7 +170,7 @@ void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
   write("vertices", data);
 }
 
-std::vector<hit_t> hdf5_io::read_hit_info() {
+std::vector<hit_t> hdf5_io::read_hit_info(std::string const& file_name) {
   std::vector<hit_t> hits;
   // Get the table from the file
   HF::File the_file      = HF::File{file_name, HF::File::ReadOnly};
