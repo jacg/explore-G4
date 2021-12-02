@@ -165,7 +165,7 @@ public:
 private:
   void ensure_open_for_writing();
 
-  std::string filename;
+  std::string file_name;
   std::optional<HighFive::File> file;
 };
 

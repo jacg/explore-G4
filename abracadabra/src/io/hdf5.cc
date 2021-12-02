@@ -8,8 +8,8 @@
 
 namespace HF { using namespace HighFive; }
 
-hdf5_io::hdf5_io(std::string fname)
-: filename{fname}
+hdf5_io::hdf5_io(std::string file_name)
+: file_name{file_name}
 {}
 
 template<class T> using hdf_t = HF::AtomicType<T>;
@@ -95,7 +95,7 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
 
 void hdf5_io::ensure_open_for_writing() {
   if (file) { return; }
-  file = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
+  file = HF::File{file_name, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
 
   // To create a table than can be resized it has be of UNLIMITED dimension
   // and requires chunking of the data
@@ -173,7 +173,7 @@ void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
 std::vector<hit_t> hdf5_io::read_hit_info() {
   std::vector<hit_t> hits;
   // Get the table from the file
-  HF::File the_file      = HF::File{filename, HF::File::ReadOnly};
+  HF::File the_file      = HF::File{file_name, HF::File::ReadOnly};
   HF::Group   group      = the_file.getGroup("MC");
   HF::DataSet hits_table = group.getDataSet("hits");
 
