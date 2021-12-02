@@ -36,8 +36,8 @@ HF::CompoundType create_total_charge_type() {
 HIGHFIVE_REGISTER_TYPE(total_charge_t, create_total_charge_type)
 
 HF::CompoundType create_runinfo_type() {
-  return {{"param_key"  , hdf_t<char[hdf5_io::CONFLEN]>{}},
-          {"param_value", hdf_t<char[hdf5_io::CONFLEN]>{}}};
+  return {{"param_key"  , hdf_t<char[CONFLEN]>{}},
+          {"param_value", hdf_t<char[CONFLEN]>{}}};
 }
 HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
@@ -87,8 +87,8 @@ void set_string_param(char * to, const char * from, u32 max_len) {
 
 run_info_t make_run_info_t(const char* param_key, const char* param_value) {
   run_info_t runinfo;
-  set_string_param(runinfo.param_key  , param_key  , hdf5_io::CONFLEN);
-  set_string_param(runinfo.param_value, param_value, hdf5_io::CONFLEN);
+  set_string_param(runinfo.param_key  , param_key  , CONFLEN);
+  set_string_param(runinfo.param_value, param_value, CONFLEN);
   return runinfo;
 }
 

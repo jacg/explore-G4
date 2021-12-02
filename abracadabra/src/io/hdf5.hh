@@ -21,6 +21,10 @@ using u32 = uint32_t;
 using f16 = f32;
 using u16 = u32;
 
+
+static const unsigned CONFLEN = 300;
+
+
 struct hit_t {
   u32 event_id;
   f16 x;
@@ -28,6 +32,43 @@ struct hit_t {
   f16 z;
   f16 t;
 };
+
+struct run_info_t {
+  char param_key  [CONFLEN];
+  char param_value[CONFLEN];
+};
+
+struct waveform_t {
+  u32 event_id, sensor_id;
+  f16 time;
+};
+
+struct total_charge_t {
+  u32 event_id, sensor_id;
+  u32 charge; // u16 ?
+};
+
+struct sensor_xyz_t {
+  u32 sensor_id;
+  f16 x, y, z;
+};
+
+struct primary_vertex_t {
+  u32 event_id;
+  f16  x,  y,  z;
+  f16 px, py, pz;
+};
+
+struct vertex_t {
+  u32 event_id;
+  u32 track_id, parent_id;
+  f16 x,y,z,t;
+  f16 moved;
+  f16 pre_KE, post_KE, deposited;
+  u32 process_id, volume_id;
+};
+
+
 
 
 // TODO There's something fishy about the implementation behind this interface:
@@ -61,8 +102,6 @@ public:
 
   std::vector<hit_t> read_hit_info();
 
-  static const unsigned CONFLEN = 300;
-
 private:
   void ensure_open_for_writing();
 
@@ -83,40 +122,5 @@ void hdf5_io::write(std::string const& dataset_name, T const& data) {
   dataset.resize({index + n_elements});
   dataset.select({index}, {n_elements}).write(data);
 }
-
-struct run_info_t {
-  char param_key  [hdf5_io::CONFLEN];
-  char param_value[hdf5_io::CONFLEN];
-};
-
-struct waveform_t {
-  u32 event_id, sensor_id;
-  f16 time;
-};
-
-struct total_charge_t {
-  u32 event_id, sensor_id;
-  u32 charge; // u16 ?
-};
-
-struct sensor_xyz_t {
-  u32 sensor_id;
-  f16 x, y, z;
-};
-
-struct primary_vertex_t {
-  u32 event_id;
-  f16  x,  y,  z;
-  f16 px, py, pz;
-};
-
-struct vertex_t {
-  u32 event_id;
-  u32 track_id, parent_id;
-  f16 x,y,z,t;
-  f16 moved;
-  f16 pre_KE, post_KE, deposited;
-  u32 process_id, volume_id;
-};
 
 #endif
