@@ -124,6 +124,12 @@ HIGHFIVE_DECLARATIONS(run_info_t, create_runinfo_type)
 #undef HIGHFIVE_DECLARATIONS
 // --------------------------------------------------------------------------------
 
+HighFive::DataSet create_dataset(HighFive::File             file,
+                                 std::string const&   group_name,
+                                 std::string const& dataset_name,
+                                 HighFive::CompoundType const& type,
+                                 hsize_t chunk_size = 32768);
+
 
 // TODO There's something fishy about the implementation behind this interface:
 // it holds on to a filename, and then opens the file each time it wants to

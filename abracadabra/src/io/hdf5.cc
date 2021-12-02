@@ -1,7 +1,9 @@
 #include "hdf5.hh"
+#include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
 
 #include <cstring>
+#include <highfive/H5Group.hpp>
 #include <iostream>
 
 namespace HF { using namespace HighFive; }
@@ -93,10 +95,7 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
 
 void hdf5_io::ensure_open_for_writing() {
   if (file) { return; }
-  // TODO                                                                              Why truncate?
   file = HF::File{filename, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
-
-  HF::Group group = file->createGroup("MC");
 
   // To create a table than can be resized it has be of UNLIMITED dimension
   // and requires chunking of the data
@@ -104,13 +103,14 @@ void hdf5_io::ensure_open_for_writing() {
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
 
-  group.createDataSet("hits"         , dataspace, create_hit_type()           , props);
-  group.createDataSet("configuration", dataspace, create_runinfo_type()       , props);
-  group.createDataSet("waveform"     , dataspace, create_waveform_type()      , props);
-  group.createDataSet("total_charge" , dataspace, create_total_charge_type()  , props);
-  group.createDataSet("sensor_xyz"   , dataspace, create_sensor_xyz_type()    , props);
-  group.createDataSet("primaries"    , dataspace, create_primary_vertex_type(), props);
-  group.createDataSet("vertices"     , dataspace, create_vertex_type()        , props);
+  create_dataset(file.value(), "MC", "hits"         , create_hit_type()           );
+  create_dataset(file.value(), "MC", "configuration", create_runinfo_type()       );
+  create_dataset(file.value(), "MC", "waveform"     , create_waveform_type()      );
+  create_dataset(file.value(), "MC", "total_charge" , create_total_charge_type()  );
+  create_dataset(file.value(), "MC", "sensor_xyz"   , create_sensor_xyz_type()    );
+  create_dataset(file.value(), "MC", "primaries"    , create_primary_vertex_type());
+  create_dataset(file.value(), "MC", "vertices"     , create_vertex_type()        );
+
 }
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
@@ -179,4 +179,24 @@ std::vector<hit_t> hdf5_io::read_hit_info() {
 
   hits_table.read(hits);
   return hits;
+}
+
+HighFive::DataSet create_dataset(HighFive::File             file,
+                                 std::string const&   group_name,
+                                 std::string const& dataset_name,
+                                 HF::CompoundType const& type,
+                                 hsize_t chunk_size) {
+  HighFive::Group group =
+    file.exist      (group_name) ?
+    file.getGroup   (group_name) :
+    file.createGroup(group_name) ;
+
+  if (group.exist(dataset_name)) { throw "Dataset " + dataset_name + " already exists"; }
+
+  // To create a table than can be resized it has be of UNLIMITED dimension
+  // and requires chunking of the data
+  HF::DataSpace empty_unlimited_dataspace = HF::DataSpace({0}, {HF::DataSpace::UNLIMITED});
+  HF::DataSetCreateProps create_props;
+  create_props.add(HF::Chunking(std::vector<hsize_t>{chunk_size}));
+  return group.createDataSet(dataset_name, empty_unlimited_dataspace, type, create_props);
 }
