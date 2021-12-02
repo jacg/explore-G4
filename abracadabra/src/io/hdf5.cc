@@ -115,7 +115,7 @@ HighFive::File hdf5_io::ensure_open_for_writing(std::string const& file_name) {
 }
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
-  HF::Group group = file -> getGroup("MC");
+  HF::Group group = file.getGroup("MC");
   // create a dataset adapted to the size of `data`
   HF::DataSet dataset = group.createDataSet<std::string>(dataset_name, HF::DataSpace::From(data));
   dataset.write(data);

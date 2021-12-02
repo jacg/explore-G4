@@ -137,7 +137,7 @@ HighFive::DataSet create_dataset(HighFive::File             file,
 class hdf5_io {
 public:
   hdf5_io(std::string file_name);
-  ~hdf5_io() { if (file) { file -> flush(); }}
+  ~hdf5_io() { file.flush(); }
 
   template<class T>
   void write(std::string const& dataset, T const& data);
@@ -156,24 +156,20 @@ public:
 
   void write_strings(const std::string& dataset_name, const std::vector<std::string>& data);
 
-  void flush() {
-    if (file) { file->flush(); }
-  }
-
   // NOTE Only used in one test, so far
   static std::vector<hit_t> read_hit_info(std::string const& file_name);
 
 private:
   HighFive::File ensure_open_for_writing(std::string const& file_name);
 
-  std::optional<HighFive::File> file;
+  HighFive::File file;
 };
 
 template<class T>
 void hdf5_io::write(std::string const& dataset_name, T const& data) {
   unsigned int n_elements = data.size();
 
-  HighFive::Group   group   = file -> getGroup("MC");
+  HighFive::Group   group   = file.getGroup("MC");
   HighFive::DataSet dataset = group.getDataSet(dataset_name);
 
   // Create extra space in the table and append the new data
