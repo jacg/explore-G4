@@ -32,32 +32,38 @@ struct hit_t {
   f16 z;
   f16 t;
 };
+HighFive::CompoundType create_hit_type();
 
 struct run_info_t {
   char param_key  [CONFLEN];
   char param_value[CONFLEN];
 };
+HighFive::CompoundType create_runinfo_type();
 
 struct waveform_t {
   u32 event_id, sensor_id;
   f16 time;
 };
+HighFive::CompoundType create_waveform_type();
 
 struct total_charge_t {
   u32 event_id, sensor_id;
   u32 charge; // u16 ?
 };
+HighFive::CompoundType create_total_charge_type();
 
 struct sensor_xyz_t {
   u32 sensor_id;
   f16 x, y, z;
 };
+HighFive::CompoundType create_sensor_xyz_type();
 
 struct primary_vertex_t {
   u32 event_id;
   f16  x,  y,  z;
   f16 px, py, pz;
 };
+HighFive::CompoundType create_primary_vertex_type();
 
 struct vertex_t {
   u32 event_id;
