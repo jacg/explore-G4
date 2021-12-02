@@ -70,12 +70,12 @@ static const unsigned CONFLEN = 300;
   namespace HighFive { template<> DataType create_datatype<TYPE_NAME>(); }
 
 // ----- Table types ------------------------------------------------------------
-struct primary_vertex_t {
+struct primaries_t {
   u32 event_id;
   f16  x,  y,  z;
   f16 px, py, pz;
 };
-HIGHFIVE_DECLARATIONS(primary_vertex_t, create_primary_vertex_type)
+HIGHFIVE_DECLARATIONS(primaries_t, create_primaries_type)
 
 struct vertex_t {
   u32 event_id;
@@ -130,6 +130,46 @@ HighFive::DataSet create_dataset(HighFive::File             file,
                                  HighFive::CompoundType const& type,
                                  hsize_t chunk_size = 32768);
 
+template<class DATA>
+struct write_buffered {
+
+  write_buffered(HighFive::File             file,
+                 std::string const&   group_name,
+                 std::string const& dataset_name,
+                 HighFive::CompoundType const& type,
+                 hsize_t chunk_size = 32768)
+  : file{file}
+  , dataset{create_dataset(file, group_name, dataset_name, type, chunk_size)}
+  {}
+
+  ~write_buffered() { flush(); }
+
+  void operator()(DATA&& datum) {
+    buffer.push_back(std::move(datum));
+    if (buffer.size() >= buffer_size) { flush(); }
+  }
+
+private:
+  HighFive::File      file;
+  std::string   group_name;
+  std::string dataset_name;
+  std::vector<DATA> buffer;
+  size_t chunk_size = 32768; // TODO check whether this size makes sense
+  size_t buffer_size = 32 * chunk_size;
+  HighFive::DataSet dataset;
+
+  void flush() {
+
+    if (buffer.empty()) { return; }
+    size_t n_buffered_elements = buffer.size();
+    auto old_size = dataset.getDimensions()[0];
+    dataset.resize({old_size +  n_buffered_elements});
+    dataset.select({old_size}, {n_buffered_elements}).write(buffer);
+    buffer.clear(); // C++ standard guarantees capacity to be unchanged
+  }
+
+};
+
 
 // TODO There's something fishy about the implementation behind this interface:
 // it holds on to a filename, and then opens the file each time it wants to
@@ -163,6 +203,15 @@ private:
   HighFive::File ensure_open_for_writing(std::string const& file_name);
 
   HighFive::File file;
+
+public:
+  write_buffered<    run_info_t> buf_run_info{file, "MC", "run_info"    , create_runinfo_type     ()};
+  write_buffered<         hit_t> buf_hits    {file, "MC", "hits"        , create_hit_type         ()};
+  write_buffered<    waveform_t> buf_waveform{file, "MC", "waveform"    , create_waveform_type    ()};
+  write_buffered<total_charge_t> buf_charge  {file, "MC", "total_charge", create_total_charge_type()};
+  write_buffered<  sensor_xyz_t> buf_sensors {file, "MC", "sensor_xyz"  , create_sensor_xyz_type  ()};
+  write_buffered<   primaries_t> buf_primary {file, "MC", "primaries"   , create_sensor_xyz_type  ()};
+  write_buffered<      vertex_t> buf_vertex  {file, "MC", "vertices"    , create_vertex_type      ()};
 };
 
 template<class T>

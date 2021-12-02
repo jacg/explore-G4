@@ -15,7 +15,7 @@ hdf5_io::hdf5_io(std::string file_name)
 
 template<class T> using hdf_t = HF::AtomicType<T>;
 
-HF::CompoundType create_primary_vertex_type() {
+HF::CompoundType create_primaries_type() {
   return {{"event_id", hdf_t<u32>{}},
           {"x"       , hdf_t<f16>{}},
           {"y"       , hdf_t<f16>{}},
@@ -25,7 +25,7 @@ HF::CompoundType create_primary_vertex_type() {
           {"vz"      , hdf_t<f16>{}},
   };
 }
-HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
+HIGHFIVE_REGISTER_TYPE(primaries_t, create_primaries_type)
 
 HF::CompoundType create_vertex_type() {
   return {{ "event_id" , hdf_t<u32>{}},
@@ -102,15 +102,6 @@ HighFive::File hdf5_io::ensure_open_for_writing(std::string const& file_name) {
   HF::DataSpace dataspace = HF::DataSpace({0}, {HF::DataSpace::UNLIMITED});
   HF::DataSetCreateProps props;
   props.add(HF::Chunking(std::vector<hsize_t>{32768}));
-
-  create_dataset(new_file, "MC", "hits"         , create_hit_type()           );
-  create_dataset(new_file, "MC", "configuration", create_runinfo_type()       );
-  create_dataset(new_file, "MC", "waveform"     , create_waveform_type()      );
-  create_dataset(new_file, "MC", "total_charge" , create_total_charge_type()  );
-  create_dataset(new_file, "MC", "sensor_xyz"   , create_sensor_xyz_type()    );
-  create_dataset(new_file, "MC", "primaries"    , create_primary_vertex_type());
-  create_dataset(new_file, "MC", "vertices"     , create_vertex_type()        );
-
   return new_file;
 }
 
@@ -123,36 +114,27 @@ void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<s
 
 
 void hdf5_io::write_run_info(const char* param_key, const char* param_value) {
-  std::vector<run_info_t> data {make_run_info_t(param_key, param_value)};
-  write("configuration", data);
+  buf_run_info({make_run_info_t(param_key, param_value)});
 }
 
 void hdf5_io::write_hit_info(u32 event_id, f16 x, f16 y, f16 z, f16 time) {
-  std::vector<hit_t> data{{event_id, x, y, z, time}};
-  write("hits", data);
+  buf_hits({event_id, x, y, z, time});
 }
 
 void hdf5_io::write_waveform(u32 event_id, u32 sensor_id, const std::vector<f16>& times) {
-  std::vector<waveform_t> data;
-  for (auto time: times) { data.push_back({event_id, sensor_id, time}); }
-  write("waveform", data);
+  for (auto time: times) { buf_waveform({event_id, sensor_id, time}); }
 }
 
 void hdf5_io::write_total_charge(u32 event_id, u32 sensor_id, u32 charge) {
-  std::vector<total_charge_t> data{{event_id, sensor_id, charge}};
-  write("total_charge", data);
+  buf_charge({event_id, sensor_id, charge});
 }
 
 void hdf5_io::write_sensor_xyz(u32 sensor_id, f16 x, f16 y, f16 z) {
-  // TODO what are the performance implications of doing this one-by-one rather
-  // than as a whole vector in one go?
-  std::vector<sensor_xyz_t> data{{sensor_id, x, y, z}};
-  write("sensor_xyz", data);
+  buf_sensors({sensor_id, x, y, z});
 }
 
 void hdf5_io::write_primary(u32 event_id, f16 x, f16 y, f16 z, f16 px, f16 py, f16 pz) {
-  std::vector<primary_vertex_t> data{{event_id, x, y, z, px, py, pz}};
-  write("primaries", data);
+  buf_primary({event_id, x, y, z, px, py, pz});
 }
 
 void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
@@ -160,14 +142,14 @@ void hdf5_io::write_vertex(u32 event_id, u32 track_id, u32 parent_id,
                            f16 moved,
                            f16 pre_KE, f16 post_KE, f16 deposited,
                            u32 process_id, u32 volume_id) {
-  std::vector<vertex_t> data{
+
+  buf_vertex(
     {event_id, track_id, parent_id,
      x,y,z,t,
      moved,
      pre_KE, post_KE, deposited,
      process_id, volume_id
-    }};
-  write("vertices", data);
+    });
 }
 
 std::vector<hit_t> hdf5_io::read_hit_info(std::string const& file_name) {
