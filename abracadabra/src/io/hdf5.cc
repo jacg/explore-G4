@@ -12,43 +12,6 @@ hdf5_io::hdf5_io(std::string fname)
 
 template<class T> using hdf_t = HF::AtomicType<T>;
 
-HF::CompoundType create_hit_type() {
-  return {{"event_id", hdf_t<u32>{}},
-          {"x"       , hdf_t<f16>{}},
-          {"y"       , hdf_t<f16>{}},
-          {"z"       , hdf_t<f16>{}},
-          {"t"       , hdf_t<f16>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
-
-HF::CompoundType create_waveform_type() {
-  return {{"event_id" , hdf_t<u32>{}},
-          {"sensor_id", hdf_t<u32>{}},
-          {"time"     , hdf_t<f16>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(waveform_t, create_waveform_type)
-
-HF::CompoundType create_total_charge_type() {
-  return {{"event_id" , hdf_t<u32>{}},
-          {"sensor_id", hdf_t<u32>{}},
-          {"charge"   , hdf_t<u32>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(total_charge_t, create_total_charge_type)
-
-HF::CompoundType create_runinfo_type() {
-  return {{"param_key"  , hdf_t<char[CONFLEN]>{}},
-          {"param_value", hdf_t<char[CONFLEN]>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
-
-HF::CompoundType create_sensor_xyz_type() {
-  return {{"sensor_id", hdf_t<u32>{}},
-          {"x"        , hdf_t<f16>{}},
-          {"y"        , hdf_t<f16>{}},
-          {"z"        , hdf_t<f16>{}}};
-}
-HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
-
 HF::CompoundType create_primary_vertex_type() {
   return {{"event_id", hdf_t<u32>{}},
           {"x"       , hdf_t<f16>{}},
@@ -61,7 +24,6 @@ HF::CompoundType create_primary_vertex_type() {
 }
 HIGHFIVE_REGISTER_TYPE(primary_vertex_t, create_primary_vertex_type)
 
-// clang-format off
 HF::CompoundType create_vertex_type() {
   return {{ "event_id" , hdf_t<u32>{}},
           { "track_id" , hdf_t<u32>{}},
@@ -79,6 +41,43 @@ HF::CompoundType create_vertex_type() {
   };
 }
 HIGHFIVE_REGISTER_TYPE(vertex_t, create_vertex_type)
+
+HF::CompoundType create_sensor_xyz_type() {
+  return {{"sensor_id", hdf_t<u32>{}},
+          {"x"        , hdf_t<f16>{}},
+          {"y"        , hdf_t<f16>{}},
+          {"z"        , hdf_t<f16>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(sensor_xyz_t, create_sensor_xyz_type)
+
+HF::CompoundType create_waveform_type() {
+  return {{"event_id" , hdf_t<u32>{}},
+          {"sensor_id", hdf_t<u32>{}},
+          {"time"     , hdf_t<f16>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(waveform_t, create_waveform_type)
+
+HF::CompoundType create_total_charge_type() {
+  return {{"event_id" , hdf_t<u32>{}},
+          {"sensor_id", hdf_t<u32>{}},
+          {"charge"   , hdf_t<u32>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(total_charge_t, create_total_charge_type)
+
+HF::CompoundType create_hit_type() {
+  return {{"event_id", hdf_t<u32>{}},
+          {"x"       , hdf_t<f16>{}},
+          {"y"       , hdf_t<f16>{}},
+          {"z"       , hdf_t<f16>{}},
+          {"t"       , hdf_t<f16>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(hit_t, create_hit_type)
+
+HF::CompoundType create_runinfo_type() {
+  return {{"param_key"  , hdf_t<char[CONFLEN]>{}},
+          {"param_value", hdf_t<char[CONFLEN]>{}}};
+}
+HIGHFIVE_REGISTER_TYPE(run_info_t, create_runinfo_type)
 
 void set_string_param(char * to, const char * from, u32 max_len) {
   memset(to, 0, max_len);

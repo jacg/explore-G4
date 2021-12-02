@@ -70,6 +70,41 @@ static const unsigned CONFLEN = 300;
   namespace HighFive { template<> DataType create_datatype<TYPE_NAME>(); }
 
 // ----- Table types ------------------------------------------------------------
+struct primary_vertex_t {
+  u32 event_id;
+  f16  x,  y,  z;
+  f16 px, py, pz;
+};
+HIGHFIVE_DECLARATIONS(primary_vertex_t, create_primary_vertex_type)
+
+struct vertex_t {
+  u32 event_id;
+  u32 track_id, parent_id;
+  f16 x,y,z,t;
+  f16 moved;
+  f16 pre_KE, post_KE, deposited;
+  u32 process_id, volume_id;
+};
+HIGHFIVE_DECLARATIONS(vertex_t, create_vertex_type)
+
+struct sensor_xyz_t {
+  u32 sensor_id;
+  f16 x, y, z;
+};
+HIGHFIVE_DECLARATIONS(sensor_xyz_t, create_sensor_xyz_type)
+
+struct waveform_t {
+  u32 event_id, sensor_id;
+  f16 time;
+};
+HIGHFIVE_DECLARATIONS(waveform_t, create_waveform_type)
+
+struct total_charge_t {
+  u32 event_id, sensor_id;
+  u32 charge; // u16 ?
+};
+HIGHFIVE_DECLARATIONS(total_charge_t, create_total_charge_type)
+
 // TODO Are hit and run_info obsolete legacy noise? If so, remove!
 struct hit_t {
   u32 event_id;
@@ -86,41 +121,8 @@ struct run_info_t {
 };
 HIGHFIVE_DECLARATIONS(run_info_t, create_runinfo_type)
 
-struct waveform_t {
-  u32 event_id, sensor_id;
-  f16 time;
-};
-HIGHFIVE_DECLARATIONS(waveform_t, create_waveform_type)
-
-struct total_charge_t {
-  u32 event_id, sensor_id;
-  u32 charge; // u16 ?
-};
-HIGHFIVE_DECLARATIONS(total_charge_t, create_total_charge_type)
-
-struct sensor_xyz_t {
-  u32 sensor_id;
-  f16 x, y, z;
-};
-HIGHFIVE_DECLARATIONS(sensor_xyz_t, create_sensor_xyz_type)
-
-struct primary_vertex_t {
-  u32 event_id;
-  f16  x,  y,  z;
-  f16 px, py, pz;
-};
-HIGHFIVE_DECLARATIONS(primary_vertex_t, create_primary_vertex_type)
-
-struct vertex_t {
-  u32 event_id;
-  u32 track_id, parent_id;
-  f16 x,y,z,t;
-  f16 moved;
-  f16 pre_KE, post_KE, deposited;
-  u32 process_id, volume_id;
-};
-
-
+#undef HIGHFIVE_DECLARATIONS
+// --------------------------------------------------------------------------------
 
 
 // TODO There's something fishy about the implementation behind this interface:
