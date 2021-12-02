@@ -21,10 +21,56 @@ using u32 = uint32_t;
 using f16 = f32;
 using u16 = u32;
 
-
 static const unsigned CONFLEN = 300;
 
+// HighFive requires the you to register user-defined types that you want it to
+// be able to write. This involves two steps:
+//
+// 1. Write a function which describes the type: the names and types of its
+//    members. (I tried to automate this process, but in C++'s metaprogramming
+//    features are just too weak, so this is much more trouble than it's worth.)
+//
+// 2. Register this type and its corresponding describing-function (step 1.)
+//    with HighFive.
+//
+// Step 2. requires calling the macro HIGHFIVE_REGISTER_TYPE, which adds
+// (*DEFINES*) a template specialization to HighFive::create_datatype.
+//
+// This macro cannot be used in header files, because function template
+// specialization DEFINITIONS cannot go there. However, when trying to write a
+// (template-)polymorphic buffered-writer for HighFive, being templates, these
+// need to be defined in the header, and they fail unless the concrete type
+// being written has been registered with HighFive.
+//
+// The solution is to declare (rather than define) the template specialization
+// that will be added by HIGHFIVE_REGISTER_TYPE (in the implementation), in the
+// header. That is the purpose of the line
+//
+//   namespace HighFive { template<> DataType create_datatype<TYPE_NAME>(); }
+//
+// in the following macro.
+//
+// Additionally, the macro takes care of declaring the function from step 1:
+//
+//   HighFive::CompoundType FUNCTION();
+//
+// as this function is used in the templated implementations of buffered writers
+// (which must be defined in the header).
+//
+// Consequently, any user-defined type that we want to use with HighFive should
+//
+// 1. Be pre-registered, using this macro after its definition in the header.
+//
+// 2. Have its describing-function from step 1. defined in the implementation.
+//
+// 3. Be registered (along with its step 1 function) using HIGHFIVE_REGISTER_TYPE
+//    just after the function's definition.
+#define HIGHFIVE_DECLARATIONS(TYPE_NAME, FUNCTION)   \
+  HighFive::CompoundType FUNCTION(); \
+  namespace HighFive { template<> DataType create_datatype<TYPE_NAME>(); }
 
+// ----- Table types ------------------------------------------------------------
+// TODO Are hit and run_info obsolete legacy noise? If so, remove!
 struct hit_t {
   u32 event_id;
   f16 x;
@@ -32,38 +78,38 @@ struct hit_t {
   f16 z;
   f16 t;
 };
-HighFive::CompoundType create_hit_type();
+HIGHFIVE_DECLARATIONS(hit_t, create_hit_type)
 
 struct run_info_t {
   char param_key  [CONFLEN];
   char param_value[CONFLEN];
 };
-HighFive::CompoundType create_runinfo_type();
+HIGHFIVE_DECLARATIONS(run_info_t, create_runinfo_type)
 
 struct waveform_t {
   u32 event_id, sensor_id;
   f16 time;
 };
-HighFive::CompoundType create_waveform_type();
+HIGHFIVE_DECLARATIONS(waveform_t, create_waveform_type)
 
 struct total_charge_t {
   u32 event_id, sensor_id;
   u32 charge; // u16 ?
 };
-HighFive::CompoundType create_total_charge_type();
+HIGHFIVE_DECLARATIONS(total_charge_t, create_total_charge_type)
 
 struct sensor_xyz_t {
   u32 sensor_id;
   f16 x, y, z;
 };
-HighFive::CompoundType create_sensor_xyz_type();
+HIGHFIVE_DECLARATIONS(sensor_xyz_t, create_sensor_xyz_type)
 
 struct primary_vertex_t {
   u32 event_id;
   f16  x,  y,  z;
   f16 px, py, pz;
 };
-HighFive::CompoundType create_primary_vertex_type();
+HIGHFIVE_DECLARATIONS(primary_vertex_t, create_primary_vertex_type)
 
 struct vertex_t {
   u32 event_id;
