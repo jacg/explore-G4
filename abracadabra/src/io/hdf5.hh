@@ -174,7 +174,6 @@ template<class T>
 void hdf5_io::write(std::string const& dataset_name, T const& data) {
   unsigned int n_elements = data.size();
 
-  ensure_open_for_writing();
   HighFive::Group   group   = file -> getGroup("MC");
   HighFive::DataSet dataset = group.getDataSet(dataset_name);
 

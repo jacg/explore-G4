@@ -10,7 +10,7 @@ namespace HF { using namespace HighFive; }
 
 hdf5_io::hdf5_io(std::string file_name)
 : file_name{file_name}
-{}
+{ ensure_open_for_writing(); }
 
 template<class T> using hdf_t = HF::AtomicType<T>;
 
@@ -114,7 +114,6 @@ void hdf5_io::ensure_open_for_writing() {
 }
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
-  ensure_open_for_writing();
   HF::Group group = file -> getGroup("MC");
   // create a dataset adapted to the size of `data`
   HF::DataSet dataset = group.createDataSet<std::string>(dataset_name, HF::DataSpace::From(data));
