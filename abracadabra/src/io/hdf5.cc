@@ -95,14 +95,7 @@ run_info_t make_run_info_t(const char* param_key, const char* param_value) {
 }
 
 HighFive::File hdf5_io::ensure_open_for_writing(std::string const& file_name) {
-  auto new_file = HF::File{file_name, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
-
-  // To create a table than can be resized it has be of UNLIMITED dimension
-  // and requires chunking of the data
-  HF::DataSpace dataspace = HF::DataSpace({0}, {HF::DataSpace::UNLIMITED});
-  HF::DataSetCreateProps props;
-  props.add(HF::Chunking(std::vector<hsize_t>{32768}));
-  return new_file;
+  return HF::File{file_name, HF::File::ReadWrite | HF::File::Create | HF::File::Truncate};
 }
 
 void hdf5_io::write_strings(const std::string& dataset_name, const std::vector<std::string>& data) {
