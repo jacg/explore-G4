@@ -21,7 +21,7 @@ using u32 = uint32_t;
 using f16 = f32;
 using u16 = u32;
 
-static const unsigned CONFLEN = 300;
+static const unsigned CONFLEN = 30;
 
 // HighFive requires the you to register user-defined types that you want it to
 // be able to write. This involves two steps:
