@@ -15,6 +15,8 @@
 /abracadabra/steel_is_vacuum true
 /abracadabra/vacuum_phantom true
 
+/abracadabra/no_secondaries false
+
 
 /abracadabra/jaszczak_activity_sphere 3
 /abracadabra/jaszczak_activity_body   1

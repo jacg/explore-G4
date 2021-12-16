@@ -23,6 +23,7 @@ struct abracadabra_messenger {
   G4double cylinder_radius  = 200; // mm
   bool steel_is_vacuum = false;
   bool vacuum_phantom  = false;
+  bool no_secondaries  = false;
   size_t nema5_sleeves = 1;
   G4double jaszczak_activity_sphere = 4.0;
   G4double jaszczak_activity_body   = 1.0;

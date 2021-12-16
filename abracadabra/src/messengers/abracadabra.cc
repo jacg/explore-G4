@@ -19,6 +19,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
   messenger -> DeclareProperty("steel_is_vacuum" , steel_is_vacuum,  "Replace steel with vacuum in IMAS");
   messenger -> DeclareProperty("vacuum_phantom"  , vacuum_phantom ,  "Set all phantom materials to vacuum");
+  messenger -> DeclareProperty("no_secondaries"  , no_secondaries ,  "Suppress secondaries");
   messenger -> DeclareProperty("nema5_sleeves"   , nema5_sleeves  ,  "Number of sleeves in NEMA5 phantom");
   // TODO these should probably go in a separate Jaszczak messenger (or in a directory here, if possible)
   messenger -> DeclareProperty("jaszczak_activity_sphere", jaszczak_activity_sphere, "Activity of Jaszczak spheres");
