@@ -70,9 +70,9 @@ struct stacking_action : public G4UserStackingAction {
   void NewStage       () override { if   (stage_)   stage_(stackManager); }
   void PrepareNewEvent() override { if (prepare_) prepare_(); }
 
-  stacking_action* classify(classify_t a) { classify_ = a; return this; }
-  stacking_action*    stage(   stage_t a) {    stage_ = a; return this; }
-  stacking_action*  prepare(voidvoid_t a) {  prepare_ = a; return this; }
+  stacking_action*   classify(classify_t a) { classify_ = a; return this; }
+  stacking_action* next_stage(   stage_t a) {    stage_ = a; return this; }
+  stacking_action* next_event(voidvoid_t a) {  prepare_ = a; return this; }
 private:
   classify_t classify_;
      stage_t stage_;

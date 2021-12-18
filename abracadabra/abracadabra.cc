@@ -552,9 +552,9 @@ int main(int argc, char** argv) {
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
-    -> set ((new n4::stacking_action) -> classify(kill_or_wait_secondaries)
-                                      ->    stage(forget_or_track_secondaries)
-                                      ->  prepare(prepare_new_event));
+    -> set ((new n4::stacking_action) ->   classify(kill_or_wait_secondaries)
+                                      -> next_stage(forget_or_track_secondaries)
+                                      -> next_event(prepare_new_event));
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
