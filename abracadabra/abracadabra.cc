@@ -505,10 +505,10 @@ int main(int argc, char** argv) {
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
   };
 
-  // ----- Eliminate secondaries (in stacking action)  -------------------------------------
-  n4::stacking_action::classify_t kill_secondaries = [](auto track) {
-    auto kill = track -> GetParentID() > 0;
-    return kill > 0 ? G4ClassificationOfNewTrack::fKill : G4ClassificationOfNewTrack::fUrgent;
+  // ----- Process gammas before secondaries ----------------------------------------------
+  n4::stacking_action::classify_t postpone_secondaries = [](auto track) {
+    auto wait = track -> GetParentID() > 0;
+    return wait ? G4ClassificationOfNewTrack::fWaiting : G4ClassificationOfNewTrack::fUrgent;
   };
 
   // ===== Mandatory G4 initializations ===================================================
@@ -529,7 +529,7 @@ int main(int argc, char** argv) {
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables));
   if (messenger.detector == "magic" || messenger.no_secondaries) {
-    actions -> set ((new n4::stacking_action) -> classify(kill_secondaries));
+    actions -> set ((new n4::stacking_action) -> classify(postpone_secondaries));
   }
 
   run_manager -> SetUserInitialization(actions);
