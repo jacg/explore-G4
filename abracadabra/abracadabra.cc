@@ -13,6 +13,7 @@
 #include "messengers/generator.hh"
 #include "utils/map_set.hh"
 
+#include <G4ClassificationOfNewTrack.hh>
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4StackManager.hh>
@@ -506,15 +507,32 @@ int main(int argc, char** argv) {
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
   };
 
-  // ----- Process gammas before secondaries ----------------------------------------------
-  n4::stacking_action::classify_t postpone_secondaries = [](auto track) {
-    auto wait = track -> GetParentID() > 0;
-    return wait ? G4ClassificationOfNewTrack::fWaiting : G4ClassificationOfNewTrack::fUrgent;
+  // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
+  unsigned stage; // 1: gammas; 2: secondaries
+
+  n4::stacking_action::classify_t kill_or_wait_secondaries = [&stage, &messenger](auto track) {
+    const auto NOW  = G4ClassificationOfNewTrack::fUrgent;
+    const auto KILL = G4ClassificationOfNewTrack::fKill;
+    const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
+    if (stage == 1) { // primary gammas only, postpone secondaries
+      if (track -> GetParentID() == 0) { return NOW;  }
+      if (messenger.no_secondaries)    { return KILL; } else { return WAIT; }
+    } else if (stage == 2) { // secondaries
+      return messenger.no_secondaries ? KILL : NOW;
+    } else {
+      throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
+    }
   };
 
-  n4::stacking_action::stage_t forget_or_track_secondaries = [&messenger] (G4StackManager * const stack_manager) {
+  n4::stacking_action::voidvoid_t prepare_new_event = [&stage] { stage = 1; };
+
+  n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
+    stage++;
+    // stage 1 // gamma propagation
     if (messenger.no_secondaries) { stack_manager -> clear();      }
     else                          { stack_manager -> ReClassify(); }
+    // stage 2 // secondaries propagation
+    stack_manager -> ReClassify();
   };
 
   // ===== Mandatory G4 initializations ===================================================
@@ -533,11 +551,10 @@ int main(int argc, char** argv) {
     -> set ((new n4::event_action) -> begin(write_primary_vertex))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
-                                 -> end  (write_string_tables));
-  if (messenger.detector == "magic" || messenger.no_secondaries) {
-    actions -> set ((new n4::stacking_action) -> classify(postpone_secondaries)
-                                              ->    stage(forget_or_track_secondaries));
-  }
+                                 -> end  (write_string_tables))
+    -> set ((new n4::stacking_action) -> classify(kill_or_wait_secondaries)
+                                      ->    stage(forget_or_track_secondaries)
+                                      ->  prepare(prepare_new_event));
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
