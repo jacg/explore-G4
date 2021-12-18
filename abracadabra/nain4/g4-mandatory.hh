@@ -4,6 +4,7 @@
 #include <G4Box.hh>
 #include <G4ClassificationOfNewTrack.hh>
 #include <G4ParticleGun.hh>
+#include <G4StackManager.hh>
 #include <G4Track.hh>
 #include <G4UserEventAction.hh>
 #include <G4UserRunAction.hh>
@@ -59,21 +60,22 @@ private:
 // ----- stacking_action ------------------------------------------------------------
 struct stacking_action : public G4UserStackingAction {
   using classify_t = std::function<G4ClassificationOfNewTrack(G4Track const*)>;
+  using stage_t    = std::function<void(G4StackManager const * const)>;
   using voidvoid_t = std::function<void()>;
 
   G4ClassificationOfNewTrack ClassifyNewTrack(G4Track const* track) override {
     if (classify_) {return classify_(track); }
     else { return G4UserStackingAction::ClassifyNewTrack(track); }
   }
-  void NewStage       () override { if   (stage_)   stage_(); }
+  void NewStage       () override { if   (stage_)   stage_(stackManager); }
   void PrepareNewEvent() override { if (prepare_) prepare_(); }
 
   stacking_action* classify(classify_t a) { classify_ = a; return this; }
-  stacking_action*    stage(voidvoid_t a) {    stage_ = a; return this; }
+  stacking_action*    stage(   stage_t a) {    stage_ = a; return this; }
   stacking_action*  prepare(voidvoid_t a) {  prepare_ = a; return this; }
 private:
   classify_t classify_;
-  voidvoid_t stage_;
+     stage_t stage_;
   voidvoid_t prepare_;
 };
 
