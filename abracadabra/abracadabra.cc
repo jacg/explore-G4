@@ -15,6 +15,7 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4StackManager.hh>
 #include <G4String.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4Types.hh>
@@ -511,6 +512,11 @@ int main(int argc, char** argv) {
     return wait ? G4ClassificationOfNewTrack::fWaiting : G4ClassificationOfNewTrack::fUrgent;
   };
 
+  n4::stacking_action::stage_t forget_or_track_secondaries = [&messenger] (G4StackManager * const stack_manager) {
+    if (messenger.no_secondaries) { stack_manager -> clear();      }
+    else                          { stack_manager -> ReClassify(); }
+  };
+
   // ===== Mandatory G4 initializations ===================================================
 
   // Construct the default run manager
@@ -529,7 +535,8 @@ int main(int argc, char** argv) {
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables));
   if (messenger.detector == "magic" || messenger.no_secondaries) {
-    actions -> set ((new n4::stacking_action) -> classify(postpone_secondaries));
+    actions -> set ((new n4::stacking_action) -> classify(postpone_secondaries)
+                                              ->    stage(forget_or_track_secondaries));
   }
 
   run_manager -> SetUserInitialization(actions);

@@ -60,7 +60,7 @@ private:
 // ----- stacking_action ------------------------------------------------------------
 struct stacking_action : public G4UserStackingAction {
   using classify_t = std::function<G4ClassificationOfNewTrack(G4Track const*)>;
-  using stage_t    = std::function<void(G4StackManager const * const)>;
+  using stage_t    = std::function<void(G4StackManager * const)>;
   using voidvoid_t = std::function<void()>;
 
   G4ClassificationOfNewTrack ClassifyNewTrack(G4Track const* track) override {
