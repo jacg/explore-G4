@@ -514,7 +514,7 @@ int main(int argc, char** argv) {
     const auto NOW  = G4ClassificationOfNewTrack::fUrgent;
     const auto KILL = G4ClassificationOfNewTrack::fKill;
     const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
-    if (stage == 1) { // primary gammas only, postpone secondaries
+    if (stage == 1) { // primary gammas only, delay secondaries
       if (track -> GetParentID() == 0) { return NOW;  }
       if (messenger.no_secondaries)    { return KILL; } else { return WAIT; }
     } else if (stage == 2) { // secondaries
