@@ -524,7 +524,7 @@ int main(int argc, char** argv) {
     }
   };
 
-  n4::stacking_action::voidvoid_t prepare_new_event = [&stage] { stage = 1; };
+  n4::stacking_action::voidvoid_t reset_stage_no = [&stage] { stage = 1; };
 
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
@@ -554,7 +554,7 @@ int main(int argc, char** argv) {
                                  -> end  (write_string_tables))
     -> set ((new n4::stacking_action) ->   classify(kill_or_wait_secondaries)
                                       -> next_stage(forget_or_track_secondaries)
-                                      -> next_event(prepare_new_event));
+                                      -> next_event(reset_stage_no));
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
