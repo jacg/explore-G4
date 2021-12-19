@@ -30,6 +30,7 @@
 #include <G4Gamma.hh>
 #include <Randomize.hh>
 
+#include <cstddef>
 #include <functional>
 #include <chrono>
 #include <csignal>
@@ -362,10 +363,11 @@ int main(int argc, char** argv) {
     auto length = messenger.cylinder_length  * mm;
     auto radius = messenger.cylinder_radius  * mm;
     auto clear  = messenger.steel_is_vacuum;
+    auto magic  = messenger.magic_level;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
-      d == "magic"     ? magic_detector()                                           :
+      magic >= 3       ? magic_detector()                                           :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
@@ -426,7 +428,7 @@ int main(int argc, char** argv) {
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
     G4String volume_name;
 
-    if (messenger.detector != "magic") {
+    if (messenger.magic_level < 3) {
       // ----- Real detector ------------------------------------------------------------------------
       // Only record vertices (not transport) of gammas
       auto particle = track -> GetParticleDefinition();
@@ -514,25 +516,39 @@ int main(int argc, char** argv) {
     const auto NOW  = G4ClassificationOfNewTrack::fUrgent;
     const auto KILL = G4ClassificationOfNewTrack::fKill;
     const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
+
+    // if (track -> GetTrackID() > 10) { return KILL; }
+    // std::cout << "Classifying " << track -> GetTrackID()
+    //           << " (" << track -> GetParentID()
+    //           << ") at stage " << stage
+    //           //<< " " << track
+    //           << std::endl;
+
     if (stage == 1) { // primary gammas only, delay secondaries
-      if (track -> GetParentID() == 0) { return NOW;  }
-      if (messenger.no_secondaries)    { return KILL; } else { return WAIT; }
+      bool is_primary         = track -> GetParentID() == 0;
+      bool ignore_secondaries = messenger.magic_level > 0;
+      if (is_primary)         { return NOW;  }
+      if (ignore_secondaries) { return KILL; } else { return WAIT; }
+
     } else if (stage == 2) { // secondaries
-      return messenger.no_secondaries ? KILL : NOW;
+      return                           NOW;
+
     } else {
       throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
     }
   };
 
-  n4::stacking_action::voidvoid_t reset_stage_no = [&stage] { stage = 1; };
+  n4::stacking_action::voidvoid_t reset_stage_no = [&stage] { stage = 1; /*std::cout << "RESET TO STAGE 1\n";*/ };
 
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
-    // stage 1 // gamma propagation
-    if (messenger.no_secondaries) { stack_manager -> clear();      }
-    else                          { stack_manager -> ReClassify(); }
-    // stage 2 // secondaries propagation
-    stack_manager -> ReClassify();
+    //std::cout << "NEW STAGE " << stage << std::endl;
+    bool ignore_secondaries = messenger.magic_level > 0;
+    if (stage == 2) {
+      if (ignore_secondaries) { stack_manager -> clear(); }
+      else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
+    }
+    //std::cout << "FINISHED PREPARING NEW STAGE\n";
   };
 
   // ===== Mandatory G4 initializations ===================================================
