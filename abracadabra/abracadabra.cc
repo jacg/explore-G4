@@ -577,13 +577,13 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   auto actions = (new n4::actions{generator_messenger.generator()})
-    -> set ((new n4::event_action) -> begin(begin_event))
-    -> set  (new n4::stepping_action{stepping_action})
-    -> set ((new n4::run_action) -> begin(start_run)
-                                 -> end  (  end_run))
-    -> set ((new n4::stacking_action) ->   classify(kill_or_wait_secondaries)
+    -> set ((new n4::run_action)      -> begin(start_run)
+                                      -> end  (  end_run))
+    -> set ((new n4::event_action)    -> begin(begin_event))
+    -> set ((new n4::stacking_action) -> classify  (   kill_or_wait_secondaries)
                                       -> next_stage(forget_or_track_secondaries)
-                                      -> next_event(reset_stage_no));
+                                      -> next_event(reset_stage_no))
+    -> set  (new n4::stepping_action{stepping_action});
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
