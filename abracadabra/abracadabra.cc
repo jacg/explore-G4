@@ -19,6 +19,7 @@
 #include <G4StackManager.hh>
 #include <G4String.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Tubs.hh>
 #include <G4Types.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
@@ -185,6 +186,15 @@ struct phantom_t {
   {}
   const n4::generator::function    generate;
   const n4::geometry::construct_fn geometry;
+};
+
+// Find the inner radius of the LXe layer (will crash for any of the detector
+// geometries that do not contain a G4Tubs volume called "Steel_1")
+auto find_LXe_inner_r() {
+  auto LXe = n4::find_logical("LXe");
+  auto solid = LXe -> GetSolid();
+  auto tubs = dynamic_cast<G4Tubs*>(solid);
+  return tubs -> GetOuterRadius();
 };
 
 // ============================== MAIN =======================================================
@@ -421,6 +431,10 @@ int main(int argc, char** argv) {
   // events in which a gamma's energy falls below the cut, before entering LXe.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
+
+  // Inner radius of the LXe layer
+  G4double LXe_r; // Initialized in start_run
+
   n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
@@ -519,6 +533,7 @@ int main(int argc, char** argv) {
   n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
+    LXe_r = find_LXe_inner_r();
   };
 
   // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
