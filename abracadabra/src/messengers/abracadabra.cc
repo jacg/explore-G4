@@ -17,6 +17,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("quartz_thickness", quartz_thickness, "Thickness of quartz layer (mm)");
   messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");
   messenger -> DeclareProperty("cylinder_radius" , cylinder_radius,  "Radius of cylinder");
+  messenger -> DeclareProperty("E_cut"           , E_cut          ,  "Abort and ignore event if gamma E drops below threshold, before LXe");
   messenger -> DeclareProperty("steel_is_vacuum" , steel_is_vacuum,  "Replace steel with vacuum in IMAS");
   messenger -> DeclareProperty("vacuum_phantom"  , vacuum_phantom ,  "Set all phantom materials to vacuum");
   messenger -> DeclareProperty("magic_level"     , magic_level ,     "1: suppress secondaries; "
