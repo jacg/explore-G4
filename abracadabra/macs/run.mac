@@ -12,6 +12,6 @@
 /event/verbose 0
 /tracking/verbose 0
 
-/abracadabra/verbosity 1
+/abracadabra/verbosity 0
 
-/run/beamOn 100
+/run/beamOn 70000

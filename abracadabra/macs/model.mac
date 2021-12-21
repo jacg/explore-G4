@@ -12,10 +12,20 @@
 /abracadabra/quartz_thickness 0
 /abracadabra/xenon_thickness 40
 
-/abracadabra/steel_is_vacuum true
-/abracadabra/vacuum_phantom true
+/abracadabra/steel_is_vacuum false
+/abracadabra/vacuum_phantom false
 
-/abracadabra/no_secondaries false
+# 1: suppress secondaries
+# 2: detect and stop all gammas on entry into LXe
+# 3: Remove everyting except LXe from geometry
+
+/abracadabra/magic_level 0
+
+
+# Don't simulate secondaries if a gamma in this event drops below this
+# threshold, before reaching LXe
+
+/abracadabra/E_cut 409
 
 
 /abracadabra/jaszczak_activity_sphere 4
