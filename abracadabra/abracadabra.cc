@@ -511,12 +511,12 @@ int main(int argc, char** argv) {
          << "  --------------------------------" << endl;
   };
 
-  n4::run_action::action_t write_string_tables = [&](auto) {
+  n4::run_action::action_t   end_run = [&](auto) {
     writer -> write_strings("process_names", process_names.items_ordered_by_id());
     writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
   };
 
-  n4::run_action::action_t start_counting_events = [&](auto run) {
+  n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
   };
@@ -579,8 +579,8 @@ int main(int argc, char** argv) {
   auto actions = (new n4::actions{generator_messenger.generator()})
     -> set ((new n4::event_action) -> begin(begin_event))
     -> set  (new n4::stepping_action{stepping_action})
-    -> set ((new n4::run_action) -> begin(start_counting_events)
-                                 -> end  (write_string_tables))
+    -> set ((new n4::run_action) -> begin(start_run)
+                                 -> end  (  end_run))
     -> set ((new n4::stacking_action) ->   classify(kill_or_wait_secondaries)
                                       -> next_stage(forget_or_track_secondaries)
                                       -> next_event(reset_stage_no));
