@@ -466,6 +466,9 @@ int main(int argc, char** argv) {
     auto pst_KE = pst_pt -> GetKineticEnergy()      / keV;
     auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
 
+    // Bookkeeping for gamma energies that might fall below messenger.E_cut
+    lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+
     // Process and volume ids
     auto  volume_id =  volume_names.id( volume_name);
     auto process_id = process_names.id(process_name);
@@ -552,8 +555,9 @@ int main(int argc, char** argv) {
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
     //std::cout << "NEW STAGE " << stage << std::endl;
-    bool ignore_secondaries = messenger.magic_level > 0;
     if (stage == 2) {
+      bool ignore_secondaries = messenger.magic_level                > 0              ||
+                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut;
       if (ignore_secondaries) { stack_manager -> clear(); }
       else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
     }
