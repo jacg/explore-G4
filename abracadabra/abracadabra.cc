@@ -421,7 +421,7 @@ int main(int argc, char** argv) {
   // events in which a gamma's energy falls below the cut, before entering LXe.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
-  n4::stepping_action::action_t write_vertex = [&](auto step) {
+  n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
 
@@ -574,7 +574,7 @@ int main(int argc, char** argv) {
   // ----- User actions (only generator is mandatory) --------------------------------------
   auto actions = (new n4::actions{generator_messenger.generator()})
     -> set ((new n4::event_action) -> begin(begin_event))
-    -> set  (new n4::stepping_action{write_vertex})
+    -> set  (new n4::stepping_action{stepping_action})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
     -> set ((new n4::stacking_action) ->   classify(kill_or_wait_secondaries)
