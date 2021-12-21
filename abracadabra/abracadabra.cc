@@ -417,6 +417,10 @@ int main(int argc, char** argv) {
      // NEMA5
      "Source", "Sleeves"}};
 
+  // If messenger.E_cut is set, save time by not simulating secondaries for
+  // events in which a gamma's energy falls below the cut, before entering LXe.
+  G4double lowest_pre_LXe_gamma_energy_in_event;
+
   n4::stepping_action::action_t write_vertex = [&](auto step) {
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
@@ -477,8 +481,13 @@ int main(int argc, char** argv) {
                                   header_last_printed, track_1_printed_this_event);
   };
 
-  // Event action that writes the primary vertex of the event to HDF5
-  n4::event_action::action_t write_primary_vertex = [&](auto event) {
+  // BeginOfEvent action:
+  // 1. Resets lowest gamma energy bookkeeping
+  // 2. Writes the primary vertex of the event to HDF5
+  n4::event_action::action_t begin_event = [&](auto event) {
+    // Reset gamma energy bookkeeping
+    lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
+    // Write primary vertex
     using std::setw;
     auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
@@ -564,7 +573,7 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   auto actions = (new n4::actions{generator_messenger.generator()})
-    -> set ((new n4::event_action) -> begin(write_primary_vertex))
+    -> set ((new n4::event_action) -> begin(begin_event))
     -> set  (new n4::stepping_action{write_vertex})
     -> set ((new n4::run_action) -> begin(start_counting_events)
                                  -> end  (write_string_tables))
