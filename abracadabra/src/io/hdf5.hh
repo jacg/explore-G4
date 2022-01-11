@@ -210,7 +210,7 @@ public:
   write_buffered<    waveform_t> buf_waveform{file, "MC", "waveform"    , create_waveform_type    ()};
   write_buffered<total_charge_t> buf_charge  {file, "MC", "total_charge", create_total_charge_type()};
   write_buffered<  sensor_xyz_t> buf_sensors {file, "MC", "sensor_xyz"  , create_sensor_xyz_type  ()};
-  write_buffered<   primaries_t> buf_primary {file, "MC", "primaries"   , create_sensor_xyz_type  ()};
+  write_buffered<   primaries_t> buf_primary {file, "MC", "primaries"   , create_primaries_type   ()};
   write_buffered<      vertex_t> buf_vertex  {file, "MC", "vertices"    , create_vertex_type      ()};
 };
 
