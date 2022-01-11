@@ -14,9 +14,12 @@ let
     gcc8    = overrideCC stdenv gcc8;
     gcc9    = overrideCC stdenv gcc9;
     gcc10   = overrideCC stdenv gcc10;
+    gcc11   = overrideCC stdenv gcc11;
     clang9  = overrideCC stdenv clang_9;
     clang10 = overrideCC stdenv clang_10;
     clang11 = overrideCC stdenv clang_11;
+    clang12 = overrideCC stdenv clang_12;
+    clang13 = overrideCC stdenv clang_13;
   };
 
   pocoLibs = {
@@ -39,6 +42,6 @@ let
 
 in
  [
-   (myProject { stdenv = compilers.gcc10;   geant4 = pkgs.geant4; })
-   (myProject { stdenv = compilers.clang11; geant4 = pkgs.geant4; })
+   (myProject { stdenv = compilers.gcc11;   geant4 = pkgs.geant4; })
+   (myProject { stdenv = compilers.clang13; geant4 = pkgs.geant4; })
  ]
