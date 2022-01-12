@@ -17,16 +17,16 @@ let
   }}/nixGL.nix" {};
 in
 
-pkgs.llvmPackages_12.stdenv.mkDerivation {
+pkgs.llvmPackages_13.stdenv.mkDerivation {
   inherit (derivation) name;
   nativeBuildInputs = derivation.nativeBuildInputs ++ [
-    pkgs.clang_12
+    pkgs.clang_13
     (pkgs.python39.withPackages (ps: [ps.docopt]))
   ];
 
   buildInputs = derivation.buildInputs ++ [
 #    pkgs.clang-tools
-    pkgs.clang_12
+    pkgs.clang_13
     pkgs.cmake
     pkgs.catch2
     pkgs.cmake-language-server
