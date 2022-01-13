@@ -382,6 +382,7 @@ int main(int argc, char** argv) {
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
   };
+
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
@@ -430,7 +431,6 @@ int main(int argc, char** argv) {
   // If messenger.E_cut is set, save time by not simulating secondaries for
   // events in which a gamma's energy falls below the cut, before entering LXe.
   G4double lowest_pre_LXe_gamma_energy_in_event;
-
 
   // Inner radius of the LXe layer
   G4double LXe_r; // Initialized in start_run
@@ -546,13 +546,6 @@ int main(int argc, char** argv) {
     const auto KILL = G4ClassificationOfNewTrack::fKill;
     const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
 
-    // if (track -> GetTrackID() > 10) { return KILL; }
-    // std::cout << "Classifying " << track -> GetTrackID()
-    //           << " (" << track -> GetParentID()
-    //           << ") at stage " << stage
-    //           //<< " " << track
-    //           << std::endl;
-
     if (stage == 1) { // primary gammas only, delay secondaries
       bool is_primary         = track -> GetParentID() == 0;
       bool ignore_secondaries = messenger.magic_level > 0;
@@ -571,14 +564,12 @@ int main(int argc, char** argv) {
 
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
-    //std::cout << "NEW STAGE " << stage << std::endl;
     if (stage == 2) {
       bool ignore_secondaries = messenger.magic_level                > 0              ||
                                 lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut;
       if (ignore_secondaries) { stack_manager -> clear(); }
       else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
     }
-    //std::cout << "FINISHED PREPARING NEW STAGE\n";
   };
 
   // ===== Mandatory G4 initializations ===================================================
