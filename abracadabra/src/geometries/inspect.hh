@@ -17,7 +17,7 @@ public:
   G4VPhysicalVolume const*   volume_at(const G4ThreeVector&) const;
   G4Material        const* material_at(const G4ThreeVector&) const;
   using f = float; using u = unsigned short;
-  void attenuation_map(std::tuple<f,f,f>, std::tuple<u,u,u>, std::string);
+  void density_map(std::tuple<f,f,f>, std::tuple<u,u,u>, std::string);
 
 private:
   std::unique_ptr<G4Navigator>        navigator;

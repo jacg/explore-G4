@@ -16,7 +16,7 @@
 
 // ===== Asymmetric, cheap to simulate phantom for basic sanity checking ===================
 
-// Should give clear attenuation maps and matching reconstructed images
+// Should give clear density maps and matching reconstructed images
 // + 3 spheres
 // + one on each axis, on the POSITIVE side
 // + different position on each axis: x=4, y=8, z=12 cm
