@@ -1,4 +1,4 @@
-/abracadabra/outfile "{job_dir}/MC-40mm-{run_number:02}.h5"
+/abracadabra/outfile "{job_dir}/MC-{run_number:02}.h5"
 
 /abracadabra/event_number_offset {run_number}000000
 
@@ -14,4 +14,4 @@
 
 /abracadabra/verbosity 0
 
-/run/beamOn 100
+/run/beamOn 70000

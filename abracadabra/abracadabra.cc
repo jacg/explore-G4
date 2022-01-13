@@ -13,10 +13,13 @@
 #include "messengers/generator.hh"
 #include "utils/map_set.hh"
 
+#include <G4ClassificationOfNewTrack.hh>
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4StackManager.hh>
 #include <G4String.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Tubs.hh>
 #include <G4Types.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIExecutive.hh>
@@ -28,6 +31,7 @@
 #include <G4Gamma.hh>
 #include <Randomize.hh>
 
+#include <cstddef>
 #include <functional>
 #include <chrono>
 #include <csignal>
@@ -182,6 +186,15 @@ struct phantom_t {
   {}
   const n4::generator::function    generate;
   const n4::geometry::construct_fn geometry;
+};
+
+// Find the inner radius of the LXe layer (will crash for any of the detector
+// geometries that do not contain a G4Tubs volume called "Steel_1")
+auto find_LXe_inner_r() {
+  auto LXe = n4::find_logical("LXe");
+  auto solid = LXe -> GetSolid();
+  auto tubs = dynamic_cast<G4Tubs*>(solid);
+  return tubs -> GetOuterRadius();
 };
 
 // ============================== MAIN =======================================================
@@ -360,14 +373,16 @@ int main(int argc, char** argv) {
     auto length = messenger.cylinder_length  * mm;
     auto radius = messenger.cylinder_radius  * mm;
     auto clear  = messenger.steel_is_vacuum;
+    auto magic  = messenger.magic_level;
     return
       d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
       d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
-      d == "magic"     ? magic_detector()                                           :
+      magic >= 3       ? magic_detector()                                           :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
   };
+
   // ----- Should the geometry contain phantom only / detector only / both
   // Can choose geometry in macros with `/abracadabra/geometry <choice>`
   auto geometry = [&, &g = messenger.geometry]() -> G4VPhysicalVolume* {
@@ -413,7 +428,17 @@ int main(int argc, char** argv) {
      // NEMA5
      "Source", "Sleeves"}};
 
-  n4::stepping_action::action_t write_vertex = [&](auto step) {
+  // If messenger.E_cut is set, save time by not simulating secondaries for
+  // events in which a gamma's energy falls below the cut, before entering LXe.
+  // Such events will be rejected later on, on the grounds of not registering
+  // enough energy, so there is no point in wasting time on the very expensive
+  // simulation of secondaries.
+  G4double lowest_pre_LXe_gamma_energy_in_event;
+
+  // Inner radius of the LXe layer
+  G4double LXe_r; // Initialized in start_run
+
+  n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
     static bool track_1_printed_this_event = false;
 
@@ -424,7 +449,7 @@ int main(int argc, char** argv) {
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
     G4String volume_name;
 
-    if (messenger.detector != "magic") {
+    if (messenger.magic_level < 3) {
       // ----- Real detector ------------------------------------------------------------------------
       // Only record vertices (not transport) of gammas
       auto particle = track -> GetParticleDefinition();
@@ -458,6 +483,11 @@ int main(int argc, char** argv) {
     auto pst_KE = pst_pt -> GetKineticEnergy()      / keV;
     auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
 
+    // Bookkeeping for gamma energies that might fall below messenger.E_cut
+    if (r < LXe_r) {
+      lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+    }
+
     // Process and volume ids
     auto  volume_id =  volume_names.id( volume_name);
     auto process_id = process_names.id(process_name);
@@ -473,8 +503,13 @@ int main(int argc, char** argv) {
                                   header_last_printed, track_1_printed_this_event);
   };
 
-  // Event action that writes the primary vertex of the event to HDF5
-  n4::event_action::action_t write_primary_vertex = [&](auto event) {
+  // BeginOfEvent action:
+  // 1. Resets lowest gamma energy bookkeeping
+  // 2. Writes the primary vertex of the event to HDF5
+  n4::event_action::action_t begin_event = [&](auto event) {
+    // Reset gamma energy bookkeeping
+    lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
+    // Write primary vertex
     using std::setw;
     auto event_id = current_event();
     auto vertex = event -> GetPrimaryVertex();
@@ -495,20 +530,49 @@ int main(int argc, char** argv) {
          << "  --------------------------------" << endl;
   };
 
-  n4::run_action::action_t write_string_tables = [&](auto) {
+  n4::run_action::action_t   end_run = [&](auto) {
     writer -> write_strings("process_names", process_names.items_ordered_by_id());
     writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
   };
 
-  n4::run_action::action_t start_counting_events = [&](auto run) {
+  n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
+    LXe_r = find_LXe_inner_r();
   };
 
-  // ----- Eliminate secondaries (in stacking action)  -------------------------------------
-  n4::stacking_action::classify_t kill_secondaries = [](auto track) {
-    auto kill = track -> GetParentID() > 0;
-    return kill > 0 ? G4ClassificationOfNewTrack::fKill : G4ClassificationOfNewTrack::fUrgent;
+  // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
+  unsigned stage; // 1: gammas; 2: secondaries
+
+  n4::stacking_action::classify_t kill_or_wait_secondaries = [&stage, &messenger](auto track) {
+    const auto NOW  = G4ClassificationOfNewTrack::fUrgent;
+    const auto KILL = G4ClassificationOfNewTrack::fKill;
+    const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
+
+    if (stage == 1) { // primary gammas only, delay secondaries
+      bool is_primary         = track -> GetParentID() == 0;
+      bool ignore_secondaries = messenger.magic_level > 0;
+      if (is_primary)         { return NOW;  }
+      if (ignore_secondaries) { return KILL; } else { return WAIT; }
+
+    } else if (stage == 2) { // secondaries
+      return                           NOW;
+
+    } else {
+      throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
+    }
+  };
+
+  n4::stacking_action::voidvoid_t reset_stage_no = [&stage] { stage = 1; /*std::cout << "RESET TO STAGE 1\n";*/ };
+
+  n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
+    stage++;
+    if (stage == 2) {
+      bool ignore_secondaries = messenger.magic_level                > 0              ||
+                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut;
+      if (ignore_secondaries) { stack_manager -> clear(); }
+      else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
+    }
   };
 
   // ===== Mandatory G4 initializations ===================================================
@@ -524,13 +588,13 @@ int main(int argc, char** argv) {
   { auto verbosity = 0;     n4::use_our_optical_physics(run_manager.get(), verbosity); }
   // ----- User actions (only generator is mandatory) --------------------------------------
   auto actions = (new n4::actions{generator_messenger.generator()})
-    -> set ((new n4::event_action) -> begin(write_primary_vertex))
-    -> set  (new n4::stepping_action{write_vertex})
-    -> set ((new n4::run_action) -> begin(start_counting_events)
-                                 -> end  (write_string_tables));
-  if (messenger.detector == "magic") {
-    actions -> set ((new n4::stacking_action) -> classify(kill_secondaries));
-  }
+    -> set ((new n4::run_action)      -> begin(start_run)
+                                      -> end  (  end_run))
+    -> set ((new n4::event_action)    -> begin(begin_event))
+    -> set ((new n4::stacking_action) -> classify  (   kill_or_wait_secondaries)
+                                      -> next_stage(forget_or_track_secondaries)
+                                      -> next_event(reset_stage_no))
+    -> set  (new n4::stepping_action{stepping_action});
 
   run_manager -> SetUserInitialization(actions);
   // ----- Construct attenuation map if requested ------------------------------------------
