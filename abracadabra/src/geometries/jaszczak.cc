@@ -48,6 +48,10 @@ G4PVPlacement* jaszczak_phantom::geometry() const {
   auto body     = volume<G4Tubs>("Body"    , water, 0.0, radius_body, height_body/2, 0.0, twopi);
   auto envelope = volume<G4Box> ("Envelope", air , env_half_width, env_half_width, env_half_length);
 
+  // TODO The rods and spheres are made of solid pmma, in reality they should be
+  // pmma shells containing water. It probably doesn't matter enough to bother
+  // with for now.
+
   // Rods
   for (const auto [n, r] : enumerate(radii_rods)) { rod_sector(n, r, body, pmma); }
 

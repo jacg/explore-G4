@@ -35,7 +35,7 @@ pkgs.llvmPackages_13.stdenv.mkDerivation {
     pkgs.highfive
     pkgs.hdfview
     pkgs.just
-    # For big-endian writing of attenuation image in raw format
+    # For big-endian writing of density image in raw format
     pkgs.poco
     pkgs.pcre # Needed by Poco
     # For graphics hardware matching on non-NixOS

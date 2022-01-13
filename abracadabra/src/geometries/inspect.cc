@@ -37,7 +37,7 @@ G4VPhysicalVolume const* WGI::volume_at(const G4ThreeVector& point) const {
   return touchable -> GetVolume();
 }
 
-void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_voxels, std::string filename) {
+void WGI::density_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_voxels, std::string filename) {
   auto [DX, DY, DZ] = fov_full_size;
   auto [nx, ny, nz] = n_voxels;
   auto dx = DX/nx;
@@ -45,9 +45,9 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
   auto dz = DZ/nz;
 
   std::ofstream out{filename, std::ios::out | std::ios::binary};
-  if (!out.good()) { FATAL(("Failed to open attenuation image file: " + filename).c_str()); }
+  if (!out.good()) { FATAL(("Failed to open density image file: " + filename).c_str()); }
   std::cout
-    << "Calculating attenuation map with "
+    << "Calculating density map with "
     << nx << " x " << ny << " x " << nz << " voxels across "
     << DX << " x " << DY << " x " << DZ << " mm" << std::endl;
 
@@ -76,5 +76,5 @@ void WGI::attenuation_map(std::tuple<f,f,f> fov_full_size, std::tuple<u,u,u> n_v
             << ", rate: " << G4BestUnit(pps, "Frequency") << ")\n";
 
   raw_image{n_voxels, fov_full_size, std::move(pixels)}.write(filename);
-  std::cout << "Wrote attenuation map to: " << filename << std::endl;
+  std::cout << "Wrote density map to: " << filename << std::endl;
 }

@@ -9,7 +9,7 @@
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 #include "messengers/abracadabra.hh"
-#include "messengers/attenuation_map.hh"
+#include "messengers/density_map.hh"
 #include "messengers/generator.hh"
 #include "utils/map_set.hh"
 
@@ -597,8 +597,9 @@ int main(int argc, char** argv) {
     -> set  (new n4::stepping_action{stepping_action});
 
   run_manager -> SetUserInitialization(actions);
-  // ----- Construct attenuation map if requested ------------------------------------------
-  attenuation_map_messenger attenuation_map_messenger{run_manager.get()};
+  // ----- Construct density map if requested ------------------------------------------
+  density_map_messenger density_map_messenger{run_manager.get()};
+
   // ----- second phase --------------------------------------------------------------------
   ui -> run();
 

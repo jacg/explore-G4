@@ -17,7 +17,7 @@
 
 # 1: suppress secondaries
 # 2: detect and stop all gammas on entry into LXe
-# 3: Remove everyting except LXe from geometry
+# 3: Use IMAS-like detector with nothing but LXe in its geometry
 
 /abracadabra/magic_level 0
 
