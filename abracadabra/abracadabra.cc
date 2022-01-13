@@ -481,7 +481,9 @@ int main(int argc, char** argv) {
     auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
 
     // Bookkeeping for gamma energies that might fall below messenger.E_cut
-    lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+    if (r < LXe_r) {
+      lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+    }
 
     // Process and volume ids
     auto  volume_id =  volume_names.id( volume_name);
