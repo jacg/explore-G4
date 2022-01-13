@@ -10,3 +10,6 @@ compile_commands.json
 /cmake_install.cmake
 .README.txt
 G4History.macro
+compositejob-template/run[0-9]*.mac
+*.svg
+
