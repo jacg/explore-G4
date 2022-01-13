@@ -430,6 +430,9 @@ int main(int argc, char** argv) {
 
   // If messenger.E_cut is set, save time by not simulating secondaries for
   // events in which a gamma's energy falls below the cut, before entering LXe.
+  // Such events will be rejected later on, on the grounds of not registering
+  // enough energy, so there is no point in wasting time on the very expensive
+  // simulation of secondaries.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
   // Inner radius of the LXe layer
