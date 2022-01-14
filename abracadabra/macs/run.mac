@@ -14,4 +14,4 @@
 
 /abracadabra/verbosity 0
 
-/run/beamOn 70000
+/run/beamOn 1000000
