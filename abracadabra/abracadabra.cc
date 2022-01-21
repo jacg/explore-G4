@@ -501,6 +501,9 @@ int main(int argc, char** argv) {
     // Bookkeeping for gamma energies that might fall below messenger.E_cut
     if (r < LXe_r) {
       lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+      if (messenger.verbosity > 3) {
+        std::cout << " gamma low: " << lowest_pre_LXe_gamma_energy_in_event << std::endl;
+      }
     } else if (r < LXe_R) {
       if (id == 1) { detected_gamma_1 = true; }
       if (id == 2) { detected_gamma_2 = true; }
