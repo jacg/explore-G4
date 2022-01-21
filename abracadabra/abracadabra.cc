@@ -449,11 +449,13 @@ int main(int argc, char** argv) {
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
     G4String volume_name;
 
+    const auto GAMMA = G4Gamma::Definition();
+
     if (messenger.magic_level < 3) {
       // ----- Real detector ------------------------------------------------------------------------
       // Only record vertices (not transport) of gammas
       auto particle = track -> GetParticleDefinition();
-      if (particle != G4Gamma::Definition() || process_name == "---->") return;
+      if (particle != GAMMA || process_name == "---->") return;
       volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
     } else {
       // ----- Magic LXe detector --------------------------------------------------------------------
