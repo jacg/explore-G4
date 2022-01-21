@@ -573,14 +573,23 @@ int main(int argc, char** argv) {
     const auto KILL = G4ClassificationOfNewTrack::fKill;
     const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
 
+    const bool verbose = messenger.verbosity > 4;
+    auto  vNOW = [=] { if (verbose) {std::cout <<  "NOW\n";} return  NOW; };
+    auto vKILL = [=] { if (verbose) {std::cout << "KILL\n";} return KILL; };
+    auto vWAIT = [=] { if (verbose) {std::cout << "WAIT\n";} return WAIT; };
+
     if (stage == 1) { // primary gammas only, delay secondaries
+      if (verbose) {
+        std::cout << track -> GetParentID() << " -> " << track -> GetTrackID() << ' '
+          << track -> GetDefinition() -> GetParticleName() << "     ";
+      }
       bool is_primary         = track -> GetParentID() == 0;
       bool ignore_secondaries = messenger.magic_level > 0;
-      if (is_primary)         { return NOW;  }
-      if (ignore_secondaries) { return KILL; } else { return WAIT; }
+      if (is_primary)         { return vNOW();  }
+      if (ignore_secondaries) { return vKILL(); } else { return vWAIT(); }
 
     } else if (stage == 2) { // secondaries
-      return                           NOW;
+      return                            NOW;
 
     } else {
       throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
