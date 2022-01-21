@@ -592,6 +592,11 @@ int main(int argc, char** argv) {
       bool ignore_secondaries = messenger.magic_level                > 0               ||
                                 lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut ||
                                 ! detected_gamma_1 || ! detected_gamma_2;
+      if (messenger.verbosity > 2) {
+        std::cout << "\nignore secondaries: " << (ignore_secondaries ? "YES" : "NO ") << "   "
+                  << lowest_pre_LXe_gamma_energy_in_event << " <? " << messenger.E_cut
+                  << "   gammas detected: " << std::boolalpha << detected_gamma_1 << ' ' <<  detected_gamma_2
+                  << "\n\n";}
       if (ignore_secondaries) { stack_manager -> clear(); }
       else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
     }
