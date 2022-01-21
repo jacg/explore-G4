@@ -507,8 +507,9 @@ int main(int argc, char** argv) {
   // 1. Resets lowest gamma energy bookkeeping
   // 2. Writes the primary vertex of the event to HDF5
   n4::event_action::action_t begin_event = [&](auto event) {
-    // Reset gamma energy bookkeeping
+    // Reset event bookkeeping
     lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
+    trigger_time                         = std::numeric_limits<G4double>::infinity();
     // Write primary vertex
     using std::setw;
     auto event_id = current_event();
