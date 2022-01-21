@@ -444,6 +444,10 @@ int main(int argc, char** argv) {
   // simulation of secondaries.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
+  // If either gamma fails to interact in LXe, the event is also boring, and we
+  // can skip the secondaries.
+  bool detected_gamma_1, detected_gamma_2;
+
   // Inner and outer radii of the LXe layer
   G4double LXe_r, LXe_R; // Initialized in start_run
 
@@ -497,6 +501,9 @@ int main(int argc, char** argv) {
     // Bookkeeping for gamma energies that might fall below messenger.E_cut
     if (r < LXe_r) {
       lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+    } else if (r < LXe_R) {
+      if (id == 1) { detected_gamma_1 = true; }
+      if (id == 2) { detected_gamma_2 = true; }
     }
 
     // Process and volume ids
@@ -521,6 +528,8 @@ int main(int argc, char** argv) {
     // Reset event bookkeeping
     lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
     trigger_time                         = std::numeric_limits<G4double>::infinity();
+    detected_gamma_1 = false;
+    detected_gamma_2 = false;
     // Write primary vertex
     using std::setw;
     auto event_id = current_event();
@@ -580,8 +589,9 @@ int main(int argc, char** argv) {
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
     if (stage == 2) {
-      bool ignore_secondaries = messenger.magic_level                > 0              ||
-                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut;
+      bool ignore_secondaries = messenger.magic_level                > 0               ||
+                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut ||
+                                ! detected_gamma_1 || ! detected_gamma_2;
       if (ignore_secondaries) { stack_manager -> clear(); }
       else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
     }
