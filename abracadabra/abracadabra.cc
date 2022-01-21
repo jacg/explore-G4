@@ -188,13 +188,22 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
-// Find the inner radius of the LXe layer (will crash for any of the detector
-// geometries that do not contain a G4Tubs volume called "Steel_1")
-auto find_LXe_inner_r() {
-  auto LXe = n4::find_logical("LXe");
-  auto solid = LXe -> GetSolid();
-  auto tubs = dynamic_cast<G4Tubs*>(solid);
-  return tubs -> GetOuterRadius();
+// Find the inner and outer radii of the LXe layer (will crash for any of the
+// detector geometries that do not contain a G4Tubs volumes called "LXe" and
+// "Steel_1")
+std::tuple<G4double, G4double> find_LXe_inner_and_outer_radii() {
+  auto   LXe = n4::find_logical("LXe");
+  auto steel = n4::find_logical("Steel_1");
+  auto solid_x =   LXe -> GetSolid();
+  auto solid_s = steel -> GetSolid();
+  auto tubs_x = dynamic_cast<G4Tubs*>(solid_x);
+  auto tubs_s = dynamic_cast<G4Tubs*>(solid_s);
+  auto LXe_R =  tubs_x -> GetOuterRadius();
+  auto LXe_r =  tubs_s -> GetOuterRadius();
+  std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
+  std::cout << "LXe radii: " << LXe_r << ' ' << LXe_R;
+  std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
+  return {LXe_r, LXe_R};
 };
 
 // ============================== MAIN =======================================================
@@ -435,8 +444,8 @@ int main(int argc, char** argv) {
   // simulation of secondaries.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
-  // Inner radius of the LXe layer
-  G4double LXe_r; // Initialized in start_run
+  // Inner and outer radii of the LXe layer
+  G4double LXe_r, LXe_R; // Initialized in start_run
 
   n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
@@ -541,7 +550,7 @@ int main(int argc, char** argv) {
   n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
-    LXe_r = find_LXe_inner_r();
+    std::tie(LXe_r, LXe_R) = find_LXe_inner_and_outer_radii();
   };
 
   // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
