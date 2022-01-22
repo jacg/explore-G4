@@ -505,7 +505,10 @@ int main(int argc, char** argv) {
       if (messenger.verbosity > 3) {
         std::cout << " gamma low: " << lowest_pre_LXe_gamma_energy_in_event << std::endl;
       }
-    } else if (r < LXe_R) {
+    } else if (r < LXe_R              &&
+               // Guaranteed to be inside the LXe layer, but we might have hit a
+               // SiPM protruding into the LXe
+               volume_name == "LXe") {
       if (id == 1) { detected_gamma_1 = true; }
       if (id == 2) { detected_gamma_2 = true; }
     }
