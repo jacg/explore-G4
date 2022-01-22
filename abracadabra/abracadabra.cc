@@ -35,6 +35,7 @@
 #include <functional>
 #include <chrono>
 #include <csignal>
+#include <iomanip>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -188,13 +189,22 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
-// Find the inner radius of the LXe layer (will crash for any of the detector
-// geometries that do not contain a G4Tubs volume called "Steel_1")
-auto find_LXe_inner_r() {
-  auto LXe = n4::find_logical("LXe");
-  auto solid = LXe -> GetSolid();
-  auto tubs = dynamic_cast<G4Tubs*>(solid);
-  return tubs -> GetOuterRadius();
+// Find the inner and outer radii of the LXe layer (will crash for any of the
+// detector geometries that do not contain a G4Tubs volumes called "LXe" and
+// "Steel_1")
+std::tuple<G4double, G4double> find_LXe_inner_and_outer_radii() {
+  auto   LXe = n4::find_logical("LXe");
+  auto steel = n4::find_logical("Steel_1");
+  auto solid_x =   LXe -> GetSolid();
+  auto solid_s = steel -> GetSolid();
+  auto tubs_x = dynamic_cast<G4Tubs*>(solid_x);
+  auto tubs_s = dynamic_cast<G4Tubs*>(solid_s);
+  auto LXe_R =  tubs_x -> GetOuterRadius();
+  auto LXe_r =  tubs_s -> GetOuterRadius();
+  std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
+  std::cout << "LXe radii: " << LXe_r << ' ' << LXe_R;
+  std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
+  return {LXe_r, LXe_R};
 };
 
 // ============================== MAIN =======================================================
@@ -435,8 +445,12 @@ int main(int argc, char** argv) {
   // simulation of secondaries.
   G4double lowest_pre_LXe_gamma_energy_in_event;
 
-  // Inner radius of the LXe layer
-  G4double LXe_r; // Initialized in start_run
+  // If either gamma fails to interact in LXe, the event is also boring, and we
+  // can skip the secondaries.
+  bool detected_gamma_1, detected_gamma_2;
+
+  // Inner and outer radii of the LXe layer
+  G4double LXe_r, LXe_R; // Initialized in start_run
 
   n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
@@ -449,11 +463,13 @@ int main(int argc, char** argv) {
     auto process_name    = transp(pst_pt -> GetProcessDefinedStep() -> GetProcessName());
     G4String volume_name;
 
+    const auto GAMMA = G4Gamma::Definition();
+
     if (messenger.magic_level < 3) {
       // ----- Real detector ------------------------------------------------------------------------
       // Only record vertices (not transport) of gammas
       auto particle = track -> GetParticleDefinition();
-      if (particle != G4Gamma::Definition() || process_name == "---->") return;
+      if (particle != GAMMA || process_name == "---->") return;
       volume_name = pst_pt -> GetPhysicalVolume() -> GetName();
     } else {
       // ----- Magic LXe detector --------------------------------------------------------------------
@@ -486,6 +502,12 @@ int main(int argc, char** argv) {
     // Bookkeeping for gamma energies that might fall below messenger.E_cut
     if (r < LXe_r) {
       lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
+      if (messenger.verbosity > 3) {
+        std::cout << " gamma low: " << lowest_pre_LXe_gamma_energy_in_event << std::endl;
+      }
+    } else if (volume_name == "LXe") {
+      if (id == 1) { detected_gamma_1 = true; }
+      if (id == 2) { detected_gamma_2 = true; }
     }
 
     // Process and volume ids
@@ -507,8 +529,11 @@ int main(int argc, char** argv) {
   // 1. Resets lowest gamma energy bookkeeping
   // 2. Writes the primary vertex of the event to HDF5
   n4::event_action::action_t begin_event = [&](auto event) {
-    // Reset gamma energy bookkeeping
-    lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
+    // Reset event bookkeeping
+    lowest_pre_LXe_gamma_energy_in_event = 511.0;
+    trigger_time                         = std::numeric_limits<G4double>::infinity();
+    detected_gamma_1 = false;
+    detected_gamma_2 = false;
     // Write primary vertex
     using std::setw;
     auto event_id = current_event();
@@ -530,15 +555,19 @@ int main(int argc, char** argv) {
          << "  --------------------------------" << endl;
   };
 
+  size_t secondaries_no = 0, secondaries_yes = 0;
   n4::run_action::action_t   end_run = [&](auto) {
     writer -> write_strings("process_names", process_names.items_ordered_by_id());
     writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
+    std::cout << "Scondaries simulated " << secondaries_yes
+              << " times, ignored " << secondaries_no << " times (" << std::setprecision(0)
+              << 100.0 * secondaries_yes / (secondaries_yes + secondaries_no)<< " %)\n";
   };
 
   n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
-    LXe_r = find_LXe_inner_r();
+    std::tie(LXe_r, LXe_R) = find_LXe_inner_and_outer_radii();
   };
 
   // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
@@ -549,14 +578,23 @@ int main(int argc, char** argv) {
     const auto KILL = G4ClassificationOfNewTrack::fKill;
     const auto WAIT = G4ClassificationOfNewTrack::fWaiting;
 
+    const bool verbose = messenger.verbosity > 4;
+    auto  vNOW = [=] { if (verbose) {std::cout <<  "NOW\n";} return  NOW; };
+    auto vKILL = [=] { if (verbose) {std::cout << "KILL\n";} return KILL; };
+    auto vWAIT = [=] { if (verbose) {std::cout << "WAIT\n";} return WAIT; };
+
     if (stage == 1) { // primary gammas only, delay secondaries
+      if (verbose) {
+        std::cout << track -> GetParentID() << " -> " << track -> GetTrackID() << ' '
+          << track -> GetDefinition() -> GetParticleName() << "     ";
+      }
       bool is_primary         = track -> GetParentID() == 0;
       bool ignore_secondaries = messenger.magic_level > 0;
-      if (is_primary)         { return NOW;  }
-      if (ignore_secondaries) { return KILL; } else { return WAIT; }
+      if (is_primary)         { return vNOW();  }
+      if (ignore_secondaries) { return vKILL(); } else { return vWAIT(); }
 
     } else if (stage == 2) { // secondaries
-      return                           NOW;
+      return                            NOW;
 
     } else {
       throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
@@ -568,10 +606,16 @@ int main(int argc, char** argv) {
   n4::stacking_action::stage_t forget_or_track_secondaries = [&] (G4StackManager * const stack_manager) {
     stage++;
     if (stage == 2) {
-      bool ignore_secondaries = messenger.magic_level                > 0              ||
-                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut;
-      if (ignore_secondaries) { stack_manager -> clear(); }
-      else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
+      bool ignore_secondaries = messenger.magic_level                > 0               ||
+                                lowest_pre_LXe_gamma_energy_in_event < messenger.E_cut ||
+                                ! detected_gamma_1 || ! detected_gamma_2;
+      if (messenger.verbosity > 2) {
+        std::cout << "\nignore secondaries: " << (ignore_secondaries ? "YES" : "NO ") << "   "
+                  << lowest_pre_LXe_gamma_energy_in_event << " <? " << messenger.E_cut
+                  << "   gammas detected: " << std::boolalpha << detected_gamma_1 << ' ' <<  detected_gamma_2
+                  << "\n\n";}
+      if (ignore_secondaries) { stack_manager -> clear();                                   secondaries_no  += 1; }
+      else { /* do nothing, and everything from waiting is automatically moved to urgent */ secondaries_yes += 1; }
     }
   };
 
