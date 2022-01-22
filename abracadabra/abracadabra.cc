@@ -35,6 +35,7 @@
 #include <functional>
 #include <chrono>
 #include <csignal>
+#include <iomanip>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -554,9 +555,13 @@ int main(int argc, char** argv) {
          << "  --------------------------------" << endl;
   };
 
+  size_t secondaries_no = 0, secondaries_yes = 0;
   n4::run_action::action_t   end_run = [&](auto) {
     writer -> write_strings("process_names", process_names.items_ordered_by_id());
     writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
+    std::cout << "Scondaries simulated " << secondaries_yes
+              << " times, ignored " << secondaries_no << " times (" << std::setprecision(0)
+              << 100.0 * secondaries_yes / (secondaries_yes + secondaries_no)<< " %)\n";
   };
 
   n4::run_action::action_t start_run = [&](auto run) {
@@ -609,8 +614,8 @@ int main(int argc, char** argv) {
                   << lowest_pre_LXe_gamma_energy_in_event << " <? " << messenger.E_cut
                   << "   gammas detected: " << std::boolalpha << detected_gamma_1 << ' ' <<  detected_gamma_2
                   << "\n\n";}
-      if (ignore_secondaries) { stack_manager -> clear(); }
-      else                    { /* do nothing, and everything from waiting is automatically moved to urgent */ }
+      if (ignore_secondaries) { stack_manager -> clear();                                   secondaries_no  += 1; }
+      else { /* do nothing, and everything from waiting is automatically moved to urgent */ secondaries_yes += 1; }
     }
   };
 
