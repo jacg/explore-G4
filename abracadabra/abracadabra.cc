@@ -530,7 +530,7 @@ int main(int argc, char** argv) {
   // 2. Writes the primary vertex of the event to HDF5
   n4::event_action::action_t begin_event = [&](auto event) {
     // Reset event bookkeeping
-    lowest_pre_LXe_gamma_energy_in_event = std::numeric_limits<G4double>::infinity();
+    lowest_pre_LXe_gamma_energy_in_event = 511.0;
     trigger_time                         = std::numeric_limits<G4double>::infinity();
     detected_gamma_1 = false;
     detected_gamma_2 = false;
