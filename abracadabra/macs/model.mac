@@ -4,7 +4,7 @@
 
 # Select detector geometry, generators and phantom here
 
-/abracadabra/geometry both
+/abracadabra/geometry phantom
 /abracadabra/phantom jaszczak
 /abracadabra/detector imas
 
