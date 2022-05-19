@@ -3,8 +3,13 @@
 # 1. Set /abracadabra/geometry phantom in model.mac: including the detector
 #    geometry slows the scan down by many orders of magnitude. TODO: can this be fixed?
 
-# 2. You will get a segfault if /density_map/full_widths exceed those of the phantom.
+# 2. You will get a segfault if /density_map/full_widths exceed those of the
+#    phantom envelope.
 #    TODO: make a useful error message appear in this case
+
+# 3. To generate the map:
+#
+#        just run model density-map-run
 
 /density_map/filename     density-map.raw
 
