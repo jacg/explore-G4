@@ -3,16 +3,21 @@
 # 1. Set /abracadabra/geometry phantom in model.mac: including the detector
 #    geometry slows the scan down by many orders of magnitude. TODO: can this be fixed?
 
-# 2. You will get a segfault if /density_map/full_widths exceed those of the phantom.
+# 2. You will get a segfault if /density_map/full_widths exceed those of the
+#    phantom envelope.
 #    TODO: make a useful error message appear in this case
+
+# 3. To generate the map:
+#
+#        just run model density-map-run
 
 /density_map/filename     density-map.raw
 
 # Segfault if map width exceeds phantom envelope dimensions
-/density_map/full_widths  300 300 280  # Good for NEMA 7
-/density_map/full_widths  235 235 215  # Good for Jaszczak
+/density_map/full_widths  300   300   280      # for NEMA 7
+/density_map/full_widths  234.4 234.4 215.648  # for Jaszczak
 # Latest overrides previous
 
-/density_map/n_voxels     235 235 215
+/density_map/n_voxels     100 100 92
 
 /density_map/generate  # Remember to set /abracadabra/geometry phantom in model.mac
