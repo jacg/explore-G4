@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
 
     const auto GAMMA = G4Gamma::Definition();
 
-    if (messenger.magic_level < 3) {
+    if (messenger.magic_level < 2) {
       // ----- Real detector ------------------------------------------------------------------------
       // Only record vertices (not transport) of gammas
       auto particle = track -> GetParticleDefinition();
