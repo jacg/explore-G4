@@ -14,10 +14,11 @@
 /density_map/filename     density-map.raw
 
 # Segfault if map width exceeds phantom envelope dimensions
-/density_map/full_widths  300   300   280      # for NEMA 7
-/density_map/full_widths  234.4 234.4 215.648  # for Jaszczak
+/density_map/full_widths  316.44 246.12 246.12    # for NEMA 7
+/density_map/full_widths  234.4  234.4  215.648   # for Jaszczak
 # Latest overrides previous
 
-/density_map/n_voxels     100 100 92
+/density_map/n_voxels     135 105 105  # for NEMA 7
+/density_map/n_voxels     100 100 92   # for Jaszczak
 
 /density_map/generate  # Remember to set /abracadabra/geometry phantom in model.mac
