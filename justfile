@@ -1,3 +1,5 @@
+# -*-Makefile-*-
+
 # Run all tests in hand-written loop: more informative and colourful than ctest
 test-all *FLAGS:
 	just test '' {{FLAGS}}
