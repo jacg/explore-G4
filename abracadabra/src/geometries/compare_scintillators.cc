@@ -18,10 +18,7 @@ G4PVPlacement* compare_scintillators(
     G4bool   use_lxe,
     G4double length,
     G4double scintillator_inner_radius,
-    G4double dr_scintillator,
-    G4double dr_steel_0,
-    G4double dr_vacuum,
-    G4double dr_steel_1
+    G4double dr_scintillator
 ) {
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
@@ -32,6 +29,13 @@ G4PVPlacement* compare_scintillators(
   auto sci_name = (use_lxe)
       ? "LXE"
       : "LYSO";
+
+  G4double dr_steel_0 = 1.5 * mm;
+  G4double dr_vacuum = 25.0 * mm;
+  G4double dr_steel_1 = 1.5 * mm;
+  if (sci_name != "LXe") {
+    dr_steel_0 = dr_vacuum = dr_steel_1 = 0;
+  }
 
   G4double cavity_radius = scintillator_inner_radius - (dr_steel_0 + dr_vacuum + dr_steel_1);
 
