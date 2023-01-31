@@ -1,7 +1,6 @@
-#include <materials/LXe.hh>
-
 #include <nain4.hh>
 #include <utils/interpolate.hh>
+#include <materials/LXe.hh>
 
 #include <G4SystemOfUnits.hh>
 
