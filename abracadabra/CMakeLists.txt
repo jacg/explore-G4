@@ -20,13 +20,15 @@ add_subdirectory(nain4)
 
 # The files that make up the headers/source/tests of the project
 set(ABRACADABRA_HEADERS
-  src/geometries/imas.hh
-  src/geometries/jaszczak.hh
   src/geometries/generate_primaries.hh
-  src/geometries/nema.hh
-  src/geometries/sipm.hh
-  src/geometries/samples.hh
+  src/geometries/imas.hh
   src/geometries/inspect.hh
+  src/geometries/jaszczak.hh
+  src/geometries/nema.hh
+  src/geometries/samples.hh
+  src/geometries/sipm.hh
+  src/io/hdf5.hh
+  src/io/raw_image.hh
   src/materials/LXe.hh
   src/messengers/abracadabra.hh
   src/messengers/density_map.hh
@@ -35,39 +37,37 @@ set(ABRACADABRA_HEADERS
   src/utils/enumerate.hh
   src/utils/interpolate.hh
   src/utils/map_set.hh
-  src/io/hdf5.hh
-  src/io/raw_image.hh
 )
 
 set(ABRACADABRA_SOURCES
-  src/geometries/imas.cc
-  src/geometries/jaszczak.cc
   src/geometries/generate_primaries.cc
-  src/geometries/nema.cc
-  src/geometries/sipm.cc
-  src/geometries/samples.cc
+  src/geometries/imas.cc
   src/geometries/inspect.cc
+  src/geometries/jaszczak.cc
+  src/geometries/nema.cc
+  src/geometries/samples.cc
+  src/geometries/sipm.cc
+  src/io/hdf5.cc
+  src/io/raw_image.cc
+  src/materials/LXe.cc
   src/messengers/abracadabra.cc
   src/messengers/density_map.cc
   src/messengers/generator.cc
-  src/materials/LXe.cc
   src/random/random.cc
-  src/io/hdf5.cc
-  src/io/raw_image.cc
 )
 
 set(ABRACADABRA_TESTS
-  test/test-nain4.cc
   src/geometries/imas-test.cc
+  src/geometries/inspect-test.cc
   src/geometries/nema-test.cc
   src/geometries/sipm_hamamatsu_blue-test.cc
-  src/geometries/inspect-test.cc
   src/io/raw_image-test.cc
-  test/trivial-full-app-test.cc
   src/materials/LXe-test.cc
-  test/nema-phantom-generator-test.cc
   src/random/random-test.cc
   src/utils/enumerate-test.cc
+  test/nema-phantom-generator-test.cc
+  test/test-nain4.cc
+  test/trivial-full-app-test.cc
 )
 
 find_package(HighFive REQUIRED)
