@@ -32,6 +32,26 @@
 #include <tuple>
 #include <optional>
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Note 1
+//
+// + G4 forces you to use its G4Exception function, whose return type is void.
+//
+// + C++'s ternary operator treats throw expressions as a special case.
+//
+// + Hiding the throw expression inside G4Exception, disables this special
+//   treatment, which results in a type mismatch between the void and whatever
+//   values are present in the rest of the ternary operator
+//
+// + So we go through the following convolutions to satisfy the type system:
+//
+//   1. use throw at the top-level
+//   2. use G4Exception in the argument to throw
+//   3. but throw does not accept void
+//   4. so use comma operator to give acceptable overall expression type (c-string)
+//   5. but the actual value of the string doesn't matter, just its type.
+
 #define FATAL(description) G4Exception((__FILE__ + (":" + std::to_string(__LINE__))).c_str(), "666", FatalException, description)
 
 namespace nain4 {

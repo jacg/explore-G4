@@ -373,7 +373,7 @@ int main(int argc, char** argv) {
     p == "nema_7"   ? phantom = nema_7()                                            :
     p == "sanity"   ? phantom = sanity()                                            :
     p == "jaszczak" ? phantom = jaszczak()                                          :
-    (throw (FATAL(("Unrecoginzed phantom: " + p).c_str()), "see note 1 at the end"));
+    (throw (FATAL(("Unrecoginzed phantom: " + p).c_str()), "see note 1 in nain4.hh"));
   };
 
   // ----- Available detector geometries -------------------------------------------------
@@ -401,7 +401,7 @@ int main(int argc, char** argv) {
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
       g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
-      (throw (FATAL(("Unrecoginzed geometry: " + g).c_str()), "see note 1 at the end"));
+      (throw (FATAL(("Unrecoginzed geometry: " + g).c_str()), "see note 1 in nain4.hh"));
   };
 
   // ----- A choice of generators ---------------------------------------------------------
@@ -598,7 +598,7 @@ int main(int argc, char** argv) {
       return                            NOW;
 
     } else {
-      throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 at the end");
+      throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 in nain4.hh");
     }
   };
 
@@ -680,22 +680,3 @@ void UI_interactive::spin() {
                            {   0,   0, 500}});
   }
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Note 1
-//
-// + G4 forces you to use its G4Exception function, whose return type is void.
-//
-// + C++'s ternary operator treats throw expressions as a special case.
-//
-// + Hiding the throw expression inside G4Exception, disables this special
-//   treatment, which results in a type mismatch between the void and whatever
-//   values are present in the rest of the ternary operator
-//
-// + So we go through the following convolutions to satisfy the type system:
-//
-//   1. use throw at the top-level
-//   2. use G4Exception in the argument to throw
-//   3. but throw does not accept void
-//   4. so use comma operator to give acceptable overall expression type (c-string)
-//   5. but the actual value of the string doesn't matter, just its type.
