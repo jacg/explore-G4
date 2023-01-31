@@ -12,5 +12,6 @@ G4Material*    LXe_with_properties();
 G4Material* G4_LXe_with_properties();
 G4Material*    air_with_properties();
 G4Material* quartz_with_properties();
+G4Material*     LYSO_no_properties();
 
 #endif // materials_LXe_hh

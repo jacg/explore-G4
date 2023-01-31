@@ -22,6 +22,17 @@ G4Material* quartz_with_properties() {
   return quartz;
 }
 
+G4Material* LYSO_no_properties() {
+  return nain4::material_from_elements_F(
+    "LYSO",
+    7.36 * g / cm3, // Density varies from 4.4 - 7.4 depending on Lu/Y ratio
+    kStateSolid,
+    {{"Lu", 0.714467891},
+     {"Y" , 0.04033805},
+     {"Si", 0.063714272},
+     {"O" , 0.181479788}});
+}
+
 G4Material* air_with_properties() {
   auto air = n4::material("G4_air");
   auto air_properties = n4::material_properties()
