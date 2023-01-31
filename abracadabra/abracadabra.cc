@@ -15,6 +15,7 @@
 #include "utils/map_set.hh"
 
 #include <G4ClassificationOfNewTrack.hh>
+#include <G4LogicalVolume.hh>
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4StackManager.hh>
@@ -191,22 +192,31 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
-// Find the inner and outer radii of the LXe layer (will crash for any of the
-// detector geometries that do not contain a G4Tubs volumes called "LXe" and
-// "Steel_1")
-std::tuple<G4double, G4double> find_LXe_inner_and_outer_radii() {
-  auto   LXe = n4::find_logical("LXe");
-  auto steel = n4::find_logical("Steel_1");
-  auto solid_x =   LXe -> GetSolid();
-  auto solid_s = steel -> GetSolid();
+// Find scintillator layer, by looking volumes with names "LXe" or "LYSO"
+G4LogicalVolume* find_scintillator_layer() {
+  for (auto sci_name: {"LXe", "LYSO"}) {
+    auto scint = n4::find_logical(sci_name);
+    if (scint) { return scint; }
+  }
+  FATAL("Couldn't find scintillator layer");
+}
+
+// Find the inner and outer radii of the scintillator layer. Assumes that the
+// scintillator layer's first daughter defines its inner radius. Will crash if
+// no daughter present.
+std::tuple<G4double, G4double> find_scintillator_inner_and_outer_radii() {
+  auto scint = find_scintillator_layer();
+  auto inner = scint -> GetDaughter(0) -> GetLogicalVolume();
+  auto solid_x = scint -> GetSolid();
+  auto solid_s = inner -> GetSolid();
   auto tubs_x = dynamic_cast<G4Tubs*>(solid_x);
   auto tubs_s = dynamic_cast<G4Tubs*>(solid_s);
-  auto LXe_R =  tubs_x -> GetOuterRadius();
-  auto LXe_r =  tubs_s -> GetOuterRadius();
+  auto scint_R =  tubs_x -> GetOuterRadius();
+  auto scint_r =  tubs_s -> GetOuterRadius();
   std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
-  std::cout << "LXe radii: " << LXe_r << ' ' << LXe_R;
+  std::cout << "scintillator radii: " << scint_r << ' ' << scint_R;
   std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
-  return {LXe_r, LXe_R};
+  return {scint_r, scint_R};
 };
 
 // ============================== MAIN =======================================================
@@ -453,8 +463,8 @@ int main(int argc, char** argv) {
   // can skip the secondaries.
   bool detected_gamma_1, detected_gamma_2;
 
-  // Inner and outer radii of the LXe layer
-  G4double LXe_r, LXe_R; // Initialized in start_run
+  // Inner and outer radii of the scintillator layer
+  G4double scint_r, scint_R; // Initialized in start_run
 
   n4::stepping_action::action_t stepping_action = [&](auto step) {
     static size_t header_last_printed = 666;
@@ -504,7 +514,7 @@ int main(int argc, char** argv) {
     auto dep_E  = step   -> GetTotalEnergyDeposit() / keV;
 
     // Bookkeeping for gamma energies that might fall below messenger.E_cut
-    if (r < LXe_r) {
+    if (r < scint_r) {
       lowest_pre_LXe_gamma_energy_in_event = std::min(lowest_pre_LXe_gamma_energy_in_event, pst_KE);
       if (messenger.verbosity > 3) {
         std::cout << " gamma low: " << lowest_pre_LXe_gamma_energy_in_event << std::endl;
@@ -571,7 +581,7 @@ int main(int argc, char** argv) {
   n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
-    std::tie(LXe_r, LXe_R) = find_LXe_inner_and_outer_radii();
+    std::tie(scint_r, scint_R) = find_scintillator_inner_and_outer_radii();
   };
 
   // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
