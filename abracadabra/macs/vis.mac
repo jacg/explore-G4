@@ -120,6 +120,9 @@
 /vis/geometry/set/colour     LXe          0  0  0  1 .1
 /vis/geometry/set/visibility LXe          0 true
 
+/vis/geometry/set/colour     LYSO         0  1  0  1 .3
+/vis/geometry/set/visibility LYSO         0 true
+
 /vis/geometry/set/colour     Quartz       0  1  0  0 .1
 /vis/geometry/set/visibility Quartz       0 true
 
