@@ -26,7 +26,7 @@ G4PVPlacement* compare_scintillators(
   auto scintillator =
     (sci_name == "LXe" ) ? LXe_with_properties() :
     (sci_name == "LYSO") ?  LYSO_no_properties() :
-    (throw (FATAL(("Unrecoginzed scintillator: " + sci_name).c_str()), "see note 1 in nain4.hh"));
+    (FATAL(("Unrecoginzed scintillator: " + sci_name).c_str()), nullptr);
 
   G4double dr_steel_0 = 1.5 * mm;
   G4double dr_vacuum = 25.0 * mm;

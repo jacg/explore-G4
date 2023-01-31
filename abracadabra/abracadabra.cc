@@ -394,7 +394,7 @@ int main(int argc, char** argv) {
       magic >= 3          ? magic_detector()                                           :
       d == "square"       ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu"    ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
-      (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 in nain4.hh"));
+      (FATAL(("Unrecoginzed detector: " + d).c_str()), nullptr);
   };
 
   // ----- Should the geometry contain phantom only / detector only / both
@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
       g == "detector" ? detector()         :
       g == "phantom"  ? phantom_geometry() :
       g == "both"     ? n4::combine_geometries(phantom_geometry(), detector()) :
-      (throw (FATAL(("Unrecoginzed geometry: " + g).c_str()), "see note 1 in nain4.hh"));
+      (FATAL(("Unrecoginzed geometry: " + g).c_str()), nullptr);
   };
 
   // ----- A choice of generators ---------------------------------------------------------
@@ -601,7 +601,7 @@ int main(int argc, char** argv) {
       return                            NOW;
 
     } else {
-      throw (FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()), "see note 1 in nain4.hh");
+      FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str());
     }
   };
 
