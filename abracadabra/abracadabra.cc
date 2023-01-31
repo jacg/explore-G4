@@ -379,18 +379,18 @@ int main(int argc, char** argv) {
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
-    auto dr_LXe = messenger.xenon_thickness  * mm;
-    auto dr_Qtz = messenger.quartz_thickness * mm;
-    auto length = messenger.cylinder_length  * mm;
-    auto radius = messenger.cylinder_radius  * mm;
+    auto dr_sci = messenger.scintillator_thickness  * mm;
+    auto dr_Qtz = messenger.quartz_thickness        * mm;
+    auto length = messenger.cylinder_length         * mm;
+    auto radius = messenger.cylinder_radius         * mm;
     auto clear  = messenger.steel_is_vacuum;
     auto magic  = messenger.magic_level;
     return
-      d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_LXe, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_LXe, clear)       :
       magic >= 3       ? magic_detector()                                           :
       d == "square"    ? square_array_of_sipms(sd)                                  :
       d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
+      d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_sci, sd) :
+      d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_sci, clear)       :
       (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
   };
 

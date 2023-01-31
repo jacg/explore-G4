@@ -17,10 +17,10 @@ struct abracadabra_messenger {
   G4int    verbosity  = 1;
   G4double y_offset   = 0;
   G4double z_offset   = 0;
-  G4double quartz_thickness =   0; // mm
-  G4double xenon_thickness  =  40; // mm
-  G4double cylinder_length  =  15; // mm
-  G4double cylinder_radius  = 200; // mm
+  G4double quartz_thickness        =   0; // mm
+  G4double scintillator_thickness  =  40; // mm
+  G4double cylinder_length         =  15; // mm
+  G4double cylinder_radius         = 200; // mm
   G4double E_cut = 0; // keV
   bool steel_is_vacuum = false;
   bool vacuum_phantom  = false;
