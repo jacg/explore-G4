@@ -385,7 +385,7 @@ int main(int argc, char** argv) {
     auto length = messenger.cylinder_length         * mm;
     auto radius = messenger.cylinder_radius         * mm;
     auto clear  = messenger.steel_is_vacuum;
-    auto magic  = messenger.magic_level;
+    auto magic  = (d == "scintillator") ? 1 : messenger.magic_level;
     auto scint  = messenger.scintillator;
     return
       d == "scintillator" ? compare_scintillators(scint  , length, radius, dr_sci)     :
