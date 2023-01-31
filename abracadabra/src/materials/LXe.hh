@@ -1,3 +1,6 @@
+#ifndef materials_LXe_hh
+#define materials_LXe_hh
+
 #include <G4Material.hh>
 #include <G4MaterialPropertiesTable.hh>
 
@@ -9,13 +12,6 @@ G4Material*    LXe_with_properties();
 G4Material* G4_LXe_with_properties();
 G4Material*    air_with_properties();
 G4Material* quartz_with_properties();
+G4Material*     LYSO_no_properties();
 
-namespace nexus_LXe {
-
-  G4double Density();
-  G4double RefractiveIndex(G4double energy);
-  G4double Scintillation(G4double energy);
-  void Scintillation(std::vector<G4double>& energy, std::vector<G4double>& intensity);
-  G4MaterialPropertiesTable* OpticalMaterialProperties();
-
-}
+#endif // materials_LXe_hh
