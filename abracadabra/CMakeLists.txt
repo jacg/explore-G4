@@ -20,6 +20,7 @@ add_subdirectory(nain4)
 
 # The files that make up the headers/source/tests of the project
 set(ABRACADABRA_HEADERS
+  src/geometries/compare_scintillators.hh
   src/geometries/generate_primaries.hh
   src/geometries/imas.hh
   src/geometries/inspect.hh
@@ -40,6 +41,7 @@ set(ABRACADABRA_HEADERS
 )
 
 set(ABRACADABRA_SOURCES
+  src/geometries/compare_scintillators.cc
   src/geometries/generate_primaries.cc
   src/geometries/imas.cc
   src/geometries/inspect.cc
