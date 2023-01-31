@@ -11,4 +11,5 @@
 
 #/abracadabra/steel_is_vacuum true
 #/abracadabra/scintillator_thickness 50
+#/abracadabra/scintillator LXe
 /abracadabra/quartz_thickness 0

@@ -13,6 +13,7 @@ abracadabra_messenger::abracadabra_messenger()
   messenger -> DeclareProperty("verbosity" , verbosity , "Print live event information");
   messenger -> DeclareProperty("y_offset"  , y_offset  , "Used in NEMA5, for now");
   messenger -> DeclareProperty("z_offset"  , z_offset  , "Used in NEMA4, for now");
+  messenger -> DeclareProperty("scintillator"    , scintillator, "LXe or LYSO");
   messenger -> DeclareProperty("scintillator_thickness" , scintillator_thickness,  "Thickness of LXe layer (mm)");
   messenger -> DeclareProperty("quartz_thickness", quartz_thickness, "Thickness of quartz layer (mm)");
   messenger -> DeclareProperty("cylinder_length" , cylinder_length,  "Length of cylinder");

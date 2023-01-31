@@ -15,7 +15,7 @@ using CLHEP::twopi;
 
 
 G4PVPlacement* compare_scintillators(
-    G4bool   use_lxe,
+    G4String sci_name,
     G4double length,
     G4double scintillator_inner_radius,
     G4double dr_scintillator
@@ -23,12 +23,10 @@ G4PVPlacement* compare_scintillators(
   auto air     = material("G4_AIR");
   auto steel   = material("G4_STAINLESS-STEEL");
   auto vacuum  = material("G4_Galactic");
-  auto scintillator = (use_lxe)
-      ? LXe_with_properties()
-      : LYSO_no_properties();
-  auto sci_name = (use_lxe)
-      ? "LXE"
-      : "LYSO";
+  auto scintillator =
+    (sci_name == "LXe" ) ? LXe_with_properties() :
+    (sci_name == "LYSO") ?  LYSO_no_properties() :
+    (throw (FATAL(("Unrecoginzed scintillator: " + sci_name).c_str()), "see note 1 in nain4.hh"));
 
   G4double dr_steel_0 = 1.5 * mm;
   G4double dr_vacuum = 25.0 * mm;

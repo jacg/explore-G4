@@ -10,5 +10,6 @@
 /abracadabra/cylinder_length 1000
 
 #/abracadabra/steel_is_vacuum true
+#/abracadabra/scintillator LXe
 #/abracadabra/scintillator_thickness 50
 /abracadabra/quartz_thickness 0

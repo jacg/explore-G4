@@ -3,9 +3,10 @@
 #include "g4-mandatory.hh"
 #include "random/random.hh"
 
+#include "geometries/compare_scintillators.hh"
 #include "geometries/imas.hh"
-#include "geometries/nema.hh"
 #include "geometries/jaszczak.hh"
+#include "geometries/nema.hh"
 #include "geometries/samples.hh"
 #include "geometries/sipm.hh"
 #include "messengers/abracadabra.hh"
@@ -385,13 +386,15 @@ int main(int argc, char** argv) {
     auto radius = messenger.cylinder_radius         * mm;
     auto clear  = messenger.steel_is_vacuum;
     auto magic  = messenger.magic_level;
+    auto scint  = messenger.scintillator;
     return
-      magic >= 3       ? magic_detector()                                           :
-      d == "square"    ? square_array_of_sipms(sd)                                  :
-      d == "hamamatsu" ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
-      d == "cylinder"  ? cylinder_lined_with_hamamatsus(length, radius, dr_sci, sd) :
-      d == "imas"      ? imas_demonstrator(sd, length, dr_Qtz, dr_sci, clear)       :
-      (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 at the end"));
+      d == "scintillator" ? compare_scintillators(scint  , length, radius, dr_sci)     :
+      d == "cylinder"     ? cylinder_lined_with_hamamatsus(length, radius, dr_sci, sd) :
+      d == "imas"         ? imas_demonstrator(sd, length, dr_Qtz, dr_sci, clear)       :
+      magic >= 3          ? magic_detector()                                           :
+      d == "square"       ? square_array_of_sipms(sd)                                  :
+      d == "hamamatsu"    ? nain4::place(sipm_hamamatsu_blue(true, sd)).now()          :
+      (throw (FATAL(("Unrecoginzed detector: " + d).c_str()), "see note 1 in nain4.hh"));
   };
 
   // ----- Should the geometry contain phantom only / detector only / both

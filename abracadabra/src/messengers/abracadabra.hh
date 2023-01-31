@@ -17,6 +17,7 @@ struct abracadabra_messenger {
   G4int    verbosity  = 1;
   G4double y_offset   = 0;
   G4double z_offset   = 0;
+  G4String scintillator = "LXe";
   G4double quartz_thickness        =   0; // mm
   G4double scintillator_thickness  =  40; // mm
   G4double cylinder_length         =  15; // mm
