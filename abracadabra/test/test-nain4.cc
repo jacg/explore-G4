@@ -25,7 +25,7 @@
 // this gives rise to the apparently superfluous division by the same unit on
 // both sides of an equation, in the source code.
 
-#include<numeric>
+#include <numeric>
 
 TEST_CASE("nain material", "[nain][material]") {
 
