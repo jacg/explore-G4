@@ -60,7 +60,7 @@ namespace report_progress {
                     G4String const& process_name, G4String const& volume_name,
                     size_t& header_last_printed, bool& track_1_printed_this_event) {
     if (event_id != header_last_printed) {
-      cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE   deposited"
+      cout << "   event  parent  id            x    y    z     r     moved    preKE pstKE  dKE   deposited"
            << endl;
       header_last_printed = event_id;
       track_1_printed_this_event = false;
@@ -84,8 +84,9 @@ namespace report_progress {
          << SETW(7, moved) << "   "
          << SETW(6, pre_KE)
          << SETW(6, pst_KE)
+         << SETW(6, pre_KE-pst_KE)
          << SETW(6, dep_E)
-         << SETW(20, volume_name) << ' '
+         << SETW(14, volume_name) << ' '
          << endl;
     #undef ROUND
     #undef SETW
