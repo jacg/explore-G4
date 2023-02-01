@@ -611,7 +611,7 @@ int main(int argc, char** argv) {
       return                            NOW;
 
     } else {
-      FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str());
+      FATAL(("FUNNY STAGE: " + std::to_string(stage)).c_str()); return /*unreachable*/ NOW;
     }
   };
 
