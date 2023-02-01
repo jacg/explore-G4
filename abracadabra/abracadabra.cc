@@ -134,6 +134,18 @@ private:
   std::vector<T> items;
 };
 
+unique_ptr<id_store<std::string>> make_volume_names(std::string scintillator_name) {
+  return unique_ptr<id_store<std::string>>{new id_store<std::string> {
+  scintillator_name, // Ensure that scintillator has id 0: the rest in inside-out order
+  "Cavity", "Steel_0", "Inner_vacuum", "Steel_1", "Quartz","Outer_vacuum", "Steel_2",
+  // NEMA7 phantom parts (Source_N also used by NEMA3)
+  "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
+  // NEMA4
+  "Cylinder", "Line_source",
+  // NEMA5
+  "Source", "Sleeves"}};
+}
+
 // =============================================================================================
 // ----- UI: Abstract class with two concrete implementations: interactive and batch -----------
 void stop_if_failed(G4int status) { if (status != 0) { FATAL("A messenger failed"); } }
@@ -192,20 +204,18 @@ struct phantom_t {
   const n4::geometry::construct_fn geometry;
 };
 
-// Find scintillator layer, by looking volumes with names "LXe" or "LYSO"
-G4LogicalVolume* find_scintillator_layer() {
-  for (auto sci_name: {"LXe", "LYSO"}) {
-    auto scint = n4::find_logical(sci_name);
+G4LogicalVolume* find_scintillator_layer(G4String& scint_name) {
+  auto scint = n4::find_logical(scint_name);
     if (scint) { return scint; }
-  }
   FATAL("Couldn't find scintillator layer");
+  return nullptr;
 }
 
 // Find the inner and outer radii of the scintillator layer. Assumes that the
 // scintillator layer's first daughter defines its inner radius. Will crash if
 // no daughter present.
-std::tuple<G4double, G4double> find_scintillator_inner_and_outer_radii() {
-  auto scint = find_scintillator_layer();
+std::tuple<G4double, G4double> find_scintillator_inner_and_outer_radii(G4String& scint_name) {
+  auto scint = find_scintillator_layer(scint_name);
   auto inner = scint -> GetDaughter(0) -> GetLogicalVolume();
   auto solid_x = scint -> GetSolid();
   auto solid_s = inner -> GetSolid();
@@ -217,7 +227,7 @@ std::tuple<G4double, G4double> find_scintillator_inner_and_outer_radii() {
   std::cout << "scintillator radii: " << scint_r << ' ' << scint_R;
   std::cout << "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n";
   return {scint_r, scint_R};
-};
+}
 
 // ============================== MAIN =======================================================
 int main(int argc, char** argv) {
@@ -387,6 +397,11 @@ int main(int argc, char** argv) {
     (throw (FATAL(("Unrecoginzed phantom: " + p).c_str()), "see note 1 in nain4.hh"));
   };
 
+  // Name of the scintillator material and its volumes
+  G4String scint_name; // Will be set when `detector()` is executed
+
+  id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
+  unique_ptr<id_store<std::string>> volume_names;
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
@@ -395,8 +410,9 @@ int main(int argc, char** argv) {
     auto length = messenger.cylinder_length         * mm;
     auto radius = messenger.cylinder_radius         * mm;
     auto clear  = messenger.steel_is_vacuum;
-    auto magic  = (d == "scintillator") ? 1 : messenger.magic_level;
-    auto scint  = messenger.scintillator;
+    auto magic  = (d == "scintillator") ?   1   : messenger.magic_level;
+    auto scint  = (d != "scintillator") ? "LXe" : messenger.scintillator; scint_name = scint;
+    volume_names = make_volume_names(scint_name);
     return
       d == "scintillator" ? compare_scintillators(scint  , length, radius, dr_sci)     :
       d == "cylinder"     ? cylinder_lined_with_hamamatsus(length, radius, dr_sci, sd) :
@@ -441,17 +457,6 @@ int main(int argc, char** argv) {
   // ----- Identifying vertices in LXe ----------------------------------------------------
   auto transp = [](auto name) { return name == "Transportation" ? "---->" : name; };
 
-  id_store<std::string> process_names{{"compt", "phot", "Rayl"}};
-  id_store<std::string>  volume_names{
-    {"LXe", // Ensure that LXe has id 0: the rest in inside-out order
-     "Cavity", "Steel_0", "Inner_vacuum", "Steel_1", "Quartz","Outer_vacuum", "Steel_2",
-     // NEMA7 phantom parts (Source_N also used by NEMA3)
-     "Body", "Lung", "Source_0", "Source_1", "Source_2", "Source_3", "Source_4", "Source_5",
-     // NEMA4
-     "Cylinder", "Line_source",
-     // NEMA5
-     "Source", "Sleeves"}};
-
   // If messenger.E_cut is set, save time by not simulating secondaries for
   // events in which a gamma's energy falls below the cut, before entering LXe.
   // Such events will be rejected later on, on the grounds of not registering
@@ -492,9 +497,9 @@ int main(int argc, char** argv) {
       auto pst_physvol = pst_pt -> GetPhysicalVolume();
       volume_name = pst_physvol ? pst_physvol -> GetName() : "None";
       // Stop as soon as LXe reached
-      if (volume_name == "LXe") { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
+      if (volume_name == scint_name) { track -> SetTrackStatus(G4TrackStatus::fStopAndKill); }
       // Write only gammas entering LXe (not expecting anything other than gamma, before LXe)
-      if (volume_name != "LXe" || process_name != "---->" ) return;
+      if (volume_name != scint_name || process_name != "---->" ) return;
     }
 
     // Event and particle identities
@@ -519,14 +524,14 @@ int main(int argc, char** argv) {
       if (messenger.verbosity > 3) {
         std::cout << " gamma low: " << lowest_pre_LXe_gamma_energy_in_event << std::endl;
       }
-    } else if (volume_name == "LXe") {
+    } else if (volume_name == scint_name) {
       if (id == 1) { detected_gamma_1 = true; }
       if (id == 2) { detected_gamma_2 = true; }
     }
 
     // Process and volume ids
-    auto  volume_id =  volume_names.id( volume_name);
-    auto process_id = process_names.id(process_name);
+    auto  volume_id =  volume_names -> id( volume_name);
+    auto process_id = process_names .  id(process_name);
 
     // Write vertex to output file
     writer -> write_vertex(       event_id, id, parent, x,y,z,t, moved, pre_KE, pst_KE, dep_E,
@@ -571,8 +576,8 @@ int main(int argc, char** argv) {
 
   size_t secondaries_no = 0, secondaries_yes = 0;
   n4::run_action::action_t   end_run = [&](auto) {
-    writer -> write_strings("process_names", process_names.items_ordered_by_id());
-    writer -> write_strings( "volume_names",  volume_names.items_ordered_by_id());
+    writer -> write_strings("process_names", process_names .  items_ordered_by_id());
+    writer -> write_strings( "volume_names",  volume_names -> items_ordered_by_id());
     std::cout << "Scondaries simulated " << secondaries_yes
               << " times, ignored " << secondaries_no << " times (" << std::setprecision(0)
               << 100.0 * secondaries_yes / (secondaries_yes + secondaries_no)<< " %)\n";
@@ -581,7 +586,7 @@ int main(int argc, char** argv) {
   n4::run_action::action_t start_run = [&](auto run) {
     report_progress::events_start = std::chrono::steady_clock::now();
     report_progress::n_events_requested = run -> GetNumberOfEventToBeProcessed();
-    std::tie(scint_r, scint_R) = find_scintillator_inner_and_outer_radii();
+    std::tie(scint_r, scint_R) = find_scintillator_inner_and_outer_radii(scint_name);
   };
 
   // ----- Stacking: Process gammas before secondaries (secondaries only if needed) -------
