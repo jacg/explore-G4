@@ -405,12 +405,13 @@ int main(int argc, char** argv) {
   // ----- Available detector geometries -------------------------------------------------
   // Can choose detector in macros with `/abracadabra/detector <choice>`
   auto detector = [&, &d = messenger.detector]() -> G4VPhysicalVolume* {
+    if (d == "scintillator" && messenger.magic_level < 1) { messenger.magic_level = 1; }
     auto dr_sci = messenger.scintillator_thickness  * mm;
     auto dr_Qtz = messenger.quartz_thickness        * mm;
     auto length = messenger.cylinder_length         * mm;
     auto radius = messenger.cylinder_radius         * mm;
     auto clear  = messenger.steel_is_vacuum;
-    auto magic  = (d == "scintillator") ?   1   : messenger.magic_level;
+    auto magic  = messenger.magic_level;
     auto scint  = (d != "scintillator") ? "LXe" : messenger.scintillator; scint_name = scint;
     volume_names = make_volume_names(scint_name);
     return
