@@ -70,7 +70,7 @@ def with_semaphore(semaphore):
 @report_progress
 def run_one_job(*, n, capture_output):
     filename_model = f'{job_dir}/model.mac'
-    filename_run   = f'{job_dir}/run{n}.mac'
+    filename_run   = f'{job_dir}/run-{n}.mac'
     with open(filename_run, 'w') as file_run:
         file_run.write(template_run.format(run_number=n, job_dir=job_dir))
     cmd = f'just run-full-path {filename_model} {filename_run}'
@@ -85,6 +85,15 @@ def save_run_output(result, job_dir, n):
     with open(job_dir / f'job-{n}.stderr', 'wb') as stderr_file:
         stderr_file.write(result.stderr)
 
+
+def clean_up_old_junk():
+    junk_files = f'{job_dir}/*.std{{err,out}} {job_dir}/run-*.mac'
+    cmd = f'rm -f {junk_files}'
+    print(cmd)
+    run(cmd, shell=True)
+
+
+clean_up_old_junk()
 
 # Launch jobs
 from time import sleep
