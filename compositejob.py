@@ -87,11 +87,13 @@ def save_run_output(result, job_dir, n):
 
 
 # Launch jobs
+from time import sleep
 threads = []
 for n in range(NTOT):
     t = Thread(target = run_one_job,
                kwargs = dict(n              = n,
                              capture_output = not args['--no-capture-output']))
+    sleep(0.01) # Seems to help avoid problems at job startup
     t.start()
     threads.append(t)
 
