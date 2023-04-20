@@ -13,5 +13,5 @@
 /abracadabra/z_offset 450
 
 /abracadabra/steel_is_vacuum false
-#/abracadabra/xenon_thickness 50
+#/abracadabra/scintillator_thickness 50
 /abracadabra/quartz_thickness  0

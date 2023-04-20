@@ -4,13 +4,19 @@
 
 # Select detector geometry, generators and phantom here
 
-/abracadabra/geometry phantom
+/abracadabra/geometry both
 /abracadabra/phantom jaszczak
-/abracadabra/detector imas
+/abracadabra/detector scintillator
 
 /abracadabra/cylinder_length 1000
+/abracadabra/cylinder_radius  350
 /abracadabra/quartz_thickness 0
-/abracadabra/xenon_thickness 30
+
+/abracadabra/scintillator LXe
+/abracadabra/scintillator_thickness 30
+
+# /abracadabra/scintillator LYSO
+# /abracadabra/scintillator_thickness 10
 
 /abracadabra/steel_is_vacuum false
 /abracadabra/vacuum_phantom false
