@@ -1,6 +1,6 @@
 """Submit local abracadabra jobs
 
-Usage: runjobs.py [--no-capture-output] JOBDIR NTOT NPAR
+Usage: runjobs.py [--no-capture-output --DELETE-OLD-MC] JOBDIR NTOT NPAR
 
 Arguments:
   FILES  Directory containing job description macros, and where results will
@@ -10,6 +10,7 @@ Arguments:
 
 Options:
   --no-capture-output  Don't hide job's output from std-err/out
+  --DELETE-OLD-MC      Remove `MC-*.h5` before starting runs.
 
 Setting a limit on the number of jobs being run simultaneously prevents
 throttling of the system.
@@ -36,6 +37,7 @@ args = docopt(__doc__)
 job_dir        = Path(args['JOBDIR'])
 NTOT           =  int(args['NTOT'])
 NPAR           =  int(args['NPAR'])
+DELETE_MC      = args['--DELETE-OLD-MC']; print(DELETE_MC)
 template_run   = file_to_string(job_dir / 'run.mac')
 
 
@@ -70,7 +72,7 @@ def with_semaphore(semaphore):
 @report_progress
 def run_one_job(*, n, capture_output):
     filename_model = f'{job_dir}/model.mac'
-    filename_run   = f'{job_dir}/run{n}.mac'
+    filename_run   = f'{job_dir}/run-{n}.mac'
     with open(filename_run, 'w') as file_run:
         file_run.write(template_run.format(run_number=n, job_dir=job_dir))
     cmd = f'just run-full-path {filename_model} {filename_run}'
@@ -86,12 +88,25 @@ def save_run_output(result, job_dir, n):
         stderr_file.write(result.stderr)
 
 
+def clean_up_old_junk():
+    junk_files = f'{job_dir}/*.std{{err,out}} {job_dir}/run-*.mac'
+    cmd = f'rm -f {junk_files}'
+    if DELETE_MC:
+        cmd = f'{cmd} {job_dir}/MC-*.h5'
+    print(cmd)
+    run(cmd, shell=True)
+
+
+clean_up_old_junk()
+
 # Launch jobs
+from time import sleep
 threads = []
 for n in range(NTOT):
     t = Thread(target = run_one_job,
                kwargs = dict(n              = n,
                              capture_output = not args['--no-capture-output']))
+    sleep(0.01) # Seems to help avoid problems at job startup
     t.start()
     threads.append(t)
 
