@@ -53,10 +53,14 @@
             python-N = "python${python-version}";
 
             #devShell = pkgs.mkShell.override { stdenv = pkgs.clang13Stdenv; } {
-            devShell = pkgs.llvmPackages_13.stdenv.mkDerivation {
+            devShell = pkgs.mkShell.override { stdenv = pkgs.clang_13.stdenv; } {
+            #devShell = pkgs.llvmPackages_13.stdenv.mkDerivation {
               name = "Geant4-development-environment";
-              nativeBuildInputs = [
+
+              packages = [
                 pkgs.clang_13
+                pkgs.cmake-language-server
+                #pkgs.clang-tools
 
                 pkgs.geant4
                 pkgs.geant4.data.G4PhotonEvaporation
@@ -68,14 +72,8 @@
                 pkgs.geant4.data.G4NDL
 
                 (pkgs.${ python-N }.withPackages (ps: [ps.docopt]))
-              ];
-
-              buildInputs = [
-                #    pkgs.clang-tools
-                pkgs.clang_13
                 new.cmake
                 pkgs.catch2
-                pkgs.cmake-language-server
                 pkgs.gdb
                 pkgs.hdf5
                 pkgs.highfive
@@ -96,6 +94,7 @@
                 (linux pkgs.graphviz) # used by kcachegrind
                 (linux pkgs.flamegraph)
               ];
+
             };
 
 
