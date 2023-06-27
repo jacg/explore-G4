@@ -11,13 +11,14 @@
     #
     #    nix flake lock --update-input nixpkgs
 
+    newpkgs         .url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs         .url = "github:nixos/nixpkgs/nixos-21.11";
     flake-utils     .url = "github:numtide/flake-utils";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
    #nixgl           .url = "github:guibou/nixGL";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, newpkgs, flake-utils, ... }:
 
     # Option 1: try to support each default system
     flake-utils.lib.eachDefaultSystem # NB Some packages in nixpkgs are not supported on some systems
@@ -48,6 +49,8 @@
               #sha256 = pkgs.lib.fakeSha256;
               sha256 = "02y38zmdplk7a9ihsxvnrzhhv7324mmf5g8hmxqizaid5k5ydpr3";
             }}/nixGL.nix" {};
+
+            new = import newpkgs { inherit system; };
         in
           rec {
 
@@ -65,7 +68,7 @@
               buildInputs = pkgs.g4-with-data.buildInputs ++ [
                 #    pkgs.clang-tools
                 pkgs.clang_13
-                pkgs.cmake
+                new.cmake
                 pkgs.catch2
                 pkgs.cmake-language-server
                 pkgs.gdb
