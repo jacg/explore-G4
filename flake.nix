@@ -31,11 +31,6 @@
               inherit system;
               overlays = [
                 #nixgl.overlay
-
-                (final: prev: {
-                  g4-with-data = final.callPackage nix/derivation.nix {};
-                })
-
               ];
             };
 
@@ -60,12 +55,22 @@
             #devShell = pkgs.mkShell.override { stdenv = pkgs.clang13Stdenv; } {
             devShell = pkgs.llvmPackages_13.stdenv.mkDerivation {
               name = "Geant4-development-environment";
-              nativeBuildInputs = pkgs.g4-with-data.nativeBuildInputs ++ [
+              nativeBuildInputs = [
                 pkgs.clang_13
+
+                pkgs.geant4
+                pkgs.geant4.data.G4PhotonEvaporation
+                pkgs.geant4.data.G4EMLOW
+                pkgs.geant4.data.G4RadioactiveDecay
+                pkgs.geant4.data.G4ENSDFSTATE
+                pkgs.geant4.data.G4SAIDDATA
+                pkgs.geant4.data.G4PARTICLEXS
+                pkgs.geant4.data.G4NDL
+
                 (pkgs.${ python-N }.withPackages (ps: [ps.docopt]))
               ];
 
-              buildInputs = pkgs.g4-with-data.buildInputs ++ [
+              buildInputs = [
                 #    pkgs.clang-tools
                 pkgs.clang_13
                 new.cmake
