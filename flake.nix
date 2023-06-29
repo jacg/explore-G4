@@ -62,7 +62,17 @@
                 pkgs.cmake-language-server
                 #pkgs.clang-tools
 
-                pkgs.geant4
+
+                (pkgs.geant4.override {
+                  enableMultiThreading = false;
+                  enableInventor       = false;
+                  enableQT             = true;
+                  enableXM             = false;
+                  enableOpenGLX11      = true;
+                  enablePython         = false;
+                  enableRaytracerX11   = false;
+                })
+
                 pkgs.geant4.data.G4PhotonEvaporation
                 pkgs.geant4.data.G4EMLOW
                 pkgs.geant4.data.G4RadioactiveDecay
@@ -83,8 +93,8 @@
                 pkgs.poco
                 pkgs.pcre # Needed by Poco
                 # For graphics hardware matching on non-NixOS
-#                pkgs.libGL
-#                (linux nixGL.nixGLDefault)
+                #                pkgs.libGL
+                #                (linux nixGL.nixGLDefault)
                 # Syntax colouring in gdb
                 pkgs.${ python-N }.pkgs.pygments
                 # profiling
@@ -95,9 +105,8 @@
                 (linux pkgs.flamegraph)
               ];
 
+              QT_QPA_PLATFORM_PLUGIN_PATH="${pkgs.libsForQt5.qt5.qtbase.bin}/lib/qt-${pkgs.libsForQt5.qt5.qtbase.version}/plugins";
             };
-
-
           }
       );
 }
